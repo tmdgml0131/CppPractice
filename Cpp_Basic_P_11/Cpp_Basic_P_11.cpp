@@ -78,10 +78,26 @@ using namespace std;
 #pragma endregion
 #pragma endregion
 
+//153페이지
+
+
+//-------------------------[ ProtoType ]-----------------------------------//
+
+void Say();
+
+//-------------------------[   FBody   ]-----------------------------------//
 
 int main()
 {
-    cout << "Hello World!";
+    Say();
+    return 0;
+}
 
 
+//-------------------------[ Func.Def. ]-----------------------------------//
+
+void Say()
+{
+    int a{ 'M' };
+    cout << a;
 }
