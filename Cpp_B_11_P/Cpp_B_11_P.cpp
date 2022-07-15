@@ -1,84 +1,10 @@
 ﻿#include <iostream>
 #include <string> //string class 사용 위해
 #include <cstring> //C 스타일 문자열 라이브러리
+#include <array>
 using namespace std;
 
-#pragma region 개념
-#pragma region 템플릿
-//int sum(int a, int b)
-//{
-//    cout << "Calling int..";
-//    return a + b;
-//}
-//
-//template<typename T>
-//T sum(T a, T b) //인텔리센스가 알아서 맞는 타입 T를 찾아줌..
-//{
-//    cout << "Calling template..";
-//    return a + b;
-//
-#pragma endregion
-#pragma region 포인터-메인으로 이동
-     /*int num1 = 1234;
-     double num2 = 3.14;
 
-     int* ptr_num1{};
-     double* ptr_num2{};
-
-     cout << "현재 num1의 값은 : " << num1 << "이고 " << "num1의 주소는 : " << &num1 << "입니다." << endl;
-     cout << "현재 num2의 값은 : " << num2 << "이고 " << "num2의 주소는 : " << &num2 << "입니다." << endl;
-     cout << "할당 되지 않은(초기값) ptr_num1의 주소는 : " << ptr_num1 << "입니다" << endl;
-     cout << "할당 되지 않은(초기값) ptr_num2의 주소는 : " << ptr_num2 << "입니다" << endl;
-     ptr_num1 = &num1;
-     ptr_num2 = &num2;
-     cout << "할당 된 ptr_num1의 주소는 : " << ptr_num1 << "이며 num1의 주소는 : " << &num1 << "입니다." << endl;
-     cout << "할당 된 ptr_num2의 주소는 : " << ptr_num2 << "이며 num2의 주소는 : " << &num2 << "입니다." << endl;
-     cout << "ptr_num1은 num1을 가르키는 포인터 입니다. '*'을 사용하여 ptr_num1이 가르키는 값을 가져옵니다.."<< *ptr_num1 << endl;
-     cout << "num1의 주소 : " << &num1 << endl << "ptr_num1의 주소 : " << &ptr_num1;*/
-#pragma endregion
-#pragma region 순수가상함수-메인으로 이동
-     //class Hamsu
-     //{
-     //public:
-     //    virtual void Drive()
-     //    {
-     //        cout << "driving.." << endl;
-     //        return;
-     //    }
-     //    virtual void Stop()
-     //    {
-     //        cout << "stopping.." << endl;
-     //        return;
-     //    }
-     //    virtual void Back()
-     //    {
-     //        cout << "going back.." << endl;
-     //    }
-     //    virtual void Peer() = 0; //순수 가상함수가 포함된 class는 instance 생성이 불가하다.
-     //    
-     //};
-     ////예 : 'hamsu a;' << 에러 발생!
-
-     //class Pear :public Hamsu
-     //{
-     //public:
-     //    string name{"Pear"};
-     //    
-     //public:
-     //    virtual void Peer() override // 순수가상함수가 포함된 class를 상속 받는 sub-class는 반드시 순수가상함수를 구현해야함.
-     //    {
-     //        cout << name << "의 순수가상함수 구현 완료\n";
-     //    }
-     //};
-
-     ////0 1 1 2 3 5 8 13 21 34
-     //Pear a;
-     //a.Peer();
-     //a.name = "Change";
-     //a.Peer();
-     //
-#pragma endregion
-#pragma endregion
 
     #pragma region 05.템플릿
     /*
@@ -707,10 +633,363 @@ using namespace std;
 
     */
     #pragma endregion
+    #pragma region 04.프로그래밍 연습_1
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_1 ----------------------------------------
+    문제 : 입력을 읽어 출력하는 C++ 프로그램을 작성하라.
+
+    입력 : 
+        Seong il
+        Yoon
+        B
+        22
+    출력 : 
+        성명 : Yoon, Seong il
+        학점 : C
+        나이 : 22
+
+    *Note : 두 단어 이상으로된 이름을 받아야 한다. 학점을 한 단계 하향 조정해서 출력한다. A->B, B->C 식으로..
+
+    해답 : 
+
+    struct Student
+    {
+        char first[20]{};
+        char last[20]{};
+        char grade{};
+        int age{};
+    };
+
+    Student std;
+    cin.getline(std.first, 20);
+    cin >> std.last >> std.grade >> std.age;
+
+    std.grade += 1;
+
+    cout << "성명 : " << std.last << ", " << std.first << endl;
+    cout << "학점 : " << std.grade << endl << "나이 : " << std.age;
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_3(2번 생략)
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_3(2번 생략) ----------------------------------------
+    문제 : 성과 이름을 입력 받고, 라스트 네임, 콤마, 빈칸, 퍼스트 네임으로 이루어지는 제 3의 문자열을 구성 후
+       출력 하는 프로그램을 작성하라. ( Char 형 사용 )
+
+    입력 :
+        Seong il
+        Yoon
+
+    출력 :
+        Yoon, Seong il
+
+    해답 :
+
+    struct Naming
+    {
+        char first[20]{};
+        char last[20]{};
+        char mixed[40]{};
+    };
+
+    Naming name;
+    cin.getline(name.first, 20);
+    cin >> name.last;
+    strcpy_s(name.mixed, name.last);
+    strcat_s(name.mixed, ", ");
+    strcat_s(name.mixed, name.first);
+    cout << name.mixed;
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_4
+    /*
+    ---------------------------------------- 05.프로그래밍 연습_4 ----------------------------------------
+    문제 : 이름, 성을 입력 받아, 성, 콤마, 빈칸, 이름으로 이루어지는 제 3의 문자열을 구성하고 출력하라. ( String 사용 )
+
+    입력 :
+        Seong il
+        Yoon
+
+    출력 :
+        Yoon, Seong il
+
+    해답 :
+        struct Name
+        {
+            string first{};
+            string last{};
+            string name{};
+        };
+
+        Name full;
+        getline(cin, full.first);   //string에서 getline(cin, 문자열) 로 한 줄 전체 읽기 가능
+        cin >> full.last;
+        full.name = full.last;
+        full.name.append(", ");     //문자열.append() 로 뒤에 다른 문자열 추가 가능
+        full.name.append(full.first);
+        cout << full.name;
+       
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_5
+    /*
+    ---------------------------------------- 05.프로그래밍 연습_5 ----------------------------------------
+    문제 : 상표명, 중량(소수), 칼로리(정수)를 멤버 변수로 갖는 snack이란 CandyBar형 구조체 변수를 만든 후,
+           그들을 각각, "Mocha Munch", 2.3, 350 으로 초기화 하라. 그 후, snack 변수의 내용을 출력하라.
+
+    해답 :
+        struct CandyBar
+        {
+            string name{};
+            float mass{};
+            int kCal{};
+        };
+
+        CandyBar snack{"Mocha Munch", 2.3f, 350};
+        cout << snack.name << endl << snack.mass << endl << snack.kCal;
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_6
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_6 ----------------------------------------
+    문제 : 이름, 중량, 칼로리를 멤버 변수로 갖는 CandyBar란 구조체의 생성 후, CandyBar 구조체를 원소로 갖는
+    배열을 생성하라. 원소들을 원하는 값으로 초기화 한 후, 각 구조체의 내용을 출력하라.
+
+    해답 :
+        struct CandyBar
+        {
+            string name{};
+            float mass{};
+            int kCal{};
+        };
+    
+        CandyBar candy[2]
+        {
+            {"Lemon", 2.3f, 500},
+            {"Cinamon", 3.7f, 300}
+        };
+
+        cout << candy[0].name << candy[0].mass << candy[0].kCal << endl;
+        cout << candy[1].name << candy[1].mass << candy[1].kCal;
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_7
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_7 ----------------------------------------
+    문제 : 
+    노미도피자헙은 피자에 관해서 다음 정보를 저장해야 한다.
+        
+        피자 회사의 이름
+        피자의 지름
+        피자의 중량
+
+    이러한 정보를 저장하는 구조체 템플릿을 설계하고, 구조체형의 멤버 변수를 사용하는 프로그램을 작성하라.
+    위 정보는, 사용자가 입력해야한다.
+
+    해답 :
+        struct Analysis
+        {
+            string name{};
+            float radius{};
+            float mass{};
+        };
+
+        Analysis pizza;
+        getline(cin, pizza.name);
+        cin >> pizza.radius >> pizza.mass;
+        cout << pizza.name << " " << pizza.radius << " " << pizza.mass;
+
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_8
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_8 ----------------------------------------
+    문제 :
+    노미도피자헙은 피자에 관해서 다음 정보를 저장해야 한다.
+        
+        피자 회사의 이름
+        피자의 지름
+        피자의 중량
+
+    이러한 정보를 저장하는 구조체 템플릿을 설계하고, 구조체형의 멤버 변수를 사용하는 프로그램을 작성하라.
+    위 정보는, 사용자가 입력해야하며, 변수의 선언 대신 new를 사용하여 구조체를 대입하라. 
+    그리고 피자 회사의 이름보다 피자의 지름을 먼저 요구하게 하라.
+
+    해답 :
+        struct Analysis
+        {
+            string name{};
+            float diameter{};
+            float mass{};
+        };
+
+        Analysis* pizza = new Analysis;
+        cin >> pizza->diameter;
+        cin.get();                      //이 문제의 핵심이다. 지름을 입력한 후 enter로 인한 개행 문자를 버려야한다.
+        getline(cin, pizza->name);
+        cin >> pizza->mass;
+
+        cout << pizza->name << " " << pizza->diameter << " " << pizza->mass;
+        delete pizza;
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_9
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_9 ----------------------------------------
+    문제 :
+    이름, 중량, 칼로리를 멤버 변수로 갖는 CandyBar란 구조체의 생성 후, CandyBar 구조체를 원소로 갖는
+    배열을 new를 사용하여 동적으로 대입하라.
+
+    해답 :
+        struct CandyBar
+        {
+            string name{};
+            float mass{};
+            int kCal{};
+        };
+
+        CandyBar *candy = new CandyBar[2];
+
+        candy[0].name = "Lemon";
+        candy[0].mass = 2.3f;
+        candy[0].kCal = 500;
+
+        candy[1].name = "Cinamon";
+        candy[1].mass = 4.3f;
+        candy[1].kCal = 700;
+
+        cout << candy[0].name;      //대입 체크용
+
+    */
+    #pragma endregion
+    #pragma region 04.프로그래밍 연습_10
+    /*
+    ---------------------------------------- 04.프로그래밍 연습_10 ----------------------------------------
+    문제 :
+    40야드 달리기 결과에 대하여 세 번 입력 가능한 프로그램을 작성하고 횟수와 평균을 디스플레이하라.
+
+    해답 :
+        int runCount{};
+        float total{};
+        cout << "How many shot would ya give? ";
+        cin >> runCount;
+        if (runCount > 3)
+        {
+            cout << "Damnn! Too many shot! Do not be greedy! Try less than 4";
+            return;
+        }
+
+        struct Dash
+        {
+            float runTime{};
+        };
+
+        Dash dash[3]{};
+
+        for (int i = 0; i < runCount; i++)
+        {
+            cout << "No." << i+1  << "'s Runtime Result? ";
+            cin >> dash[i].runTime;
+            total += dash[i].runTime;
+        }
+
+        cout << "The average result of your runtime is " << total / runCount;
+    */
+    #pragma endregion
+
+
 
 #pragma  endregion
 
 #pragma region Chapter 5.루프와 관계 표현식
+    
+    #pragma region 05.for 루프
+    /*
+    ---------------------------------------- 05.for 루프 ----------------------------------------
+    프로그래밍을 하다 보면 배열의 원소들을 모두 더한다든지, 문자열을 여러번 출력하는 등, 반복적인 작업을 수행 할 때가 많다.
+    C++의 for루프를 사용하면 이러한 반복 작업을 쉽게 처리할 수 있다. 다음 예제를 보자
+
+        int i{};    // 카운터 선언
+        for(i = 0; i < 5; i++)
+        {
+            cout << "C++가 루프를 사용합니다." << endl;
+            cout << i +1 << "번째 루프 중.." << endl;
+        }
+        cout << "루프를 종료합니다."
+        return 0;
+
+    출력 : 
+        C++가 루프를 사용합니다.
+        1번째 루프중..
+        C++가 루프를 사용합니다.
+        2번째 루프중..
+        C++가 루프를 사용합니다.
+        3번째 루프중..
+        C++가 루프를 사용합니다.
+        4번째 루프중..
+        C++가 루프를 사용합니다.
+        5번째 루프중..
+        루프를 종료합니다.
+
+    이는 간단하지만 강력한 루프의 예시이다.
+    루프는 정수 i를 0으로 설정하며 시작한다. 
+    i = 0 --> 루프 초기화 부분은 
+    루프 조건 검사 부분에서 i가 5보다 작은지 검사한다. --> i < 5
+    이 조건을 만족하면, 루프 몸체라고 부르는 다음 구문을 수행한다.
+            
+            cout << "C++가 루프를 사용합니다." << endl;
+            cout << i << "번째 루프 중..";
+
+    이제 프로그램은 루프 갱신 부분에서 i를 1만큼 증가 시킨다. --> i++
+    
+    프로그램은 이 과정을 i가 5가 될 때까지 계속한다. i가 5가 되면 루프 조건 검사를 만족하지 못하므로
+    for Loop는 종료 되고 그 다음 구문인 return 0;를 수행한다.
+    */
+    #pragma endregion
+    #pragma region 05.for 루프를 사용한 문자열 처리
+    /*
+    ---------------------------------------- 05.for 루프를 사용한 문자열 처리 ----------------------------------------
+    for 루프를 사용하여 문자열을 구성하는 문자들에 차례대로 접근할 수 있다.
+    string.size() 를 사용하여 string의 크기를 알아낸 후 for루프를 통한 역출력의 예시를 보자.
+
+        cout << "단어 하나를 입력하시오" << endl;
+        string word{};
+        cin >> word;
+
+        for(int i = word.size() -1 ; i >= 0; i--)
+        {
+            cout << word[i];
+        }
+        cout << endl << "종료";
+        return 0;
+    
+    예시 입력 : size
+    예시 출력 : ezis
+
+    프로그램 설명 : 
+        배열의 마지막 인덱스는 배열의 크기보다 1작기 때문에 word.size() 에서 1을 뺀 값으로 시작한다.
+        이 경우 i는 3부터 시작하여 1씩 감소하다, 0보다 작아지면 루프를 중단하게 된다.
+    */
+    #pragma endregion
+    #pragma region 05.증감 연산자와 포인터
+    /*
+    ---------------------------------------- 05.증감 연산자와 포인터 ----------------------------------------
+    증감 연산자는 변수 뿐만 아니라 포인터에도 사용이 가능하다. 포인터에 증감 연산자를 사용하면,
+    포인트가 가르키는 데이터형의 바이트 수만큼 그 값을 증가 시킨다. 다음 예제를 보자.
+
+        int arr[5] { 1,3,5,7,9 };
+        int* pt = arr;  // pt는 arr[0], 즉 1을 지시한다.
+        ++pt;           // pt는 arr[1], 즉 3를 지시한다.
+        ++*pt;          // pt는 arr[1]을 지시하며 1이 증가된 4이다.
+
+    예제처럼, 접두형 연산자들은 오른쪽에서 왼쪽으로 결합을 하는 규칙을 따른다. 예제 마지막 줄 처럼
+    ++*pt는, (*pt) 의 처리 이후 ( = 3 ), 증감 연산자를 사용하여 값을 1만큼 더해준다.
+
+
+    */
+    #pragma endregion
+
+
 
 
 #pragma endregion
@@ -724,38 +1003,30 @@ using namespace std;
 //-------------------------[ ProtoType ]-----------------------------------//
 
 void Say();
-char* getname();
+
 //-------------------------[   FBody   ]-----------------------------------//
 
 struct Explosive // struct(구조체 서술 정의) Explosive(구조체 이름) 
 {
-    char name[20]{};
-    float volume{};
-    double price{};
+    
 };
 
 int main()
 {
-    char* name{};
-    name = getname();   // 문자열의 주소를 name에 대입한다.
-    cout << (int*)name << " : " << name << endl;
-    delete[] name;      // 메모리를 다시 해제한다.
+    cout << "단어 하나를 입력하시오" << endl;
+    string word{};
+    cin >> word;
 
-    name = getname();   // 해제한 메모리를 다시 사용한다.
-    cout << (int *)name << " : " << name << endl;
-    delete[] name;      // 메모리를 다시 해제한다.
+    for (int i = word.size() - 1; i >= 0; i--)
+    {
+        cout << word[i];
+    }
+    cout << endl << "종료";
+    
     return 0;
 }
 
-char* getname()
-{
-    char temp[80];                                    // 임시배열
-    cout << "이름을 입력하십시오 : ";
-    cin >> temp;
-    char* pn = new char[strlen(temp) + 1];
-    strcpy_s(pn, strlen(temp)+1, temp);               // 문자열을 더 작은 공간으로 복사한다.
-    return pn;                                        // 함수가 종료될 때, 임시 배열인 temp는 소멸한다.
-}
+
 
 
 //-------------------------[ Func.Def. ]-----------------------------------//
@@ -765,3 +1036,90 @@ void Say()
     
     cout << "\n\n\nEnd Fuction";
 }
+
+
+
+
+
+
+
+
+
+
+
+#pragma region 개념
+#pragma region 템플릿
+//int sum(int a, int b)
+//{
+//    cout << "Calling int..";
+//    return a + b;
+//}
+//
+//template<typename T>
+//T sum(T a, T b) //인텔리센스가 알아서 맞는 타입 T를 찾아줌..
+//{
+//    cout << "Calling template..";
+//    return a + b;
+//
+#pragma endregion
+#pragma region 포인터-메인으로 이동
+     /*int num1 = 1234;
+     double num2 = 3.14;
+
+     int* ptr_num1{};
+     double* ptr_num2{};
+
+     cout << "현재 num1의 값은 : " << num1 << "이고 " << "num1의 주소는 : " << &num1 << "입니다." << endl;
+     cout << "현재 num2의 값은 : " << num2 << "이고 " << "num2의 주소는 : " << &num2 << "입니다." << endl;
+     cout << "할당 되지 않은(초기값) ptr_num1의 주소는 : " << ptr_num1 << "입니다" << endl;
+     cout << "할당 되지 않은(초기값) ptr_num2의 주소는 : " << ptr_num2 << "입니다" << endl;
+     ptr_num1 = &num1;
+     ptr_num2 = &num2;
+     cout << "할당 된 ptr_num1의 주소는 : " << ptr_num1 << "이며 num1의 주소는 : " << &num1 << "입니다." << endl;
+     cout << "할당 된 ptr_num2의 주소는 : " << ptr_num2 << "이며 num2의 주소는 : " << &num2 << "입니다." << endl;
+     cout << "ptr_num1은 num1을 가르키는 포인터 입니다. '*'을 사용하여 ptr_num1이 가르키는 값을 가져옵니다.."<< *ptr_num1 << endl;
+     cout << "num1의 주소 : " << &num1 << endl << "ptr_num1의 주소 : " << &ptr_num1;*/
+#pragma endregion
+#pragma region 순수가상함수-메인으로 이동
+     //class Hamsu
+     //{
+     //public:
+     //    virtual void Drive()
+     //    {
+     //        cout << "driving.." << endl;
+     //        return;
+     //    }
+     //    virtual void Stop()
+     //    {
+     //        cout << "stopping.." << endl;
+     //        return;
+     //    }
+     //    virtual void Back()
+     //    {
+     //        cout << "going back.." << endl;
+     //    }
+     //    virtual void Peer() = 0; //순수 가상함수가 포함된 class는 instance 생성이 불가하다.
+     //    
+     //};
+     ////예 : 'hamsu a;' << 에러 발생!
+
+     //class Pear :public Hamsu
+     //{
+     //public:
+     //    string name{"Pear"};
+     //    
+     //public:
+     //    virtual void Peer() override // 순수가상함수가 포함된 class를 상속 받는 sub-class는 반드시 순수가상함수를 구현해야함.
+     //    {
+     //        cout << name << "의 순수가상함수 구현 완료\n";
+     //    }
+     //};
+
+     ////0 1 1 2 3 5 8 13 21 34
+     //Pear a;
+     //a.Peer();
+     //a.name = "Change";
+     //a.Peer();
+     //
+#pragma endregion
+#pragma endregion
