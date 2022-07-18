@@ -1,1 +1,2 @@
 C:\Users\tmdgm\Desktop\CppPractice\CppPractice\Cpp_B_11_P\Debug\Cpp_B_11_P.exe
+F:\Git\CppPractice\Cpp_B_11_P\Debug\Cpp_B_11_P.exe
