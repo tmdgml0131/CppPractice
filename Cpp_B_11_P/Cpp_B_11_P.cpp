@@ -7,9 +7,9 @@ using namespace std;
 
 
 
-#pragma region 05.템플릿
+#pragma region 06.템플릿
 /*
----------------------------------------- 05.템플릿 ----------------------------------------
+---------------------------------------- 06.템플릿 ----------------------------------------
 */
 #pragma endregion
 
@@ -1500,11 +1500,217 @@ using namespace std;
 
 
 #pragma endregion
-     
+
+#pragma region Chapter 6.분기 구문과 논리 연산자
+    
+    #pragma region 06.if 구문
+    /*
+    ---------------------------------------- 06.if 구문 ----------------------------------------
+    C++ 프로그램은 하나의 특정한 행동을 할 것인지 말 것인지 선택해야 할 때, if 구문을 사용한다.
+    if 구문에는 if와 if else 두 가지가 있다.
+    다음 예시를 보자..
+
+        if(조건)
+        {
+            statement
+        }
+
+    조건이 참으로 평가되면 statement를 수행한다. 거짓이라면, 실행하지 않고 건너 뛴다.
+
+    if else는 if문에서 다른 선택지와 statement를 주는 것이다. 다음 예시를 보자.
+
+        if(조건1)
+        {
+            statement 1
+        }
+        else if(조건2)
+        {
+            statement 2
+        }
+        else
+        {
+            statement 3
+        }
+
+    위 예제에서, 조건 1이 참이라면 statement 1을 실행 시킨 후 if문은 종료된다.
+    조건 1이 거짓이고 조건 2가 참이라면, statement 2를 수행한다.
+    만일, 조건 1,2 가 모두 거짓이라면, 마지막으로 statement 3을 수행한다.
+    */
+    #pragma endregion
+    #pragma region 06.논리 표현식
+    /*
+    ---------------------------------------- 06.논리 표현식 ----------------------------------------
+    1 == 1, 2 == 2, 3 > 2,,, 처럼 한 개의 조건을 검사하는 경우도 있지만,
+    하나 이상의 조건을 검사해야 하는 경우가 있다.
+    마트에서 요구르트를 사려면,
+    
+        1. 요구르트가 있어야 한다.
+        2. 요구르트를 살 돈이 있어야 한다.
+    
+    두 조건을 모두 충족해야 한다.
+
+    C++에서는 주어진 표현식을 조합하거나 변경할 수 있는 세 가지 연산자인
+    논리합( || ), 논리곱( && ), 논리부정( ! ) 을 제공한다.
+
+    논리합 OR 연산자 ( || )
+        논리합 연산자는 OR 연산자라고도 불린다. 한 쪽 조건이라도 만족 될 경우, 참으로 처리한다.
+        다음 예시를 보자
+
+        5 == 5 || 4 == 4    ( 좌, 우측이 모두 true이기 때문에, 이 연산은 true다 )
+        5 == 5 || 5 == 4    ( 좌측이 true이기 때문에, 이 연산은 true 다 )
+        4 == 3 || 3 == 2    ( 모두 false이기 때문에, 이 연산은 false 다 )
+
+    논리곱 AND 연산자 ( && )
+        논리곱 연산자는 AND 연산자라고도 불린다. 모든 조건이 만족 될 경우, 참으로 처리한다.
+        다음 예시를 보자.
+
+        5 == 5 && 4 == 4    ( 좌, 우측이 모두 true이기 때문에, 이 연산은 true다 )
+        5 == 5 && 5 == 4    ( 좌측만 true이기 때문에, 이 연산은 false 다 )
+        4 == 3 && 3 == 2    ( 모두 false이기 때문에, 이 연산은 false 다 )
+
+    논리부정 NOT 연산자 ( ! )
+        논리부정 연산자는 표현식의 값을 반대로 만든다. 즉, true를 false로, false를 true로 변경한다.
+        다음 예시를 보자
+
+        5 == 5                  ( true 다 )
+        !(5 == 5)               ( false다 )
+        !(3 == 2 || 4 == 2)     ( true 다 )
+    */
+    #pragma endregion
+    #pragma region 06.cctype 라이브러리
+    /*
+    ---------------------------------------- 06.cctype 라이브러리 ----------------------------------------
+    C++는 is~~(ch) 함수를 통해 입력된 문자가 영문자인지, 화이트스페이스인지, 숫자인지, 구두점인지를 검사한다.
+    또한, 소문자를 대문자로, 대문자를 소문자로 바꾸는 유용한 함수 또한 존재한다.
+    다음 예시를 보자.
+
+        #include <cctype>
+
+        char ch{};
+        isalpha(ch);        // 영문자인가?
+        isspace(ch);        // 화이트스페이스인가?
+        isdigit(ch);        // 숫자인가?
+        ispunct(ch);        // 구두점인가?
+        islower(ch);        // 소문자인가?
+        isupper(ch);        // 대문자인가?
+        tolower(ch);        // 대문자를 소문자로 리턴, 아니라면 그대로
+        toupper(ch);        // 소문자를 대문자로 리턴, 아니라면 그대로
+        isalnum(ch);        // 알파벳이거나 숫자인가?
+        isblank(ch);        // 빈칸 또는 수평 탭인가?
+        iscntrl(ch);        // 제어 문자인가?
+        isgraph(ch);        // 인쇄 가능한가? ( 빈칸이 아닌가? )
+        isxdigit(ch);       // 16진 숫자 (0~9, a~f 또는 A~F)인가?
+
+    */
+    #pragma endregion
+    #pragma region 06.삼항 연산자
+    /*
+    ---------------------------------------- 06.삼항 연산자 ----------------------------------------
+    C++는 if else 대신, 사용할 수 있는 ' ? : '연산자를 제공한다. 사용법은 다음과 같다.
+
+        조건? 참 : 거짓
+
+    얼핏 봐선 이해가 힘들 것이다. 다음 예시를 보자.
+
+        (1==1)? cout<<"true" : cout << "false";
+
+    먼저 ? 앞에 있는 (1==1)이 참인지 거짓인지 확인한다. 1==1은 참이므로, : 기준 좌측의 cout<<"true"를 실행한다.
+        
+        (1==2)? cout<<"true" : cout << "false";
+
+    의 경우에는 cout << "false" 를 수행한다.
+    */
+    #pragma endregion
+    #pragma region 06.switch 구문
+    /*
+    ---------------------------------------- 06.switch 구문 ----------------------------------------
+    예를 들어, cheap, moderate, expensive, extravagant, excessive 라는 
+    다섯 가지 선택 사항 중 하나를 선택해야 한다고 가정하자.
+    이 경우, 선택 사항마다 if else 문을 사용하여 구조를 길게 확장할 수 있다.
+    하지만 C++의 switch 구문을 사용하면, 이를 좀 더 쉽게 구현할 수 있다.
+    다음 예시를 보자.
+
+        switch (integer-expression)
+        {
+            case label1 : statement
+                break;
+            case label2 : statement
+                break;
+                ...
+            default : statement
+
+    이를 활용한 예시를 보자.
+
+        int choice{};
+        cin >> choice;
+    
+        switch (choice)
+        {
+            case 1: 
+                cout << "11111111111111";
+                break;
+            case 2: 
+                cout << "22222222222222";
+                break;
+            case 3: 
+                cout << "33333333333333";
+                break;
+            case 4: 
+                cout << "44444444444444";
+                break;
+            default: 
+                cout << "aaaaaaaaaaaa";
+                break;
+        }
+                
+        
+
+    */
+    #pragma endregion
+    #pragma region 06.템플릿
+    /*
+    ---------------------------------------- 06.enum을 활용한 switch문 ----------------------------------------
+    우리는 chapter 4에서 열거체의 유용성을 보았다. 열거체는 switch문에서 빛을 발한다.
+    다음 예시를 보자..
+
+    int code{};
+    cin >> code;
+
+        switch ((Days)code)
+        {
+        case MON:
+            cout << "월요일";
+            break;
+        case TUE:
+            cout << "화요일";
+            break;
+        case WED:
+            cout << "수요일";
+            break;
+        case THU:
+            cout << "목요일";
+            break;
+        case FRI:
+            cout << "금요일";
+            break;
+        case SAT:
+            cout << "토요일";
+            break;
+        case SUN:
+            cout << "일요일";
+            break;
+        default:
+            cout << "what the hell";
+            break;
+        }
+
+    */
+    #pragma endregion
+#pragma endregion
     
 
 
-//338페이지
+//370페이지
 
 
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -1513,10 +1719,7 @@ void Say();
 
 //-------------------------[   FBody   ]-----------------------------------//
 
-struct Explosive // struct(구조체 서술 정의) Explosive(구조체 이름) 
-{
-    
-};
+enum Days{MON, TUE, WED, THU, FRI, SAT, SUN};
 
 int main()
 {
@@ -1532,26 +1735,43 @@ int main()
 
 void Say()
 {
-    int count{};
-    cin >> count;
-    for (int i{1}; i <= count; i++)
+    int code{};
+    cin >> code;
+    
+    switch ((Days)code)
     {
-        for (int k = count - i; k > 0 ; k--)
-        {
-            cout << " ";
-        }
-        
-        for (int j = count - i; j < count; j++)
-        {
-            cout << "*";
-            
-        }
-        if (i == count) return;
-        cout << endl;
+    case MON:
+        cout << "월요일";
+        break;
+    case TUE:
+        cout << "화요일";
+        break;
+    case WED:
+        cout << "수요일";
+        break;
+    case THU:
+        cout << "목요일";
+        break;
+    case FRI:
+        cout << "금요일";
+        break;
+    case SAT:
+        cout << "토요일";
+        break;
+    case SUN:
+        cout << "일요일";
+        break;
+    default:
+        cout << "what the hell";
+        break;
     }
+    
+
+
+}
 
     
-}
+
 
 
 
