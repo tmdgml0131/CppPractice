@@ -2,7 +2,10 @@
 #include <string> //string class 사용 위해
 #include <cstring> //C 스타일 문자열 라이브러리
 #include <array>
+#include <cctype>
 #include <ctime>
+#include <fstream>  // 파일 I/O 를 위해
+#include <cstdlib>  // exit() 지원
 using namespace std;
 
 
@@ -131,7 +134,7 @@ using namespace std;
     아래의 예시를 보겠습니다.
 
     char let1[20]{};
-    char  let2[20]{ "Jaguar" };
+    char let2[20]{ "Jaguar" };
     string let3{};
     string let4{ "Panther"};
 
@@ -1667,12 +1670,14 @@ using namespace std;
 
     */
     #pragma endregion
-    #pragma region 06.템플릿
+    #pragma region 06.enum을 활용한 switch문
     /*
     ---------------------------------------- 06.enum을 활용한 switch문 ----------------------------------------
     우리는 chapter 4에서 열거체의 유용성을 보았다. 열거체는 switch문에서 빛을 발한다.
     다음 예시를 보자..
 
+    enum Days{MON, TUE, WED, THU, FRI, SAT, SUN}
+    
     int code{};
     cin >> code;
 
@@ -1706,11 +1711,462 @@ using namespace std;
 
     */
     #pragma endregion
+    #pragma region 06.break와 continue 구문
+    /*
+    ---------------------------------------- 06.break와 continue 구문 ----------------------------------------
+    break와 continue 구문은, 프로그램이 코드의 일부를 무시하고 건너뛰게 만든다.
+    break는, switch 구문과, 모든 종류에 루프에 사용할 수 있다.
+    break는, switch나 루프의 바로 뒤에 오는 구문을 실행하게 만든다.
+
+    continue 구문은 루프에만 사용 가능하며, 루프 몸체의 나머지를 무시하고 새로운 루프 주기를 시작한다.
+
+    다음 예시를 보자.
+
+        int i{};
+
+        while (true)                            // 무한 반복문
+        {
+            if (i == 3) break;                  // i가 3이 되면 반복문을 종료한다
+
+            cout << "Hello" << endl;
+            i++;
+            continue;                           // 밑의 구문은 실행하지 않고 루프를 반복한다.
+            cout << "Hello again" << endl;
+
+
+        }
+
+    출력 :
+        Hello
+        Hello
+        Hello
+
+    
+
+    */
+    #pragma endregion
+    #pragma region 06.수를 읽어들이는 루프
+    /*
+    ---------------------------------------- 06.수를 읽어들이는 루프 ----------------------------------------
+    
+        int n{};
+        cin >> n; 
+        입력 : aaaaaaaaaaaaaaaaaa
+
+    숫자를 입력받는 프로그램이, 사용자에 의해 단어가 입력된다면 무슨 일이 벌어질까?
+    단순히 에러를 발생하는 것이 아닌, 네 가지 일이 벌어진다.
+
+        * n의 값은 변하지 않는다.
+        * 입력 큐에 잘못된 입력이 유지된다.
+        * cin 객체의 에러 플래그가 설정된다.
+        * cin 메서드 호출이 false( bool형으로 변환된다면 )를 리턴한다.
+    
+    cin 메서드가 false를 리턴하는 사실은, 수를 입력받는 루프를 종료시키기 위해 수가 아닌
+    입력을 사용할 수 있다는 것을 의미한다. 또한, 에러 플래그를 설정한다는 사실은,
+    프로그램이 다시 입력을 받기전에 그 에러플래그를 초기화해야 함을 의미한다.
+    파일의 끝(EOF) 조건을 초기화하는 clear() method는 불량 입력 플래그도 초기한다.
+    다음 예시를 보자..
+
+        double golf[5]{};
+        
+        for(int i{}; i < 5; i++)
+        {
+            whille( !(cin>>golf[i]) )           // 이 구문으로 cin >> golf[i] 도 수행한다.
+            {
+                cin.clear;                      // cin >> golf[i]가 실패할 경우..(range문제, 데이터 타입 문제 등..) 입력 초기화
+            }
+            while(cin.get != '\n') continue;    // 불량입력을 제거한다
+            cout << "골프 점수를 입력하세요";
+        }
+
+    */
+    #pragma endregion
+    #pragma region 06.간단한 파일 입/출력
+    /*
+    ---------------------------------------- 06.간단한 파일 입/출력 ----------------------------------------
+    때로 키보드 입력은 최선의 선택이 아니다. 주식을 예로 들어보자.
+    1,000 종목의 주식 시세가 들어 있는 파일을 다운 했다면,
+    수작업으로 값을 입력하는 것보단, 프로그램이 파일을 직접 읽게 만드는 것이 편리할 것이다.
+    C++에서는 I/O ( Input / Output )의 적용이 간단하다.
+    이 주제는 17장에서 폭넓게 탐구한다. 여기선, 간단한 텍스트 파일 I/O만 살펴보자.
+
+    * 텍스트 파일에 쓰기
+        파일 출력은 다음과 같은 방식으로 처리된다.
+        * fstream 헤더 파일을 포함해야 한다.
+        * fstream 헤더 파일은 출력을 처리하는 ofstream 클래스를 정의한다.
+        * 하나 이상의 ofstream 변수 또는 객체를 선언해야 한다.
+        * ofstream 객체와 특정 파일의 연결이 필요하다. 한 가지 방법은, open() method의 사용이다.
+        * 파일을 다루는 작업이 끝나면, close() method로 파일을 닫아준다.
+    
+        객체의 선언법과 파일 연결 방법은 다음과 같다.
+
+        ofstream outFile;   // outFile은 ofstream 객체
+        ofstream fout;      // fout은 ofstream 객체
+
+        객체를 특정 파일에 연결하는 방법은 다음과 같다.
+
+        outFile.open("fish.txt");   // fish.txt에 쓰는 데, outFile 사용
+        char fileName[50];
+        cin >> fileName;            // 사용자가 이름을 지정한다
+        fout.open(fileName);        // 지정된 파일을 읽는데 fout 사용
+
+        요약하자면, 파일 출력을 사용하는 기본 절차는 다음과 같다.
+        1. fstream 헤더 파일의 포함
+        2. ofstream 객체의 생성
+        3. ofstream 객체와 파일의 연결
+        4. ofstream 객체를 cout과 동일한 방식으로 사용
+
+        다음 예시를 보자.
+
+        #include <fstream>      // 파일 I/O 를 위해
+
+        char automobile[50]{};
+        int year{};
+        double a_price{};
+        double d_price{};
+
+        ofstream outFile;
+        outFile.open("carinfo.txt");
+
+        cout << "자동차 메이커와 차종을 입력하시오." << endl;
+        cin.getline(automobile, 50);
+        cout << "연식을 입력하시오." << endl;
+        cin >> year;
+        cout << "구입 가격을 입력하시오." << endl;
+        cin >> a_price;
+        d_price = 0.913 * a_price;
+
+        // cout으로 스크린에 정보 디스플레이
+
+        cout << fixed;                      // 소수점 자리수 고정
+        cout.precision(2);                  // 소수점 2째 자리까지
+        cout.setf(ios_base::showpoint);     // 소수점 출력할 것
+        cout << "메이커와 차종 : " << automobile << endl;
+        cout << "연식 : " << year << endl;
+        cout << "구입 가격 $" << a_price << endl;
+        cout << "현재 가격 $" << d_price << endl;
+
+        // cout 대신 outFile 사용하여 똑같은 일 처리
+        outFile << fixed;
+        outFile.precision(2);
+        outFile.setf(ios_base::showpoint);
+        outFile << "메이커와 차종 : " << automobile << endl;
+        outFile << "연식 : " << year << endl;
+        outFile << "구입 가격 $" << a_price << endl;
+        outFile << "현재 가격 $" << d_price << endl;
+
+        outFile.close();        //파일 처리 종료
+
+        
+        실행 프로그램이 들어 있는 디렉터리나 폴더에서 
+        carinfo.txt 라는 새로운 파일을 찾을 수 있다. ( 컴파일러 환경에 따라 다를 수 있다. )
+        파일에는 outFile 사용에 의해 만들어진 출력이 들어 있다.
+        텍스트 에디터를 사용하여 파일을 열었을 때, 다음과 같은 내용이 있어야 한다.
+
+            메이커와 차종 : ~~~
+            연식 : ~~~
+            구입 가격 : ~~~
+            현재 가격 : ~~~
+
+
+    * 텍스트 파일 읽기
+        파일 입력은 다음과 같은 방식으로 처리된다.
+        * fstream 헤더 파일을 포함
+        * fstream 헤더 파일은, 입력을 처리하는 ifstream 클래스를 정의
+        * 하나 이상의 ifstream 변수 또는 객체의 선언
+        * ifstream과 특정 파일의 연결, open() method 사용
+        * 파일을 다루는 작업이 끝나면, close() method 사용
+        * ifstream 객체를 >>, get(), getline() 과 같은 연산자와 메서드를 함께 사용 가능.
+        * ifstream 객체를 eof() 와 fail() 과 같은 method를 사용하여 입력 시도의 성공여부 확인 가능
+        
+        객체의 선언법은 다음과 같다.
+
+        ifstream inFile;        // inFile은 ifstream 객체
+        ifstream fin;           // fin은 ifstream 객체
+
+        객체와 파일의 연결법은 다음과 같다.
+
+        inFile.open("bowling.txt");
+        char fileName[50];
+        cin >> fileName;
+        fin.open(fileName);
+
+        객체들의 사용법은 다음과 같다.
+
+        double wt{};
+        inFile >> wt;               // bowling.txt에서 하나의 수를 읽는다.
+        char line[81];
+        fin.getline(line, 81);      // 한 행의 텍스트를 읽는다.
+
+        
+        입력을 위해 존재하지 않는 파일을 열려고 시도하면 무슨 일이 일어날까?
+        에러는, ifstream 객체를 사용하려는 이어지는 시도들을 실패하게 만든다.
+        파일의 개폐 여부를 아는 방법은, is_open() 메서드의 사용이다.
+        다음 예시를 보자.
+
+        inFile.open("bowling.txt");
+        if( !inFile.is_open() )
+        {
+            exit(EXIT_FAILURE);
+        }
+
+        
+        is_open() 메서드는, 파일이 열렸다면 true를 리턴한다.
+        exit() 함수는 cstdlib 헤더 파일에 원형이 있다. 이 헤더파일은,
+        운영 체제와 커뮤니케이션하는데 사용하는 매개변수 값으로 EXIT_FAILURE 를 정의한다.
+        exit() 함수는 프로그램을 종료한다.
+
+        다음 예시를 보자..
+
+        #include <fstream>  // 파일 I/O 를 위해
+        #include <cstdlib>  // exit() 지원
+
+        char fileName[60];
+        ifstream inFile;            // 파일 입력 처리 위한 객체
+        cout << "데이터 파일의 이름을 입력하시오." << endl;
+        cin.getline(fileName, 60);
+        inFile.open(fileName);      // inFile을 파일에 연결
+
+        if ( !inFile.is_open() )    // 파일을 여는데 실패하면
+        {
+            exit(EXIT_FAILURE);     // 프로그램을 종료한다.
+        }
+
+        double value;
+        double sum{};
+        int count{};                // 읽은 항목의 개수
+
+        inFile >> value;            // 첫 번째 값을 얻는다
+        while (inFile.good())       // 입력이 양호하고 EOF가 아닌 동안 ( EOF = 읽을 데이터가 없는 상태 )
+        {
+            count++;
+            sum += value;
+            inFile >> value;        // 다음 값을 얻는다.
+        }
+
+        if (inFile.eof())
+        {
+            cout << "파일 끝에 도달!";
+        }
+        else if (inFile.fail())
+        {
+            cout << "데이터 불일치로 입력 종료!";
+        }
+        else
+        {
+            cout << "알 수 없는 에러";
+        }
+
+        if (count == 0)
+        {
+            cout << "데이터 없음";
+        }
+        else
+        {
+            cout << "읽은 항목 개수 : " << count << endl;
+            cout << "합계 : " << sum << endl;
+            cout << "평균 : " << sum / count << endl;
+        }
+
+        inFile.close();
+        ---------------------------------------
+        scores.txt 파일을 생성하고 내용이 다음과 같다고 하자
+        18 19 18.5 13.5 14
+        16 19.5 20 18 12 18.5
+        17.5
+
+        출력 :
+        데이터 파일의 이름을 입력하시오 : scores.txt
+        파일 끝에 도달했습니다.
+        읽은 항목의 개수 : 12
+        합계 : 204.5
+        평균 : 17.0417
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_1
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_1 ----------------------------------------
+    문제 :
+    @ 기호가 나타날 때까지 키보드 입력을 읽어들여 대문자는 소문자로, 소문자는 대문자로 에코하는 프로그램을 작성하라.
+    숫자들은 에코에서 제외하여야 한다. ( cctype 라이브러리를 사용하라. )
+
+    해답 :
+        char ch{};
+
+        while (true)
+        {
+            cout << "Your input : ";
+
+            cin >> ch;
+            
+            if (ch == '@') return;
+
+            if (isalpha(ch))
+            {
+                if (isupper(ch))
+                {
+                   ch = tolower(ch);
+                }
+                else if(islower(ch))
+                {
+                   ch = toupper(ch);
+                }
+            }
+
+            cout << "Your output : " << ch << endl;
+        }
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_2
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_2 ----------------------------------------
+    문제 :
+    double 형의 배열에 기부금을 10개까지 읽어들이는 프로그램을 작성하라.
+    10개가 입력되기 전이라도, 수가 아닌 것이 입력되면 프로그램이 종료되어야한다.
+    프로그램은 기부금들의 평균과, 평균보다 큰 기부금이 배열에 몇 개 들어 있는지 보고해야 한다.
+
+    해답 :
+        double donation[10]{};
+        double amount{};
+        double average{};
+        int bigger{};
+
+        for (int i{}; i < 10; i++)
+        {
+            cout << "기부금을 입력하세요 : ";
+            while (!(cin >> donation[i])) return;
+
+            amount += donation[i];
+            
+        }
+        average = amount / 10;
+
+        cout << "기부금 평균 : " << amount / 10 << endl;
+        
+        for (int i{}; i < 10; i++)
+        {
+            if (donation[i] > average)
+            {
+                bigger++;
+            }
+
+        }
+
+        cout << "평균 이상 기부자 :" << bigger << "명";
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_3
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_3 ----------------------------------------
+    문제 :
+    다음과 같은 샘플 프로그램을 작성하라.  ( 대소문자 구별 )
+
+        다음 선택 사항 중에서 하나를 선택하십시오. ( 끝내려면 q )
+        a ) apple       b ) banana
+        c ) carrot      d ) durian
+        
+        입력 : f
+        a, b, c, d 중에서 하나를 선택하십시오. ( 끝내려면 q ) : e
+        a, b, c, d 중에서 하나를 선택하십시오. ( 끝내려면 q ) : a
+        사과는 맛있습니다.
+
+    해답 :
+        char ch[80]{};
+
+
+        cout << "다음 선택 사항 중에서 하나를 선택하십시오. ( 끝내려면 q )\n";
+        cout << "a ) apple          b ) banana\nc ) carrot         d ) durian" << endl;
+
+        do
+        {
+            cin >> ch;
+
+            if (ch[0] == 113) return;
+
+            if (ch[1] != NULL)          // Null 은 아무것도 없는 상태, 빈 공간을 의미한다.
+            {
+                ch[0] = NULL;
+            }
+
+            if (ch[0] < 97 || ch[0] > 100)
+            {
+                cout << "a, b, c, d 중에서 하나를 선택하십시오. ( 끝내려면 q ) : " << endl;
+            }
+        }
+        while (!(ch[0] >=97 && ch[0] <=100));
+
+        switch (ch[0])
+        {
+        case 97:
+            cout << "사과는 맛있어";
+            break;
+        case 98:
+            cout << "맛있으면 바나나";
+            break;
+        case 99:
+            cout << "당근은 싫어";
+            break;
+        case 100:
+            cout << "우웱";
+            break;
+        default:
+            cout << "Unknown Error";
+            break;
+        }
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_4
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_4 ----------------------------------------
+
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_5
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_5 ----------------------------------------
+
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_6
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_6 ----------------------------------------
+
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_7
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_7 ----------------------------------------
+
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_8
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_8 ----------------------------------------
+
+
+    */
+    #pragma endregion
+    #pragma region 06.프로그래밍 연습_9
+    /*
+    ---------------------------------------- 06.프로그래밍 연습_9 ----------------------------------------
+
+
+    */
+    #pragma endregion
+
 #pragma endregion
     
 
 
-//370페이지
+//400페이지
 
 
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -1719,7 +2175,6 @@ void Say();
 
 //-------------------------[   FBody   ]-----------------------------------//
 
-enum Days{MON, TUE, WED, THU, FRI, SAT, SUN};
 
 int main()
 {
@@ -1735,39 +2190,9 @@ int main()
 
 void Say()
 {
-    int code{};
-    cin >> code;
     
-    switch ((Days)code)
-    {
-    case MON:
-        cout << "월요일";
-        break;
-    case TUE:
-        cout << "화요일";
-        break;
-    case WED:
-        cout << "수요일";
-        break;
-    case THU:
-        cout << "목요일";
-        break;
-    case FRI:
-        cout << "금요일";
-        break;
-    case SAT:
-        cout << "토요일";
-        break;
-    case SUN:
-        cout << "일요일";
-        break;
-    default:
-        cout << "what the hell";
-        break;
-    }
     
-
-
+    
 }
 
     
