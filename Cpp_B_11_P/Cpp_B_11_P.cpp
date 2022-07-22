@@ -10,9 +10,9 @@ using namespace std;
 
 
 
-#pragma region 06.템플릿
+#pragma region 07.템플릿
 /*
----------------------------------------- 06.템플릿 ----------------------------------------
+---------------------------------------- 07.템플릿 ----------------------------------------
 */
 #pragma endregion
 
@@ -2084,12 +2084,12 @@ using namespace std;
         {
             cin >> ch;
 
-            if (ch[0] == 113) return;
-
             if (ch[1] != NULL)          // Null 은 아무것도 없는 상태, 빈 공간을 의미한다.
             {
                 ch[0] = NULL;
             }
+            
+            if (ch[0] == 113) return;
 
             if (ch[0] < 97 || ch[0] > 100)
             {
@@ -2122,27 +2122,280 @@ using namespace std;
     #pragma region 06.프로그래밍 연습_4
     /*
     ---------------------------------------- 06.프로그래밍 연습_4 ----------------------------------------
+    문제 :
+    Cpp 라는 회원제  인터넷 사이트에서는 실명, 직함, Cpp 아이디로 자신을 나타낼 수 있다.
+    회원 명부를 실명, 직함, Cpp 아이디로, 또는 가입 회원이 지정한 방식에 따라 열람하는
+    프로그램을  다음 구조체에 기초하여 작성하라.
 
+        struct cpp
+        {
+            char fullname[20];       // 실명
+            char title[20];          // 직함
+            char cppname[20];        // Cpp 아이디
+            int preference{};        // 0 = 실명, 1 = 직함, 2 = 아이디
+        };
+    
+        cpp list[3] = 
+        {
+            { "James", "Junior", "Joat", 0 },
+            { "John", "Senior", "KingMaker", 1 },
+            { "Peter", "CEO", "The King", 2 }
+        };
+
+        char ch[80];
+
+        cout << "Cpp 회원 정보 열람\n";
+        cout << "a ) By name          b ) By Title\nc ) By ID            d ) By preference" << endl << "(종료하려면 q)"<< endl;
+
+        do
+        {
+            
+            cin >> ch;
+            
+            if (ch[1] != NULL)          // Null 은 아무것도 없는 상태, 빈 공간을 의미한다.
+            {
+                ch[0] = NULL;
+            }
+
+            if (ch[0] == 113)
+            {
+                return;
+            }
+
+            switch (ch[0])
+            {
+            case 97:
+                for (int i{}; i < 3; i++)
+                {
+                    cout << list[i].fullname << endl;
+                }
+                break;
+            case 98:
+                for (int i{}; i < 3; i++)
+                {
+                    cout << list[i].title << endl;
+                }
+                break;
+            case 99:
+                for (int i{}; i < 3; i++)
+                {
+                    cout << list[i].cppname << endl;
+                }
+                break;
+            case 100:
+                for (int i{}; i < 3; i++)
+                {
+                    switch (list[i].preference)
+                    {
+                    case 0:
+                        cout << list[i].fullname << endl;
+                        break;
+                    case 1:
+                        cout << list[i].title << endl;
+                        break;
+                    case 2:
+                        cout << list[i].cppname << endl;
+                        break;
+                    default:
+                        cout << "Unknown Error" << endl;
+                        break;
+                    }
+                }
+                break;
+            default:
+                cout << "Unknown Error" << endl;
+                break;
+            }
+
+            cout << "원하는 것을 입력하세요 : " << endl;
+        } while (true);
 
     */
     #pragma endregion
     #pragma region 06.프로그래밍 연습_5
     /*
     ---------------------------------------- 06.프로그래밍 연습_5 ----------------------------------------
+    문제 :
+    Cpp 왕국은 화폐단위로 Ppc를 사용한다. Cpp 왕국의 소득세는 다음과 같다.
+        
+        5,000 Pcc 까지는           - 0%
+        그 다음 10,000 Pcc 까지는  - 10%
+        그 다음 20,000 Pcc 까지는  - 15%
+        35,000 Pcc 이상 부터는     - 20%
 
+    38,000 Pcc의 소득이 있는 사람은, ( 5000 x 0 ) + ( 10,000 * 0.10 ) + ( 20,000 * 0.15 ) + ( 3,000 * 0.20 ) = 4,600 Pcc 의 세금을 내야한다.
+    소득을 입력하면 소득세를 산출하는 프로그램을 작성하라. 사용자가 음수를 입력하거나 수가 아닌 것을 입력하면 종료해야 한다.
+    ( 최소 화폐와 세금 단위는 1이다 )
 
+    해답 :
+        int income{};
+        int tax{};
+
+        while ( cin >> income && income >= 0 )
+        {
+            if (income <= 5000)
+            {
+                tax = 0;
+            }
+            else if (income > 5000 && income <= 15000)
+            {
+                tax = (income - 5000) * 0.10;
+            }
+            else if (income > 15000 && income <= 35000)
+            {
+                tax = (income - 15000) * 0.15 + 1000;
+            }
+            else if (income > 35000)
+            {
+                tax = (income - 35000) * 0.20 + 4000;
+            }
+
+            cout << "소득세 : " << tax << endl;
+        }
+
+        
     */
     #pragma endregion
     #pragma region 06.프로그래밍 연습_6
     /*
     ---------------------------------------- 06.프로그래밍 연습_6 ----------------------------------------
+    문제 : 
+    Cpp에 대한 기부금을 추적하는 프로그램을 작성하라.
+    프로그램은 사용자에게 기부할 사람이 몇 사람인지 묻는다. 그리고, 기부자의 이름과 기부금을 입력 받는다.
+    정보는 동적으로 대입된 구조체 배열에 저장되며, 구조체는 이름과 기부금을 저장하는 char형 배열(또는 string 객체)와 double형 멤버이다.
+    저장을 마친 후, 프로그램은 $10,000 또는 그 이상을 기부한 사람들에 대해서 기부자의 이름과 기부금을 나란히 표시하되,
+    목록의 위에 '고액 기부자' 라는 제목을 붙인다.
+    나머지 기부자들의 목록을 표시하되, 목록의 위에는 '소액 기부자' 라는 제목을 붙인다. 
+    기부자가 없다면 "기부자가 없습니다" 를 출력한다.
 
+    해답 :
+        struct Donation
+        {
+            string name{};
+            double money{};
+        };
+
+        cout << "총 기부 인원 수를 입력하세요 : " << endl;
+        int size{};
+        double sum{};
+        cin >> size;
+
+        Donation* members = new Donation[size];
+
+        for (int i{}; i < size; i++)
+        {
+            cout << "이름을 입력하세요 : " << endl;
+            cin >> members[i].name;
+            cout << "기부금을 입력하세요 : " << endl;
+            if (!(cin >> members[i].money && members[i].money >= 0))
+            {
+                cout << "올바른 값을 입력하세요";
+                return;
+            }
+        }
+
+        for (int i{}; i < size; i++)
+        {
+            sum += members[i].money;
+        }
+
+        if (sum == 0)
+        {
+            cout << "기부자가 없습니다.";
+            return;
+        }
+
+        cout << "-----  고액 기부자    -----" << endl;
+
+        for (int i{}; i < size; i++)
+        {
+
+            if (members[i].money >= 10000)
+            {
+                cout << "이름 : " << members[i].name << " 기부금 : " << members[i].money << endl;
+            }
+        }
+
+        cout << "-----  소액 기부자    -----" << endl;
+
+        for (int i{}; i < size; i++)
+        {
+
+            if (members[i].money < 10000)
+            {
+                cout << "이름 : " << members[i].name << " 기부금 : " << members[i].money << endl;
+            }
+        }
+
+        delete []members;
 
     */
     #pragma endregion
     #pragma region 06.프로그래밍 연습_7
     /*
     ---------------------------------------- 06.프로그래밍 연습_7 ----------------------------------------
+    문제 :
+    외따로 떨어진 q가 입력될 때까지, 한 번에 한 단어씩 입력을 읽는 프로그램을 작성하라.
+    프로그램은 모음으로 시작하는 단어 수, 자음으로 시작하는 단어, 어느 범주에도 속하지 않는 단어 수를 보고해야 한다.
+    프로그램 실행 예는 다음과 같다.
+
+        단어를 입력하시오 ( 끝내려면 q ) :
+        The 12 awesome oxen ambled
+        quietly across 15 meters of lawn. q
+        모음으로 시작하는 단어의 수 : 5
+        자음으로 시작하는 단어의 수 : 4
+        기타 : 2
+
+    해답 :
+        int consonant{};
+        int vowel{};
+        int other{};
+
+        string str{};
+        do
+        {
+            cin >> str;
+
+            if (isalpha(str[0]))
+            {
+                switch (str[0])
+                {
+                case 'a':
+                case 'A':
+                    vowel++;
+                    break;
+                case 'e':
+                case 'E':
+                    vowel++;
+                    break;
+                case 'i':
+                case 'I':
+                    vowel++;
+                    break;
+                case 'o':
+                case 'O':
+                    vowel++;
+                    break;
+                case 'u':
+                case 'U':
+                    vowel++;
+                    break;
+                default:
+                    consonant++;
+                    break;
+                }
+            }
+            else
+            {
+                other++;
+            }
+
+
+        } while (str != "q");
+
+        cout << "모음으로 시작하는 단어 수 : " << vowel << endl;
+        cout << "자음으로 시작하는 단어 수 : " << consonant << endl;
+        cout << "기타 : " << other;
 
 
     */
@@ -2150,23 +2403,150 @@ using namespace std;
     #pragma region 06.프로그래밍 연습_8
     /*
     ---------------------------------------- 06.프로그래밍 연습_8 ----------------------------------------
+    문제 :
+    텍스트 파일을 열고, 파일의 끝까지 문자 단위로 읽고, 파일에 들어 있는
+    문자들의 수를 보고하는 프로그램을 작성하라.
 
+    해답 :
+        #include<fstream>
+        #include<cstdlib>
+
+        const int SIZE = 20;
+
+        char filename[SIZE];
+        ifstream inFile;
+        
+        cout << "읽을 파일명 입력 : ";
+        cin.getline(filename, SIZE);
+        
+        inFile.open(filename);
+        
+        if (!inFile.is_open())
+        {
+        	cout << "파일 열기 실패" << endl;
+        	exit(EXIT_FAILURE);
+        }
+        
+        char ch;
+        int count = 0;
+        inFile >> ch;
+        
+        while (inFile.good())
+        {
+        	++count;
+        	inFile >> ch;
+        }
+        
+        if (inFile.eof())
+        {
+            cout << "파일 끝에 도달\n";
+        }
+        
+        if (count == 0)
+        {
+        	cout << "데이터가 없습니다.\n";
+        }
+        else
+        {
+            cout << "문자 수 : " << count << endl;
+        }
+        
+        inFile.close();
+        
 
     */
     #pragma endregion
     #pragma region 06.프로그래밍 연습_9
     /*
     ---------------------------------------- 06.프로그래밍 연습_9 ----------------------------------------
+    문제 :
+    파일로부터 정보를 얻는 프로그램을 만들어라.
+    파일에 들어 있는 첫 항목은 기부자 수가 되어야 한다.
+    파일의 나머지는 두 행씩 짝을 이루어, 순서대로 이름, 기부액을 출력해야한다.
+    파일의 예시는 다음과 같다.
 
+        2
+        Sam
+        2000
+        Tom
+        1000
+
+    해답 :
+        #include<fstream>
+        #include<cstdlib>
+        
+        const int SIZE = 20;
+        
+        struct donation_info 
+        {
+            char name[20];
+            double donation;
+        };
+
+        char filename[SIZE];
+
+        ifstream inFile;
+        cout << "읽을 파일명 입력 : ";
+        cin.getline(filename, SIZE);
+
+        inFile.open(filename);
+
+        if (!inFile.is_open())
+        {
+            cout << "파일 열기 실패" << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        int n {};
+
+        (inFile >> n).get();
+
+        donation_info* SPRI = new donation_info[n];
+        
+        for (int i = 0; i < n; i++)
+        {
+            inFile.getline((SPRI + i)->name, SIZE);
+            (inFile >> (SPRI + i)->donation).get();
+        }
+
+
+        for (int i = 0; i < n; i++)
+        {
+            if ((SPRI + i)->donation >= 10000)
+            {
+                cout << (SPRI + i)->name << "	$" << (SPRI + i)->donation << endl;
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            if ((SPRI + i)->donation < 10000)
+            {
+                cout << (SPRI + i)->name << "	$" << (SPRI + i)->donation << endl;
+            }
+        }
+
+        inFile.close();
+        
 
     */
     #pragma endregion
 
 #pragma endregion
+
+#pragma region Chapter 7.함수 - C++의 프로그래밍 모듈
+    #pragma region 07.템플릿
+    /*
+    ---------------------------------------- 07.템플릿 ----------------------------------------
+    */
+    #pragma endregion
+
+
+#pragma endregion
     
 
 
-//400페이지
+//404페이지
 
 
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -2191,7 +2571,7 @@ int main()
 void Say()
 {
     
-    
+
     
 }
 
@@ -2208,79 +2588,3 @@ void Say()
 
 
 
-#pragma region 개념
-#pragma region 템플릿
-//int sum(int a, int b)
-//{
-//    cout << "Calling int..";
-//    return a + b;
-//}
-//
-//template<typename T>
-//T sum(T a, T b) //인텔리센스가 알아서 맞는 타입 T를 찾아줌..
-//{
-//    cout << "Calling template..";
-//    return a + b;
-//
-#pragma endregion
-#pragma region 포인터-메인으로 이동
-     /*int num1 = 1234;
-     double num2 = 3.14;
-
-     int* ptr_num1{};
-     double* ptr_num2{};
-
-     cout << "현재 num1의 값은 : " << num1 << "이고 " << "num1의 주소는 : " << &num1 << "입니다." << endl;
-     cout << "현재 num2의 값은 : " << num2 << "이고 " << "num2의 주소는 : " << &num2 << "입니다." << endl;
-     cout << "할당 되지 않은(초기값) ptr_num1의 주소는 : " << ptr_num1 << "입니다" << endl;
-     cout << "할당 되지 않은(초기값) ptr_num2의 주소는 : " << ptr_num2 << "입니다" << endl;
-     ptr_num1 = &num1;
-     ptr_num2 = &num2;
-     cout << "할당 된 ptr_num1의 주소는 : " << ptr_num1 << "이며 num1의 주소는 : " << &num1 << "입니다." << endl;
-     cout << "할당 된 ptr_num2의 주소는 : " << ptr_num2 << "이며 num2의 주소는 : " << &num2 << "입니다." << endl;
-     cout << "ptr_num1은 num1을 가르키는 포인터 입니다. '*'을 사용하여 ptr_num1이 가르키는 값을 가져옵니다.."<< *ptr_num1 << endl;
-     cout << "num1의 주소 : " << &num1 << endl << "ptr_num1의 주소 : " << &ptr_num1;*/
-#pragma endregion
-#pragma region 순수가상함수-메인으로 이동
-     //class Hamsu
-     //{
-     //public:
-     //    virtual void Drive()
-     //    {
-     //        cout << "driving.." << endl;
-     //        return;
-     //    }
-     //    virtual void Stop()
-     //    {
-     //        cout << "stopping.." << endl;
-     //        return;
-     //    }
-     //    virtual void Back()
-     //    {
-     //        cout << "going back.." << endl;
-     //    }
-     //    virtual void Peer() = 0; //순수 가상함수가 포함된 class는 instance 생성이 불가하다.
-     //    
-     //};
-     ////예 : 'hamsu a;' << 에러 발생!
-
-     //class Pear :public Hamsu
-     //{
-     //public:
-     //    string name{"Pear"};
-     //    
-     //public:
-     //    virtual void Peer() override // 순수가상함수가 포함된 class를 상속 받는 sub-class는 반드시 순수가상함수를 구현해야함.
-     //    {
-     //        cout << name << "의 순수가상함수 구현 완료\n";
-     //    }
-     //};
-
-     ////0 1 1 2 3 5 8 13 21 34
-     //Pear a;
-     //a.Peer();
-     //a.name = "Change";
-     //a.Peer();
-     //
-#pragma endregion
-#pragma endregion
