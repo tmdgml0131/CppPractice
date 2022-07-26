@@ -2831,40 +2831,104 @@ using namespace std;
     즉, 2차원 배열은 1차원 배열로 이루어진 n개만큼의 원소를 가진 다른 배열이라고 할 수 있다.
     */
     #pragma endregion
+    #pragma region 07.C 스타일 문자열을 리턴하는 함수
+    /*
+    ---------------------------------------- 07.C 스타일 문자열을 리턴하는 함수 ----------------------------------------
+    문자열을 리턴하는 함수를 작성하고 싶다고 가정하자. 함수로는 문자열 자체를 리턴할 수 없다.
+    대신, 문자열의 주소를 리턴할 수 있다. 이것이 더 효율적이다. 다음 예제를 보자.
 
+    char* buildstr(char c, int n);
 
+    
+    const int ArSize{ 8 };
+
+    int main()
+    {
+        int times{};
+        char ch{};
+
+        cout << "문자를 입력하세요 : " << endl;
+        cin >> ch;
+        cout << "정수를 입력하세요 : " << endl;
+        cin >> times;
+
+        char* ps = buildstr(ch, times);
+        cout << ps << endl;
+        delete[]ps;
+
+        ps = buildstr('+', 20);
+        cout << ps << "--done--" << ps << endl;
+        delete[]ps;
+
+        return 0;
+    }
+
+    char* buildstr(char c, int n)
+    {
+        char* pstr = new char[n + 1];
+        pstr[n] = '\0';
+        while (n-- > 0)
+        {
+            pstr[n] = c;
+        }
+        return pstr;
+    }
+
+    변수 pstr은 buildstr() 함수의 지역 변수이다. 따라서 함수가 종결되면, pstr에 대입되었던
+    기억 장소는 자동으로 해제된다. 그러나, 이 함수는 종결하기 전, pstr의 값을 리턴하기 때문에,
+    main()의 ps 포인터를 통하여 문자열에 접근할 수 있다.
+
+    */
+    #pragma endregion
+    #pragma region 07.함수와 구조체
+    /*
+    ---------------------------------------- 07.함수와 구조체 ----------------------------------------
+    구조체 변수는 보통의 변수처럼 함수에 값으로 전달할 수 있다. 이때, 함수는 구조체의 원본이 아닌
+    복사본을 대상으로 작업한다. 또한, 함수는 구조체를 리턴할 수 있다. 배열의 이름은
+    배열의 첫 번째 원소의 주소라는 등의 특별한 어떤 것이 구조체에는 없다.
+    구조체 이름은 그냥 구조체 이름일 뿐이다.
+    구조체를 이용하는 가장 직접적인 방법은, 기본적인 데이터형처럼 사용하는 것이다.
+    그러나, 구조체를 값으로 전달하는 것은 단점이 있다.
+    구조체의 덩치가 클 경우, 구조체를 복사하는 데 시간이 걸리고,
+    기억 장소에 대한 요구도 높아진다. **이것은 시스템 성능을 저하시킨다.**
+    이런 이유로, 많은 프로그래머들은 구조체의 주소를 전달한다.
+    이를 ( passing by reference ), 또는 ( call by reference )라 하며, 값을 전달하는 경우,
+    ( passing by value ), 또는 ( call by value ) 라고 한다. 이는 8장에서 더 자세하게 다룰 것이다.
+    */
+    #pragma endregion
 #pragma endregion
     
 
 
-//447페이지
+//452페이지
 
 
 //-------------------------[ ProtoType ]-----------------------------------//
 
 void Say();
-
+char* buildstr(char c, int n);
 
 //-------------------------[   FBody   ]-----------------------------------//
 const int ArSize{ 8 };
 
 int main()
 {
-    int sloth{ 3 };
-    int change{};
-    const int* ps = &sloth;             // const int 를 지시하는 포인터
-    int* const finger = &sloth;         // int 를 지시하는 const 포인터
+    int times{};
+    char ch{};
 
-    cout << sloth << endl;
+    cout << "문자를 입력하세요 : " << endl;
+    cin >> ch;
+    cout << "정수를 입력하세요 : " << endl;
+    cin >> times;
+
+    char* ps = buildstr(ch, times);
     cout << ps << endl;
-    cout << finger << endl;
-    sloth = 4;
-    cout << sloth << endl;
-    ps = &change;
-    *finger = 5;
-    cout << sloth << endl;
-    cout << ps << endl;
-    cout << finger << endl;
+    delete[]ps;
+
+    ps = buildstr('+', 20);
+    cout << ps << "--done--" << ps << endl;
+    delete[]ps;
+
     return 0;
 }
 
@@ -2878,6 +2942,16 @@ void Say()
     cout << "Hi";
 }
 
+char* buildstr(char c, int n)
+{
+    char* pstr = new char[n + 1];
+    pstr[n] = '\0';
+    while (n-- > 0)
+    {
+        pstr[n] = c;
+    }
+    return pstr;
+}
     
 
 
