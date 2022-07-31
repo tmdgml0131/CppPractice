@@ -2896,38 +2896,397 @@ using namespace std;
     ( passing by value ), 또는 ( call by value ) 라고 한다. 이는 8장에서 더 자세하게 다룰 것이다.
     */
     #pragma endregion
+    #pragma region 07.구조체의 전달과 리턴
+    /*
+    ---------------------------------------- 07.구조체의 전달과 리턴 ----------------------------------------
+    구조체를 값으로 전달하는 것은, 구조체의 크기가 비교적 작은 경우에 알맞다.
+    첫 번째 예제는 여행 소요시간을 다룬다. 서울에서 대구까지 3시간 50분이 걸리고,
+    대구에서 경주까지는 1시간 25분이 걸린다고 한다. 시간과 분을 멤버로 가지는
+    구조체를 만들면, 이러한 소요시간을 나타낼 수 있다. 두개의 소요시간을 합하는 것은
+    분 값의 일부를 시간 값으로 올리는 일이 생길 수도 있으므로 조금 어렵다.
+
+    예를 들어, 위의 두 소요시간의 합은, 4시간 75분이다. 이것을 5시간 15분으로 표시해야한다.
+    소요시간 구조체 두 개를 매개변수로 넘겨받아 그들의 합을 나타내는 구조체를 
+    다시 리턴하는 함수에 대해 살펴보자. 그러한 구조체를 정의하는 것은 간단하다.
+
+        struct travel_time
+        {
+            int hours{};
+            int mins{};
+        }
+
+    그 다음, 구조체의 합을 계산하여 리턴하는 sum()함수의 원형에 대해서 살펴보자.
+    sum()함수의 리턴값과 매개변수는 travel_time형이어야 한다.
+    따라서, 함수의 원형은 다음과 같을 것이다.
+
+        travel_time sum(travel_time t1, travel_time t2);
+
+    두 소요시간의 합을 구하려면 분 값 멤버끼리 먼저 더해야 한다. 나머지 셈(%)을 사용하여
+    60으로 나누는 것은 시간 값으로 올리고 남는 분 값을 구한다. 다음 예제를 보자..
+
+        
+        //-------------------------[ ProtoType ]-----------------------------------//
+        struct travel_time
+        {
+            int hours{};
+            int mins{};
+        };
+
+        travel_time sum(travel_time t1, travel_time t2);
+        void show_time(travel_time t);
+
+        //-------------------------[   FBody   ]-----------------------------------//
+        const int Mins_per_hr{ 60 };
+
+        int main()
+        {
+            travel_time day1{ 5, 45 };      // 5시간 45분
+            travel_time day2{ 4, 55 };      // 4시간 55분
+
+
+            travel_time trip = sum(day1, day2);
+            cout << "이틀간 소요 시간 : ";
+            show_time(trip);
+
+            travel_time day3{ 4,32 };
+            cout << "사흘간 소요 시간 : ";
+            show_time(sum(trip, day3));
+
+            return 0;
+        }
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        travel_time sum(travel_time t1, travel_time t2)
+        {
+            travel_time total;
+
+            total.mins = (t1.mins + t2.mins) % Mins_per_hr;
+            total.hours = t1.hours + t2.hours + (t1.mins + t2.mins) / Mins_per_hr;
+
+            return total;
+        }
+
+        void show_time(travel_time t)
+        {
+            cout << t.hours << "시간" << t.mins << "분" << endl;
+        }
+
+    출력 :
+        이틀간 소요 시간 : 10시간 40분
+        사흘간 소요 시간 : 15시간 12분
+    */
+    #pragma endregion
+    #pragma region 07.구조체 주소의 전달
+    /*
+    ---------------------------------------- 07.구조체 주소의 전달 ----------------------------------------
+    구조체 전체를 함수에 전달하는 대신, 구조체의 주소만 함수에 전달하여 시간과 공간을 절약하고 싶다고 가정하자.
+    이렇게 하려면, 구조체를 지시하는 포인터를 사용하도록 함수를 작성해야 한다. 
+    
+        //-------------------------[ ProtoType ]-----------------------------------//
+        struct travel_time
+        {
+            int hours{};
+            int mins{};
+        };
+        
+        travel_time sum(travel_time* t1, travel_time* t2);
+        void show_time(const travel_time* t);
+        //-------------------------[   FBody   ]-----------------------------------//
+        const int Mins_per_hr{ 60 };
+        
+        int main()
+        {
+            travel_time day1{ 5, 45 };      // 5시간 45분
+            travel_time day2{ 4, 55 };      // 4시간 55분
+            
+            travel_time day3 = sum(&day1, &day2);
+        
+            show_time(&day3);
+            return 0;
+        }
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        
+        travel_time sum(travel_time* t1, travel_time* t2)
+        {
+            travel_time total;
+        
+            total.mins = (t1->mins + t2->mins) % Mins_per_hr;
+            total.hours = t1->hours + t2->hours + (t1->mins + t2->mins) / Mins_per_hr;
+        
+            return total;
+        }
+        
+        void show_time(const travel_time* t)
+        {
+            cout << t->hours << "시간" << t->mins << "분" << endl;
+        }
+    */
+    #pragma endregion
+    #pragma region 07.함수와 string 클래스 객체
+    /*
+    ---------------------------------------- 07.함수와 string 클래스 객체 ----------------------------------------
+    string 클래스 객체는 배열보다 구조체와 훨씬 관련이 있다.
+    예를 들면, 한 구조체를 다른 구조체에 대입할 수 있고, 한 객체를 다른 객체에 대입할 수 있다.
+    한 구조체를 완전한 하나의 엔티티로 함수에 전달할 수 있고, 한 객체를 완전한 하나의 엔티티로 함수에 전달할 수 있다.
+    여러 개의 문자열이 필요한 경우, char형의 2차원 배열 대신, string 객체의 1차원 배열을 선언할 수 있다.
+    다음 예제는 string 객체의 배열을 선언하고, 그 내용을 디스플레이하는 함수에 그 배열을 전달하는
+    간단한 예제를 제공한다.
+        
+        //-------------------------[ ProtoType ]-----------------------------------//
+        void display(const string sa[], int n);
+
+        //-------------------------[   FBody   ]-----------------------------------//
+        int main()
+        {
+            const int size{ 5 };
+            string list[size];
+            cout << "좋아하는 밤 하늘의 광경을 " << size << "개 입력하시오 : " << endl;
+            for (int i{}; i < size; i++)
+            {
+                cout << i+1  << " : ";
+                getline(cin, list[i]);
+            }
+
+            cout << "입력하신 내용은 다음과 같습니다 : " << endl;
+            display(list, size);
+
+            return 0;
+        }
+
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void display(const string sa[], int n)
+        {
+            for (int i{}; i < n; i++)
+            {
+                cout << i + 1 << " : " << sa[i] << endl;
+            }
+        }
+
+    프로그램 실행 결과 :
+        
+        좋아하는 밤 하늘의 광경을 5개 입력하시오 :
+        입력 :
+            1. A
+            2. B
+            3. C
+            4. D
+            5. E
+        입력하신 내용은 다음과 같습니다 : 
+            1. A
+            2. B
+            3. C
+            4. D
+            5. E
+
+    이 예제에서 주목할 것은, 프로그램이 string을 마치 int형과 같은 내장 데이터형을 다루듯이 다룬다는 점이다. 
+    string의 배열을 원한다면, 보통의 배열 선언 형식을 그대로 사용하면 된다.
+        
+        string list[size];
+
+    이제 list 배열의 각 원소는 string 객체이고, 다음과 같이 사용될 수 있다.
+        
+        getline(cin, list[i]);
+
+    마찬가지로, 형식 매개변수 sa는 string 객체를 지시하는 포인터이다. 그래서, sa[i]는
+    string 객체이고, 다음과 같이 사용될 수 있다.
+
+        cout << i+1 << ": " << sa[i] << endl;
+    */
+    #pragma endregion
+    #pragma region 07.함수와 array 객체
+    /*
+    ---------------------------------------- 07.함수와 array 객체 ----------------------------------------
+    C++에서 클래스 객체는 구조체에 기반을 두고 있다. 따라서 구조체에 적용되는
+    동일한 프로그래밍 고려 사항들 중 일부가 클래스에도 적용된다. 예를 들면,
+    값으로 객체를 함수로 전달할 수 있는데, 이러한 경우 그 함수가 원본 객체가 아닌
+    사본으로 동작한다. 또는, 포인터를 객체로 보낼 수 있는데, 이를 통해서 그 함수가
+    원본 객체로 동작하도록 한다. C++11 array 템플릿 클래스를 사용하는 다음의 예를 살펴보자.
+
+    1년간 사계절의 각각에 대하여 비용 숫자를 지니기 위한 array 객체를 하나 가지고 있다고 가정해 보자.
+
+        array<double, 4> expenses;
+
+    만약 expenses에 저장된 내용을 표시하기 위한 함수를 원한다면, 우리는 값으로 expenses 함수로 보내야한다.
+
+        show(expenses);
+
+    그러나, 만약 우리가 expenses 객체를 수정하는 함수를 원할 경우에는 그 객체의 주소를 함수로 보내야만 한다.
+
+        fill(&expenses);
+
+    어떻게 우리가 이 두 함수를 선언할 수 있을까? expenses의 변수형은 array<double ,4> 타입이기 때문에
+    다음과 같이 함수 원형에 표시되어야 한다.
+
+        void show(array<double, 4> da);     // da 객체
+        void fill(array<double, 4> *pa);    // pa 객체에 대한 포인터
+
+    이러한 고려 사항들이 예제 프로그램의 핵심을 이루고 있는데, 몇 가지 특징적인 사안들이 추가되어 있다.
+    
+    첫째, 4를 심볼릭 상수로 대신한다.
+
+        const int Seasons {4};
+
+    둘째, 그 사계절을 표현하는 4개의 string 객체를 지닌 상수 array 객체를 추가한다.
+        
+        const array<string, Seasons> Snames =
+         {"Spring", "Summer", "Fall", "Winter"};
+    
+    배열 템플릿은 기초 데이터 타입을 고수하는 것에 한정되지 않고, 클래스 타입도
+    사용 가능하다. 다음 예제를 보자...
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        const int Seasons{ 4 };
+        const array<string, Seasons> Sname{ "Spring", "Summer", "Fall", "Winter" };
+        
+        void fill(array<double, Seasons>* pa);
+        void show(array<double, Seasons> da);
+        
+        //-------------------------[   FBody   ]-----------------------------------//
+        int main()
+        {
+            array<double, Seasons> expenses{};
+            fill(&expenses);
+            show(expenses);
+        
+            return 0;
+        }
+
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void fill(array<double, Seasons>* pa)
+        {
+            for (int i{}; i < Seasons; i++)
+            {
+                cout << Sname[i] << "에 소요되는 비용 : ";
+                cin >> (*pa)[i];
+            }
+        }
+        
+        void show(array<double, Seasons>da)
+        {
+            double total{};
+            cout << endl << "계절별 비용" << endl;
+        
+            for (int i{}; i < Seasons; i++)
+            {
+                cout << Sname[i] << " : $" << da[i] << endl;
+                total += da[i];
+            }
+            cout << "총 비용 : $" << total << endl;
+        }
+
+    프로그램 실행 결과 :
+        Spring에 소요되는 비용 :
+        Summer에 소요되는 비용 :
+        Fall에 소요되는 비용 :
+        Winter에 소요되는 비용 :
+
+        입력 :
+        1,2,3,4
+
+        출력 :
+        Spring에 소요되는 비용 : $1
+        Summer에 소요되는 비용 : $2
+        Fall에 소요되는 비용 : $3
+        Winter에 소요되는 비용 : $4
+        총 비용 : $10
+
+    */
+    #pragma endregion
+    #pragma region 07.재귀 호출
+    /*
+    ---------------------------------------- 07.재귀 호출 ----------------------------------------
+    C++ 함수는 자기 자신을 호출 할 수 있는 능력을 가지고 있다. 이것을 재귀 호출이라고 하낟.
+    재귀 호출은 인공지능과 같은 특별한 프로그래밍에서 매우 중요한 도구이다.
+    
+    * 단일 재귀 호출
+    재귀 함수가 자신을 호출하면 새로 호출되는 함수도 다시 자기 자신을 호출하게 되므로,
+    호출의 연쇄를 끝내는 조건이 없다면, 재귀 호출은 끝없이 반복될 것이다.
+    호출의 연쇄를 끝내기 위해 일반적으로 사용하는 방법은, 재귀 호출 부분을 if 구문의
+    일부로 만드는 것이다. 다음 예시를 보자..
+
+        void recurs(argumentlist)
+        {
+            statements1
+            if(test)
+            {
+                recurs(arguments)
+            }
+            statements
+        }
+    test가 거짓이 되면, 재귀 호출은 종료되게 된다.
+    
+    재귀 호출은 흥미로운 연쇄이벤트를 만든다.
+    if 구문이 참인 동안, recurs() 함수 호출은 statements1 부분만 수행하고 statement2의 수행은
+    유보한 채, 새로운 recurs() 함수 호출로 진행한다. if 구문이 거짓이 되면, 마지막 함수 호출에서
+    statements2가 진행되고 이전 단계의 recurs() 호출로 제어가 넘어가 유보해 두었던 statements2 부분을
+    수행한다. 이렇게 재귀 호출의 사슬을 되짚어 올라가게 되면, recurs() 함수의 재귀 호출이
+    5번 일어났을 때, statements1 부분이 함수가 호출된 순서대로 5번 먼저 수행된 후,
+    recurs()함수가 호출된 순서와는 반대로 statemets2 부분이 다시 수행된다.
+
+    다음 예제를 보자..
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        void countdown(int n);
+        
+        //-------------------------[   FBody   ]-----------------------------------//
+        
+        
+        int main()
+        {
+            countdown(4);
+        
+            return 0;
+        }
+        
+        
+        
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        
+        void countdown(int n)
+        {
+            cout << "카운트 다운 ... " << n << endl;
+            if (n > 0)
+            {
+                countdown(n - 1);
+            }
+            cout << n << ": Kamoom!\n";
+               
+        }
+    
+    프로그램 실행 결과 :
+        카운트 다운 ... 4                // 1단계
+        카운트 다운 ... 3                // 2단계 
+        카운트 다운 ... 2                // 3단계
+        카운트 다운 ... 1                // 4단계
+        카운트 다운 ... 0                // 5단계
+        0: Kaboom!                       // 5단계
+        1: Kaboom!                       // 4단계
+        2: Kaboom!                       // 3단계
+        3: Kaboom!                       // 2단계
+        4: Kaboom!                       // 1단계
+    */
+    #pragma endregion
+    #pragma region 07.템플릿
+    /*
+    ---------------------------------------- 07.템플릿 ----------------------------------------
+    */
+    #pragma endregion
 #pragma endregion
     
 
 
-//452페이지
+//471페이지
 
 
 //-------------------------[ ProtoType ]-----------------------------------//
-
-void Say();
-char* buildstr(char c, int n);
+void countdown(int n);
 
 //-------------------------[   FBody   ]-----------------------------------//
-const int ArSize{ 8 };
+
 
 int main()
 {
-    int times{};
-    char ch{};
-
-    cout << "문자를 입력하세요 : " << endl;
-    cin >> ch;
-    cout << "정수를 입력하세요 : " << endl;
-    cin >> times;
-
-    char* ps = buildstr(ch, times);
-    cout << ps << endl;
-    delete[]ps;
-
-    ps = buildstr('+', 20);
-    cout << ps << "--done--" << ps << endl;
-    delete[]ps;
+    countdown(4);
 
     return 0;
 }
@@ -2937,21 +3296,17 @@ int main()
 
 //-------------------------[ Func.Def. ]-----------------------------------//
 
-void Say()
+void countdown(int n)
 {
-    cout << "Hi";
+    cout << "카운트 다운 ... " << n << endl;
+    if (n > 0)
+    {
+        countdown(n - 1);
+    }
+    cout << n << ": Kamoom!\n";
+       
 }
 
-char* buildstr(char c, int n)
-{
-    char* pstr = new char[n + 1];
-    pstr[n] = '\0';
-    while (n-- > 0)
-    {
-        pstr[n] = c;
-    }
-    return pstr;
-}
     
 
 
