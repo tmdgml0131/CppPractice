@@ -3689,10 +3689,43 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_1 ----------------------------------------
     문제 :
+    쌍을 이루는 두 수를 반복해서 입력할 것을 사용자에게 요구하는 프로그램을 작성하라.
+    쌍을 이루는 두 수 중에 적어도 어느 하나가 0으로 입력될 때까지 입력은 계속된다.
+    프로그램은 각 쌍에 대하여 두 수의 조화 평균을 계산하는 함수를 사용한다.
+    그 함수는 계산 값을 main()에 return하며, main()은 그 결과를 보고해야 한다.
+    조화평균은 다음과 같은 공식을 따른다.
 
+        조화평균 = 2.0*x*y / (x+y)
 
     해답 :
-
+        //-------------------------[ ProtoType ]-----------------------------------//
+        double calculate(double a, double b);
+        
+        //-------------------------[   FBody   ]-----------------------------------// 
+        int main()
+        {
+            double x{};
+            double y{};
+            double result{};
+            while (true)
+            {
+                cout << "숫자 2개를 입력하세요 : " << endl;
+                cin >> x;
+                if (x == 0) break;
+                cin >> y;
+                if (y == 0) break;
+                result = calculate(x, y);
+                cout << result << endl;
+            }
+            
+            cout << "프로그램이 종료됩니다...";
+            return 0;
+        }
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        double calculate(double a, double b)
+        {
+            return 2.0 * a * b / (a + b);
+        }
 
     */
     #pragma endregion
@@ -3700,10 +3733,68 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_2 ----------------------------------------
     문제 :
-
+    골프 스코어를 최대 10개까지 입력할 것을 사용자에게 요구하여 배열에 저장하는 프로그램을 작성하라.
+    10개의 스코어를 입력하기 전이라도 사용자가 입력을 끝 낼 수 있어야 한다.
+    프로그램은 모든 스코어를 한 줄에 출력하고, 평균 스코어를 보고해야 한다.
+    입력 / 출력 / 평균 스코어 계산을 위해 세 가지 서로 다른 배열 처리 함수를 사용하라.
 
     해답 :
-
+        //-------------------------[ ProtoType ]--------------------------------
+        const int SIZE = 10;
+        void input(int ar[], int size);
+        double average(int ar[], int size, int num);
+        void output(int ar[], int count, double avg);
+        
+        //-------------------------[   FBody   ]--------------------------------
+        int main()
+        {
+            int arr[SIZE]{};
+            input(arr, SIZE);
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]--------------------------------
+        void input(int ar[], int size)
+        {
+            int count{};
+            double avg{};
+        
+            cout << "종료를 원하시면 숫자가 아닌 문자를 입력하세요." << endl;
+            for (int i{}; i < size; i++)
+            {
+                cout << i + 1 << "번 라운드의 점수 : ";
+                if (cin >> ar[i])
+                {
+                    count++;
+                }
+                else
+                {
+                    return;
+                }
+                cout << endl;
+            }
+            avg = average(ar, size, count);
+            output(ar, count, avg);
+        }
+        
+        double average(int ar[], int size, int num)
+        {
+            double sum{};
+            for (int i{}; i < size; i++)
+            {
+                sum += ar[i];
+            }
+            return sum / num;
+        }
+        
+        void output(int ar[], int count, double avg)
+        {
+            for (int i{}; i < count; i++)
+            {
+                cout << ar[i] << " ";
+            }
+            cout << endl <<"평균 값은 : " << avg << "입니다.";
+        }
 
     */
     #pragma endregion
@@ -3803,85 +3894,60 @@ using namespace std;
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-// 표현식만 다를뿐 모두 같은 함수이다.
-const double* f1(const double ar[], int n);
-const double* f2(const double[], int);
-const double* f3(const double*, int);
+const int SIZE = 10;
+void input(int ar[], int size);
+double average(int ar[], int size, int num);
+void output(int ar[], int count, double avg);
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    double av[3]{ 1112.3, 1542.6, 2227.9 };
-
-    // 함수를 가리킨다.
-    const double* (*p1)(const double*, int) = f1;
-    auto p2 = f2;      // C++11 자동 형 변환
-
-    cout << "함수 포인터 : \n";
-    cout << "주소 값\n";
-
-    cout << (*p1)(av, 3) << ": " << *(*p1)(av, 3) << endl;
-    cout << p2(av, 3) << ": " << *p2(av, 3) << endl;
-
-    // 포인터들의 배열 pa
-    // auto는 리스트 초기화에 사용할 수 없다.
-    const double* (*pa[3])(const double*, int) = { f1,f2,f3 };
-    // 그러나, 단일 값을 초기화할 때는 사용할 수 있다.
-    // pb는 pa의 첫 번째 원소를 가리킨다.
-    auto pb = pa;
-
-    cout << "\n함수 포인터를 원소로 가지는 배열 : \n";
-    cout << "주소 값\n";
-
-    for (int i{}; i < 3; i++)
-    {
-        cout << pa[i](av, 3) << ": " << *pa[i](av, 3) << endl;
-    }
-
-    cout << "\n함수 포인터를 가리키는 포인터 : \n";
-    cout << "주소 값\n";
-
-    for (int i{}; i < 3; i++)
-    {
-        cout << pb[i](av, 3) << ": " << *pb[i](av, 3) << endl;
-    }
-
-    // 함수 포인터를 원소로 가지는 배열을 가리키는 포인터
-    cout << "\n포인터를 원소로 가지는 배열을 가리키는 포인터 : \n";
-    cout << "주소 값\n";
-
-    // pc를 선언하는 간단한 방법
-    auto pc = &pa;
-
-    cout << (*pc)[0](av, 3) << ": " << *(*pc)[0](av, 3) << endl;
-
-    // pd를 선언하는 복잡한 방법
-    const double* (*(*pd)[3])(const double*, int) = &pa;
-
-    //pdb에 리턴 값을 저장한다.
-    const double* pdb = (*pd)[1](av, 3);
-    cout << pdb << ": " << *pdb << endl;
-
-    // 또 다른 방법
-    cout << (*(*pd)[2])(av, 3) << ": " << *(*(*pd)[2])(av, 3) << endl;
-
+    
+    int arr[SIZE]{};
+    input(arr, SIZE);
     return 0;
 }
 
-
-
-
 //-------------------------[ Func.Def. ]-----------------------------------//
-const double* f1(const double* ar, int n)
+void input(int ar[], int size)
 {
-    return ar;
+    int count{};
+    double avg{};
+
+    cout << "종료를 원하시면 숫자가 아닌 문자를 입력하세요." << endl;
+    for (int i{}; i < size; i++)
+    {
+        cout << i + 1 << "번 라운드의 점수 : ";
+        if (cin >> ar[i])
+        {
+            count++;
+        }
+        else
+        {
+            return;
+        }
+        cout << endl;
+    }
+    avg = average(ar, size, count);
+    output(ar, count, avg);
 }
-const double* f2(const double ar[], int n)
+
+double average(int ar[], int size, int num)
 {
-    return ar + 1;
+    double sum{};
+    for (int i{}; i < size; i++)
+    {
+        sum += ar[i];
+    }
+    return sum / num;
 }
-const double* f3(const double ar[], int n)
+
+void output(int ar[], int count, double avg)
 {
-    return ar + 2;
+    for (int i{}; i < count; i++)
+    {
+        cout << ar[i] << " ";
+    }
+    cout << endl <<"평균 값은 : " << avg << "입니다.";
 }
 #pragma endregion
