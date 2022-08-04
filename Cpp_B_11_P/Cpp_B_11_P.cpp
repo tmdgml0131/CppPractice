@@ -10,15 +10,15 @@ using namespace std;
 
 
 
-#pragma region 07.템플릿
+#pragma region 08.템플릿
 /*
----------------------------------------- 07.템플릿 ----------------------------------------
+---------------------------------------- 08.템플릿 ----------------------------------------
 */
 #pragma endregion
 
-#pragma region 07.프로그래밍 연습_템플릿
+#pragma region 08.프로그래밍 연습_템플릿
 /*
----------------------------------------- 07.프로그래밍 연습_템플릿 ----------------------------------------
+---------------------------------------- 08.프로그래밍 연습_템플릿 ----------------------------------------
 문제 :
 
 
@@ -3802,10 +3802,56 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_3 ----------------------------------------
     문제 :
-
+    다음과 같은 구조체 선언이 있다.
+        
+        struct Box
+        {
+            char maker[40];
+            float height;
+            float width;
+            float length;
+            float volume;
+        };
+    
+    1. box 구조체를 값으로 전달 받아, 각 멤버의 값을 출력하는 함수를 작성하라.
+    2. box 구조체의 주소를 전달 받아, volume 멤버를 다른 세 가지 멤버의 곱으로 설정하는 함수를 작성하라.
+    3. 앞의 두 함수를 사용하는 간단한 프로그램을 작성하라.
 
     해답 :
+        //-------------------------[ ProtoType ]-----------------------------------//
+        struct Box
+        {
+            char maker[40];
+            float height;
+            float width;
+            float length;
+            float volume;
+        };
+        void output(Box boo);
+        void setVolume(Box* boo);
 
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            Box box = { "Hi", 1, 2, 3, 4 };
+            output(box);
+            setVolume(&box);
+            cout << endl;
+            output(box);
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void output(Box boo)
+        {
+            cout << "Maker : " << boo.maker << "\nHeight : " << boo.height 
+                 << "\nWidth : " << boo.width << "\nLength : " << boo.length 
+                 << "\nVolume : " << boo.volume << endl;
+        }
+        void setVolume(Box* boo)
+        {
+            boo->volume = boo->height * boo->length * boo->width;
+        }
 
     */
     #pragma endregion
@@ -3813,10 +3859,58 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_4 ----------------------------------------
     문제 :
-
+    사용자가 수의 범위를 정하고, 그 집합에서 몇 개의 수를 뽑는 복권 시스템이 있다.
+    예를 들어, 1~47 범위를 정하고, 5개의 수를 뽑을 수 있다.
+    또한, 1~27과 같은 두 번째 범위를 정하고, 하나의 수를 뽑을 수 있다.
+    그랑프리를 타려면 뽑아 낸 모든 수가 들어맞아야 한다.
+    승률은 47개의 수에서 번호 5개를 모두 맞출 확률과
+    27개의 수에서 1개의 수를 바르게 뽑을 확률을 곱한 것이다.
+    이러한 종류의 변형 복권 시스템의 승률을 계산할 수 있도록 프로그램을 작성하라.
 
     해답 :
-
+        //-------------------------[ ProtoType ]-----------------------------------//
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            int start{};
+            int end{};
+            int second_start{};
+            int second_end{};
+            double arr[5]{};
+            double win{ 1.0 };
+            double winwin{ 0 };
+            double winwinwin{ 0 };
+        
+            cout << "첫 번째 범위를 입력하세요.." << endl;
+            cout << "시작 : \n";
+            cin >> start;
+            cout << "끝 : \n";
+            cin >> end;
+            cout << "두 번째 범위를 입력하세요.." << endl;
+            cout << "시작 : \n";
+            cin >> second_start;
+            cout << "끝 : \n";
+            cin >> second_end;
+        
+            int first_size = end - start + 1;
+            int second_size = second_end - second_start + 1;
+        
+            for (double i{ 5 }; i > 0; i--)
+            {
+                win *= static_cast<double>(i / (first_size - (5 - i)));
+            }
+        
+            winwin = 1.0 / (second_size);
+        
+            winwinwin = win * winwin;
+        
+            cout << "당신의 당첨 확률 : " << winwinwin;
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
 
     */
     #pragma endregion
@@ -3824,9 +3918,46 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_5 ----------------------------------------
     문제 :
-
+    하나의 정수를 매개변수로 취하고, 그 매개변수의 팩토리얼을 리턴하는 재귀함수를 정의하라.
 
     해답 :
+        //-------------------------[ ProtoType ]-----------------------------------//
+        long long factorial(long long num);
+        long long factorial2(long long num);
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            long long num{};
+            cin >> num;
+            long long dam = factorial(num);
+            long long damdam = factorial2(num);
+            cout << dam << endl;
+            cout << damdam;
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        long long factorial(long long num)          // 재귀함수 미사용
+        {
+            long long dam{1};
+            for (num; num >= 1; num--)
+            {
+                dam *= num;
+            }
+            return dam;
+        }
+        
+        long long factorial2(long long num)         // 재귀함수 사용
+        {
+            if (num > 0)
+            {
+                 return num * factorial2(num - 1);
+            }
+            else
+            {
+                return 1;
+            }
+        }
 
 
     */
@@ -3835,10 +3966,67 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_6 ----------------------------------------
     문제 :
+    다음과 같은 함수를 사용하는 프로그램을 작성하라.
 
+    Fill_array()는, int형 값들의 배열 이름과 배열 크기를 매개변수로 취한다.
+    이 함수는, 배열에 저장할 int형 값들을 입력하라는 프롬포트를 표시한다.
+    배열이 가득 차거나, 숫자가 아닌 것이 입력되면 입력 받기를 멈추고,
+    그때까지 입력 받은 값의 개수를 리턴한다.
+
+    show_array()는 int형 값들의 배열 이름과 배열 크기를 매개변수로 취하고,
+    배열의 내용을 출력한다.
+    
+    Reverse_array()는 int형 값들의 배열 값들의 배열 이름과 배열 크기를 매개변수로 취하고
+    배열에 저장된 값들의 순서를 뒤집는다.
+
+    프로그램은 이 함수들을 사용하여, 배열을 채우고, 출력하고, 순서를 뒤집고 출력해야한다.
 
     해답 :
-
+        //-------------------------[ ProtoType ]-----------------------------------//
+        void Fill_array(int arr[], int size);
+        void Show_array(int arr[], int size);
+        void Reverse_array(int arr[], int size);
+        //-------------------------[   FBody   ]-----------------------------------// 
+        int main()
+        {
+            int arr[5]{};
+            Fill_array(arr, 5);
+            Show_array(arr, 5);
+            Reverse_array(arr, 5);
+            Show_array(arr, 5);
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void Fill_array(int arr[], int size)
+        {
+            for (int i{}; i < size; i++)
+            {
+                cout << "배열 값을 입력하세요 : " << endl;
+                cout << i + 1 << "번 원소의 값 : ";
+                cin >> arr[i];
+            }
+        }
+        void Show_array(int arr[], int size)
+        {
+            cout << "\n\n배열 값을 출력합니다 : " << endl;
+            for (int i{}; i < size; i++)
+            {
+                cout << i + 1 << "번 원소의 값 : ";
+                cout << arr[i] << endl;
+            }
+        }
+        void Reverse_array(int arr[], int size)
+        {
+            cout << "\n뒤집기!" << endl;
+            int i, j, temp;
+            for (i = 0, j = size - 1; i < j; i++, j--) 
+            {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
 
     */
     #pragma endregion
@@ -3846,108 +4034,338 @@ using namespace std;
     /*
     ---------------------------------------- 07.프로그래밍 연습_7 ----------------------------------------
     문제 :
+    배열과 구조체를 다루는 함수의 작성이다.
+    주어진 프로그램의 골격을 보고, 주석문으로 서술된 함수들을 작성하라.
+
+        #include <iostream>
+        using namespace std;
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        const int SLEN{ 30 };
+        struct Student
+        {
+            char fullName[SLEN]{};
+            char hobby[SLEN]{};
+            int oopLevel{};
+        };
+
+        int getinfo(Student pa[], int n);
+        // getinfo()는 두 개의 매개변수를 취한다. Student 구조체 배열의 첫 원소를 지시하는 포인터와 배열의 원소 수를 나타내는 int 값이다
+        // 이 함수는, 학생 정보의 저장 및 배열이 다 차거나 학생 이름에 빈 줄이 입력되면 종료된다.
+        // 이 함수는 배열의 실제로 채워진 원소 수를 리턴한다.
+        //
+        void display1(Student st);
+        // display1()은 Student 구조체를 매개변수로 취하며 그 구조체의 내용을 출력한다.
+
+        void display2(const Student* ps);
+        // display2()는 Student 구조체의 주소를 매개변수로 취하며 구조체의 내용을 출력한다.
+
+        void display3(const Student pa[], int n);
+        // display3()은 구조체 배열 첫 번째 원소의 주소와 배열의 원소 수를 입력 받고, 구조체의 내용을 출력한다.
+
+        //-------------------------[   FBody   ]-----------------------------------//
+        int main()
+        {
+            cout << "학급의 학생 수를 입력하시오 : ";
+            int class_size{};
+            cin >> class_size;
+
+            while (cin.get() != '\n')
+                continue;
+
+            Student* ptr_stu = new Student[class_size];
+            int entered = getinfo(ptr_stu, class_size);
+
+            for (int i{}; i < entered; i++)
+            {
+                display1(ptr_stu[i]);
+                display2(&ptr_stu[i]);
+            }
+
+            display3(ptr_stu, entered);
+            cout << "프로그램을 종료합니다.\n";
+            return 0;
+        }
+
+        //-------------------------[ Func.Def. ]-----------------------------------//
+
+        // getinfo()는 두 개의 매개변수를 취한다. Student 구조체 배열의 첫 원소를 지시하는 포인터와 배열의 원소 수를 나타내는 int 값이다
+        // 이 함수는, 학생 정보의 저장 및 배열이 다 차거나 학생 이름에 빈 줄이 입력되면 종료된다.
+        // 이 함수는 배열의 실제로 채워진 원소 수를 리턴한다.
+        int getinfo(Student pa[], int n)
+        {
+
+        }
+
+        // display1()은 Student 구조체를 매개변수로 취하며 그 구조체의 내용을 출력한다.
+        void display1(Student st)
+        {
+            cout << "Full Name : " << st.fullName << "\nHobby : " << st.hobby << "\nOopLevel : " << st.oopLevel << endl;
+        }
+
+        // display2()는 Student 구조체의 주소를 매개변수로 취하며 구조체의 내용을 출력한다.
+        void display2(const Student* ps)
+        {
+
+        }
+
+        // display3()은 구조체 배열 첫 번째 원소의 주소와 배열의 원소 수를 입력 받고, 구조체의 내용을 출력한다.
+        void display3(const Student pa[], int n)
+        {
+
+        }
 
 
     해답 :
+        //-------------------------[ ProtoType ]-----------------------------------//
+        const int SLEN{ 30 };
+        struct Student
+        {
+            char fullName[SLEN]{};
+            char hobby[SLEN]{};
+            int oopLevel{};
+        };
+        
+        int getinfo(Student pa[], int n);
+        void display1(Student st);
+        void display2(const Student* ps);
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            cout << "학급의 학생 수를 입력하시오 : ";
+            int class_size{};
+            cin >> class_size;
+        
+            while (cin.get() != '\n')
+                continue;
+            
+            Student* ptr_stu = new Student[class_size];
+            int entered = getinfo(ptr_stu, class_size);
+        
+            for (int i{}; i < entered; i++)
+            {
+                display1(ptr_stu[i]);
+            }
+            cout << "--------------------------\n";
+            for (int i{}; i < entered; i++)
+            {
+                display2(&ptr_stu[i]);
+            }
+            cout << "--------------------------\n";
+            display3(ptr_stu, entered);
+            cout << "프로그램을 종료합니다.\n";
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        int getinfo(Student pa[], int n)
+        {
+            int count{};
+            for (int i{}; i < n; i++)
+            {
+                cout << "학생 이름 : ";
+                cin.getline(pa[i].fullName, SLEN);
+                if (pa[i].fullName[0] == '\0') break;
+                cout << "학생 취미 : ";
+                cin.getline(pa[i].hobby, SLEN);
+                cout << "학생 OopLevel : ";
+                if (!(cin >> pa[i].oopLevel).get()) break;
+                count++;
+            }
+            cout << "----------- 입력 완료 -----------\n";
+            return count;
+        }
 
-
+        void display1(Student st)
+        {
+            cout << "Full Name : " << st.fullName << "\nHobby : " << st.hobby << "\nOopLevel : " << st.oopLevel << "\n\n";
+        }
+        
+        void display2(const Student* ps)
+        {
+            cout << "Full Name : " << ps->fullName << "\nHobby : " << ps->hobby << "\nOopLevel : " << ps->oopLevel << "\n\n";
+        
+        }
+        
+        void display3(const Student pa[], int n)
+        {
+            for (int i{}; i < n; i++)
+            {
+                cout << "Full Name : " << pa[i].fullName << "\nHobby : " << pa[i].hobby << "\nOopLevel : " << pa[i].oopLevel << "\n\n";
+            }
+            
+        }
+        
     */
     #pragma endregion
     #pragma region 07.프로그래밍 연습_8
     /*
     ---------------------------------------- 07.프로그래밍 연습_8 ----------------------------------------
     문제 :
+    calculate() 함수를 설계하라.
+    calculate() 함수의 첫 번째와 두번째 매개변수는 double 형이다.
+    세 번째 매개변수는 두 개의 double형을 매개변수로 취급하여 double형을 리턴하는
+    함수를 지시하는 포인터이다. 그리고 calculate() 함수 역시 double 형이다.
+    따라서, calculate() 함수는 자신의 세 번째 매개변수가 지시하는 함수가,
+    두 개의 double 형 매개변수를 취하고 계산하여 리턴하는 값을 다시 리턴한다.
+    예시를 보자..
 
+        double add(double x, double y)
+        {
+            return x+y;
+        }
+
+    그러면 다음과 같은 calculate() 함수의 호출은
+
+        double q = calculate(2.5, 10.4, add);
+
+    2.5와 10.4를 add() 함수에 전달, add() 함수가 계산하여 리턴하는 값 (12.9)를 리턴하여 q에 대입한다.
+
+    이 함수들과 함께, add() 스타일의 다른 함수를 최소한 하나 더 프로그램에 사용하라.
+    프로그램은 사용자가 쌍을 이루는 두 수를 반복해서 입력할 수 있도록 루프를 사용한다.
+    좀 더 진도를 나가고 싶다면, add() 스타일의 함수들을 지시하는 포인터들의 배열을 만들고,
+    이 포인터들을 사용하여 calculate() 함수를 일련의 add 스타일의 함수들에 연속적으로 적용하는 루프를 만들어라.
+
+    HINT : 다음은 세 개의 함수 포인터 배열을 선언하는 방법이다.
+        
+        double (*pf[3]) (double, double);
 
     해답 :
-
+        //-------------------------[ ProtoType ]-----------------------------------//
+        double add(double x, double y);
+        double sub(double x, double y);
+        double mul(double x, double y);
+        double div(double x, double y);
+        double calculate(double x, double y, double(*pf)(double, double));
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            double(*pf[4])(double, double) { add, sub, mul, div };
+        
+            for (;;)
+            {
+                double x{};
+                double y{};
+                double arr[4]{};
+                int n{};
+        
+                cout << "두 수 입력 (종료를 원하면 아무 문자나 입력) : " << endl;
+                if (!(cin >> x >> y)) break;
+        
+                for (int i{}; i < 4; i++)
+                {
+                    arr[i] = calculate(x, y, pf[i]);
+                    cout << arr[i] << endl;
+                }
+                
+            }
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        double calculate(double x, double y, double(*pf)(double, double))
+        {
+            return (pf(x, y));
+        }
+        double add(double x, double y)
+        {
+            return x + y;
+        }
+        double sub(double x, double y)
+        {
+            return x - y;
+        }
+        double mul(double x, double y)
+        {
+            return x * y;
+        }
+        double div(double x, double y)
+        {
+            return x / y;
+        }
+        
 
     */
     #pragma endregion
-    #pragma region 07.프로그래밍 연습_9
+
+
+#pragma endregion
+
+#pragma region 08.함수의 활용
+    
+    #pragma region 08.C++ 인라인(Inline) 함수
     /*
-    ---------------------------------------- 07.프로그래밍 연습_9 ----------------------------------------
-    문제 :
-
-
-    해답 :
+    ---------------------------------------- 08.C++ 인라인(Inline) 함수 ----------------------------------------
 
 
     */
     #pragma endregion
-    #pragma region 07.프로그래밍 연습_10
-    /*
-    ---------------------------------------- 07.프로그래밍 연습_10 ----------------------------------------
-    문제 :
 
 
-    해답 :
 
-
-    */
-    #pragma endregion
+#pragma endregion
 
     
 
 
-//493페이지
+//498페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-const int SIZE = 10;
-void input(int ar[], int size);
-double average(int ar[], int size, int num);
-void output(int ar[], int count, double avg);
+double add(double x, double y);
+double sub(double x, double y);
+double mul(double x, double y);
+double div(double x, double y);
+double calculate(double x, double y, double(*pf)(double, double));
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    
-    int arr[SIZE]{};
-    input(arr, SIZE);
+    double(*pf[4])(double, double) { add, sub, mul, div };
+
+    for (;;)
+    {
+        double x{};
+        double y{};
+        double arr[4]{};
+        int n{};
+
+        cout << "두 수 입력 (종료를 원하면 아무 문자나 입력) : " << endl;
+        if (!(cin >> x >> y)) break;
+
+        for (int i{}; i < 4; i++)
+        {
+            arr[i] = calculate(x, y, pf[i]);
+            cout << arr[i] << endl;
+        }
+        
+    }
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-void input(int ar[], int size)
+double calculate(double x, double y, double(*pf)(double, double))
 {
-    int count{};
-    double avg{};
-
-    cout << "종료를 원하시면 숫자가 아닌 문자를 입력하세요." << endl;
-    for (int i{}; i < size; i++)
-    {
-        cout << i + 1 << "번 라운드의 점수 : ";
-        if (cin >> ar[i])
-        {
-            count++;
-        }
-        else
-        {
-            return;
-        }
-        cout << endl;
-    }
-    avg = average(ar, size, count);
-    output(ar, count, avg);
+    return (pf(x, y));
+}
+double add(double x, double y)
+{
+    return x + y;
+}
+double sub(double x, double y)
+{
+    return x - y;
+}
+double mul(double x, double y)
+{
+    return x * y;
+}
+double div(double x, double y)
+{
+    return x / y;
 }
 
-double average(int ar[], int size, int num)
-{
-    double sum{};
-    for (int i{}; i < size; i++)
-    {
-        sum += ar[i];
-    }
-    return sum / num;
-}
 
-void output(int ar[], int count, double avg)
-{
-    for (int i{}; i < count; i++)
-    {
-        cout << ar[i] << " ";
-    }
-    cout << endl <<"평균 값은 : " << avg << "입니다.";
-}
 #pragma endregion
