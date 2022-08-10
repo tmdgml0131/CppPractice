@@ -4293,7 +4293,7 @@ using namespace std;
 
 #pragma endregion
 
-#pragma region 08.함수의 활용
+#pragma region Chapter 8.함수의 활용
     
     #pragma region 08.C++ 인라인(Inline) 함수
     /*
@@ -4739,49 +4739,282 @@ using namespace std;
     
     */
     #pragma endregion
+    #pragma region 08.구조체에 대한 참조
+    /*
+    ---------------------------------------- 08.구조체에 대한 참조 ----------------------------------------
+    참조는 C++의 사용자 정의 데이터형인 구조체나 클래스를 다루는데 아주 유용하다.
+    구조체에 대한 참조를 사용하는 방법은, 기본 데이터형의 변수에 대한 참조를 선언할 때와 마찬가지로
+    구조체 매개변수를 선언할 때 참조 연산자 &를 앞에 붙이면 된다.
+
+        struct free_throws
+        {
+            string name{};
+            int made{};
+            int attemps{};
+            float percent{};
+        }
+
+    위와 같은 형에 대하여 참조를 사용하는 함수는 다음과 같이 원형을 지닐 수 있다.
+
+        void set_pc(free_throws& ft);               // 구조체에 대하여 참조를 사용한다.
+
+    이 함수가 구조체를 변경하지 않으면 const를 사용할 수 있다.
+
+        void display(const free_throws& ft);        // 구조체에 대하여 변경을 허용하지 않는다.
+
+    다음 예시를 보자..
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        struct free_throws 
+        {
+            string name{};
+            int made{};
+            int attempts{};
+            float percents{};
+        };
+        void display(const free_throws& ft);
+        void set_pc(free_throws& ft);
+        free_throws& accumulate(free_throws& target, const free_throws& source);
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+        // 부분 초기화 - 멤버는 0에 세팅된 상태로 남는다
+            free_throws one{ "A", 1, 2 };
+            free_throws two{ "B", 3, 4 };
+            free_throws three{ "C", 5, 6 };
+            free_throws four{ "D", 7, 8 };
+            free_throws five{ "E", 9, 10 };
+            free_throws team{ "ThrowGoods"};
+        
+        // 초기화하지 않음
+            free_throws dup;
+            set_pc(one);
+            display(one);
+            accumulate(team, one);
+            display(team);
+        
+        // 리턴 값을 매개변수로 사용한다.
+            display(accumulate(team, two));
+            accumulate(accumulate(team, three), four);
+            display(team);
+        
+        // 리턴 값을 대입 값으로 사용한다.
+            free_throws dub = accumulate(team, five);
+            cout << "team 출력 :\n";
+            display(team);
+            cout << "대입 이후 dup 출력 :\n";
+            display(dup);
+            set_pc(four);
+        
+        // 문제의 소지가 있는 대입
+            accumulate(dup, five) = four;
+            cout << "문제 소지가 있는 대입 이후 dup 출력 :\n";
+            display(dub);
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void display(const free_throws& ft)
+        {
+            cout << "Name : " << ft.name << '\n';
+            cout << "Made : " << ft.made << '\t';
+            cout << "Attempts : " << ft.attempts << '\t';
+            cout << "Percent : " << ft.percents << '\n';
+        }
+        
+        void set_pc(free_throws& ft)
+        {
+            if (ft.attempts != 0)
+            {
+                ft.percents = 100.0f * float(ft.made) / float(ft.attempts);
+            }
+            else
+            {
+                ft.percents = 0;
+            }
+        }
+        
+        free_throws& accumulate(free_throws& target, const free_throws& source)
+        {
+            target.attempts += source.attempts;
+            target.made += source.made;
+            set_pc(target);
+            return target;
+        }
+
+    프로그램 실행 결과 :
+        Name : A
+        Made : 1        Attempts : 2    Percent : 50
+        Name : ThrowGoods
+        Made : 1        Attempts : 2    Percent : 50
+        Name : ThrowGoods
+        Made : 4        Attempts : 6    Percent : 66.6667
+        Name : ThrowGoods
+        Made : 16       Attempts : 20   Percent : 80
+        team 출력 :
+        Name : ThrowGoods
+        Made : 25       Attempts : 30   Percent : 83.3333
+        대입 이후 dup 출력 :
+        Name :
+        Made : 0        Attempts : 0    Percent : 0
+        문제 소지가 있는 대입 이후 dup 출력 :
+        Name : ThrowGoods
+        Made : 25       Attempts : 30   Percent : 83.3333
+
+    ## 왜 참조를 리턴하는가?
+    전통적인 리턴 매커니즘과 참조를 리턴하는 것이 어떻게 다른지 알아보자.
+
+    전통적인 리턴은 값을 기준으로 함수 매개변수를 통해 값을 전달하는 방식으로 동작한다.
+    함수가 종료되면 리턴에 의해 그 값은 다시 호출한 함수로 전달된다.
+    개념적으로, 이 값은 임시 장소에 복사되고 호출 프로그램은 이 값을 사용한다.
+    다음의 내용을 보자..
+
+        double m = squr(16.0);
+        cout << squrt(25.0);
+
+    첫 번째 구문에서 결과 값인 4.0은 임시 장소에 복사된다. 그런 다음,
+    임시 장소에 있는 그 값은 m으로 복사된다. 두 번째 구문에서 결과 값인 5.0은
+    임시 장소에 복사된 후, 그 임시 장소의 내용들이 cout으로 전달된다.
+
+    다음 구문을 보자..
+        
+        dup = accumulate(team, five);
+
+    만약 accumulate()가 어떤 구조체에 대한 래퍼런스 대신에, 구조체 자체를 리턴한다면
+    전체 구조체를 임시 장소에 복사하고, 그 복사한 것을 dup에 복사할 것이다.
+    하지만, 참조를 리턴으로 사용하는 경우, team은 직접적으로 dup에 복사되어
+    보다 효율적인 방법이 될 수 있다.
+
+
+    ## 참조를 리턴할 때 주의할 점
+    참조를 리턴할 때 기억해야 할 가장 중요한 것은, 함수가 종료할 때, 수명이 함께
+    끝나는 메모리 위치에 대한 참조를 리턴하지않도록 조심하는 것이다. 다음과 같은 코드를 사용하면 안된다.
+
+        const free_throws& clone2(free_throws& ft)
+        {
+            free_throws newguy;         // 큰 에러의 첫 걸음
+            newguy = ft;                // 정보를 복사한다.
+            return newguy;              // 복사본에 대한 참조를 리턴한다.
+        }
+
+    이 코드는 함수가 종료될 때 함께 사라질 운명인 임시 변수(newguy)를 리턴한다.
+
+    이 문제를 피하는 가장 간단한 방법은, 함수에 매개변수로 전달된 참조를 리턴하는 것이다.
+    참조 배개변수는 호출 함수가 사용하는 데이터를 참조한다.
+
+    새로운 저장소를 생성하기 위해서 new를 사용하는 두 번째 방법은 new의 사용이다.
+
+        const free_throws& clone(free_throws& ft)
+        {
+            free_throws *pt;
+            *pt = ft;                   // 정보를 복사한다.
+            return *pt;              // 복사본에 대한 참조를 리턴한다.
+        }
+    
+    이 코드는 언뜻 보면 구조체를 리턴하는 것처럼 보이지만, 함수 선언을 보면
+    실제로는 구조체에 대한 참조를 리턴한다. 그러면 이제 이 함수를 다음과 같이 이용할 수 있다.
+
+        free_throws& jolly = clone(three);
+
+    이러한 접근은 반드시 메모리가 더 이상 필요 없을 때, new에 의한 메모리를 delete로 삭제해야 한다.
+    그러나, clone() 호출이 new 호출을 안에 감추고 있으므로, 나중에 delete를 사용하는 것을
+    잊어버릴 가능성이 높다. 16장에서 설명할 unique_ptr을 사용하면 그러한 삭제가 자동으로 이루어지게 할 수 있다.
+    
+    ## 참조를 리턴할 때 왜 const를 사용하는가
+    일반적으로 모호한 코드는 에러를 일으킬 확률을 높이기에 설계할 때 모호한 코드를 추가하지 않는 것이 좋다.
+    리턴형을 const 참조로 만드는 것은 프로그래머가 모호한 에러를 만들지 않는 좋은 방법이다.
+    그러나 경우에 따라서 const를 쓰지 않는 것이 옳을 때도 있다. 11장에서 설명하는 오버로딩 연산자가 그것의 한 예이다.
+    */
+    #pragma endregion
+
+
 #pragma endregion
 
     
 
 
-//517페이지
+//526페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-double cube(double a);
-double refcube(double& ra);
+struct free_throws 
+{
+    string name{};
+    int made{};
+    int attempts{};
+    float percents{};
+};
+void display(const free_throws& ft);
+void set_pc(free_throws& ft);
+free_throws& accumulate(free_throws& target, const free_throws& source);
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    double side{ 3.0 };
-    double* pd = &side;
-    double& rd = side;
+// 부분 초기화 - 멤버는 0에 세팅된 상태로 남는다
+    free_throws one{ "A", 1, 2 };
+    free_throws two{ "B", 3, 4 };
+    free_throws three{ "C", 5, 6 };
+    free_throws four{ "D", 7, 8 };
+    free_throws five{ "E", 9, 10 };
+    free_throws team{ "ThrowGoods"};
 
-    long edge{ 5L };
-    double lens[4]{ 2.0, 5.0, 10.0, 12.0 };
+// 초기화하지 않음
+    free_throws dup;
+    set_pc(one);
+    display(one);
+    accumulate(team, one);
+    display(team);
 
-    double c1 = refcube(side);              // ra는 side
-    double c2 = refcube(lens[2]);           // ra는 lens[2]
-    double c3 = refcube(rd);                // ra는 rd이며 side
-    double c4 = refcube(*pd);               // ra는 *pd이며 side
-    double c5 = refcube(edge);              // ra는 임시변수
-    double c6 = refcube(7.0);               // ra는 임시변수
-    double c7 = refcube(side + 10.0);       // ra는 임시변수
+// 리턴 값을 매개변수로 사용한다.
+    display(accumulate(team, two));
+    accumulate(accumulate(team, three), four);
+    display(team);
 
+// 리턴 값을 대입 값으로 사용한다.
+    free_throws dub = accumulate(team, five);
+    cout << "team 출력 :\n";
+    display(team);
+    cout << "대입 이후 dup 출력 :\n";
+    display(dup);
+    set_pc(four);
+
+// 문제의 소지가 있는 대입
+    accumulate(dup, five) = four;
+    cout << "문제 소지가 있는 대입 이후 dup 출력 :\n";
+    display(dub);
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-double cube(double a)
+void display(const free_throws& ft)
 {
-    a *= a * a;
-    return a;
+    cout << "Name : " << ft.name << '\n';
+    cout << "Made : " << ft.made << '\t';
+    cout << "Attempts : " << ft.attempts << '\t';
+    cout << "Percent : " << ft.percents << '\n';
 }
 
-double refcube(const double& ra)
+void set_pc(free_throws& ft)
 {
-    return ra * ra * ra;
+    if (ft.attempts != 0)
+    {
+        ft.percents = 100.0f * float(ft.made) / float(ft.attempts);
+    }
+    else
+    {
+        ft.percents = 0;
+    }
+}
+
+free_throws& accumulate(free_throws& target, const free_throws& source)
+{
+    target.attempts += source.attempts;
+    target.made += source.made;
+    set_pc(target);
+    return target;
 }
 #pragma endregion
