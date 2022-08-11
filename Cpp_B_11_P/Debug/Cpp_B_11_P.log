@@ -1,2 +1,3 @@
 ﻿  Cpp_B_11_P.cpp
+F:\Git\CppPractice\Cpp_B_11_P\Cpp_B_11_P.cpp(5140): warning C4172: 지역 변수 또는 임시: temp의 주소를 반환하고 있습니다.
   Cpp_B_11_P.vcxproj -> F:\Git\CppPractice\Cpp_B_11_P\Debug\Cpp_B_11_P.exe

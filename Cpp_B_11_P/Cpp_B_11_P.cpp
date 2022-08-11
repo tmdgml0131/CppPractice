@@ -4928,93 +4928,215 @@ using namespace std;
     그러나 경우에 따라서 const를 쓰지 않는 것이 옳을 때도 있다. 11장에서 설명하는 오버로딩 연산자가 그것의 한 예이다.
     */
     #pragma endregion
+    #pragma region 08.클래스 객체와 참조
+    /*
+    ---------------------------------------- 08.클래스 객체와 참조 ----------------------------------------
+    일반적으로 C++는 클래스 객체를 함수에 전달할 때 참조를 사용한다.
+    string 클래스를 사용하는 하나의 예제를 살펴보자. 이 예제는 서로 다른 설계를
+    선택할 수 있음을 보여 준다. 이 선택들 중 어떤 것은 좋지 않다. 기본 아이디어는,
+    주어진 문자열을 다른 문자열에 끝에 추가하는 함수를 만드는 것이다.
 
+    다음 예제는 이것을 수행하는 세 개의 함수를 제공한다. 그러나, 이 함수들 중 하나는 결함이 있어
+    프로그램을 먹통으로 만들거나 컴파일이 되지 않을 수도 있다.
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        string version1(const string& s1, const string& s2);
+        const string& version2(string& s1, const string& s2);       // 부수 효과
+        const string& version3(string& s1, const string& s2);       // 나쁜 설계
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            string input{};
+            string copy{};
+            string result{};
+        
+            cout << "문자열을 입력하시오 : ";
+            getline(cin, input);
+            copy = input;
+            cout << "입력한 문자열 : " << input << endl;
+            result = version1(input, "***");
+            cout << "바뀐 문자열 : " << result << endl;
+            cout << "원래 문자열 : " << input << endl;
+        
+            result = version2(input, "###");
+            cout << "바뀐 문자열 : " << result << endl;
+            cout << "원래 문자열 : " << input << endl;
+        
+            cout << "원래 문자열 재설정\n";
+            input = copy;
+            result = version3(input, "@@@");
+            cout << "바뀐 문자열 : " << result << endl;
+            cout << "원래 문자열 : " << input << endl;
+        
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        string version1(const string& s1, const string& s2)
+        {
+            string temp{};
+            
+            temp = s2 + s1 + s2;
+            return temp;
+        }
+        const string& version2(string& s1, const string& s2)
+        {
+            s1 = s2 + s1 + s2;
+            return s1;
+        }
+        const string& version3(string& s1, const string& s2)
+        {
+            string temp;
+        
+            temp = s2 + s1 + s2;
+            return temp;
+        }
+
+    프로그램 실행 결과 :
+        문자열을 입력하시오 : It's not my fault
+        입력한 문자열 : It's not my fault
+        바뀐 문자열 : ***It's not my fault***
+        원래 문자열 : It's not my fault
+        바뀐 문자열 : ###It's not my fault###
+        원래 문자열 : ###It's not my fault###
+        원래 문자열 재설정
+        바뀐 문자열 :                                // 실행 실패 시점
+        원래 문자열 : It's not my fault
+
+    함수 버전 1은 셋 중에서 가장 간단하다.
+        
+        string version1(const string& s1, const string& s2)
+        {
+            string temp{};
+
+            temp = s2 + s1 + s2;
+            return temp;
+        }
+
+    이 함수는 두 개의 string을 취하고, string 클래스 덧셈을 사용하여
+    원하는 특성을 가진 새로운 문자열을 만든다. 두 매개변수가 const라는 점을 주목하라.
+    이 함수는 다음과 같이 string 객체를 전달해도 동일한 결과를 낼 것이다.
+
+        string version4(string s1, string s2);
+
+    이 경우, s1, s2는 새로 만들어지는 객체가 될 것이다.
+    그래서 참조를 사용하는 것이 새로운 객체를 만들 필요가 없고 불필요한 과정을 줄여 더 효율적이다.
+
+    temp 객체는 version1() 함수에 지역적인 새로운 객체다. 이것은 함수가 종료될 때, 자신의 존재를 끝낸다.
+    그래서 temp를 참조로 리턴하면 그 참조는 동작하지 않는다. 그래서 함수형이 string이다.
+    이것은, temp의 내용이 임시 리턴 위치로 복사된 후, main()에서 그 리턴 위치의 내용이 result라는 이름의
+    string으로 복사되는 것을 의미한다.
+
+    version2() 함수는 임시 문자열을 만들지 않고, 원래 문자열을 직접 변경한다.
+
+        const string& version2(string& s1, const string& s2)
+        {
+            s1 = s2 + s1 + s2;
+            // 함수에 전달된 참조를 리턴하므로 안전하다.
+            return s1;
+        }
+    
+    s2와 달리 s1은 const를 사용하여 선언되지 않았기에 이 함수가 s1을 변경하는 것은 허용된다.
+
+    s1이 main()에 있는 객체에 대한 참조이기에, s1을 참조로 리턴하는 것은 안전하다.
+    s1이 input에 대한 참조이기에, 다음과 같은 행은
+
+        result = version2(input,"###");
+
+    실제로 다음과 동등하다.
+
+        version2(input, "###");
+        result = input;
+
+    그러나, s1이 input에 대한 참조이기에, 이 함수를 호출하는 것은 input을 변경하는 부수효과를 가진다.
+
+        원래 문자열 : It's not my fault.
+        바뀐 문자열 : ###It's not my fault.###
+        원래 문자열 : ###It's not my fault.###
+
+    버전3는 하면 안되는 것이 무엇인지 보여준다.
+
+        const string& version3(string& s1, const string& s2)
+        {
+            string temp;
+        
+            temp = s2 + s1 + s2;
+            // 지역 변수에 대한 참조를 리턴하므로 안전하지 않다.
+            return temp;
+        }
+
+    이것은 version#() 내에 지역적으로 선언된 변수에 대한 참조를 리턴하는 결함을 가진다.
+    이 함수는, 컴파일 되지만 프로그램이 그 함수를 실행하려 할 때, 실패하거나 오류가 발생한다.
+    구체적으로, 다음과 같은 코드에서 대입이 문제를 일으킨다.
+
+        result = version3(input, "@@@");
+
+    프로그램이 더 이상 사용되지 안흔ㄴ 메모리를 참조하려 시도하기 때문이다.
+    */
+    #pragma endregion
 
 #pragma endregion
 
     
 
 
-//526페이지
+//531페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-struct free_throws 
-{
-    string name{};
-    int made{};
-    int attempts{};
-    float percents{};
-};
-void display(const free_throws& ft);
-void set_pc(free_throws& ft);
-free_throws& accumulate(free_throws& target, const free_throws& source);
+string version1(const string& s1, const string& s2);
+const string& version2(string& s1, const string& s2);       // 부수 효과
+const string& version3(string& s1, const string& s2);       // 나쁜 설계
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-// 부분 초기화 - 멤버는 0에 세팅된 상태로 남는다
-    free_throws one{ "A", 1, 2 };
-    free_throws two{ "B", 3, 4 };
-    free_throws three{ "C", 5, 6 };
-    free_throws four{ "D", 7, 8 };
-    free_throws five{ "E", 9, 10 };
-    free_throws team{ "ThrowGoods"};
+    string input{};
+    string copy{};
+    string result{};
 
-// 초기화하지 않음
-    free_throws dup;
-    set_pc(one);
-    display(one);
-    accumulate(team, one);
-    display(team);
+    cout << "문자열을 입력하시오 : ";
+    getline(cin, input);
+    copy = input;
+    cout << "입력한 문자열 : " << input << endl;
+    result = version1(input, "***");
+    cout << "바뀐 문자열 : " << result << endl;
+    cout << "원래 문자열 : " << input << endl;
 
-// 리턴 값을 매개변수로 사용한다.
-    display(accumulate(team, two));
-    accumulate(accumulate(team, three), four);
-    display(team);
+    result = version2(input, "###");
+    cout << "바뀐 문자열 : " << result << endl;
+    cout << "원래 문자열 : " << input << endl;
 
-// 리턴 값을 대입 값으로 사용한다.
-    free_throws dub = accumulate(team, five);
-    cout << "team 출력 :\n";
-    display(team);
-    cout << "대입 이후 dup 출력 :\n";
-    display(dup);
-    set_pc(four);
+    cout << "원래 문자열 재설정\n";
+    input = copy;
+    result = version3(input, "@@@");
+    cout << "바뀐 문자열 : " << result << endl;
+    cout << "원래 문자열 : " << input << endl;
 
-// 문제의 소지가 있는 대입
-    accumulate(dup, five) = four;
-    cout << "문제 소지가 있는 대입 이후 dup 출력 :\n";
-    display(dub);
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-void display(const free_throws& ft)
+string version1(const string& s1, const string& s2)
 {
-    cout << "Name : " << ft.name << '\n';
-    cout << "Made : " << ft.made << '\t';
-    cout << "Attempts : " << ft.attempts << '\t';
-    cout << "Percent : " << ft.percents << '\n';
+    string temp{};
+    
+    temp = s2 + s1 + s2;
+    return temp;
 }
-
-void set_pc(free_throws& ft)
+const string& version2(string& s1, const string& s2)
 {
-    if (ft.attempts != 0)
-    {
-        ft.percents = 100.0f * float(ft.made) / float(ft.attempts);
-    }
-    else
-    {
-        ft.percents = 0;
-    }
+    s1 = s2 + s1 + s2;
+    return s1;
 }
-
-free_throws& accumulate(free_throws& target, const free_throws& source)
+const string& version3(string& s1, const string& s2)
 {
-    target.attempts += source.attempts;
-    target.made += source.made;
-    set_pc(target);
-    return target;
+    string temp{};
+
+    temp = s2 + s1 + s2;
+    return temp;
 }
 #pragma endregion
