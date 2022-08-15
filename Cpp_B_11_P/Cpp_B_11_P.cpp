@@ -5073,70 +5073,555 @@ using namespace std;
 
         result = version3(input, "@@@");
 
-    프로그램이 더 이상 사용되지 안흔ㄴ 메모리를 참조하려 시도하기 때문이다.
+    프로그램이 더 이상 사용되지 않는 메모리를 참조하려 시도하기 때문이다.
     */
     #pragma endregion
+    #pragma region 08.또 하나의 객체 레슨 : 객체, 상속, 참조
+    /*
+    ---------------------------------------- 08.또 하나의 객체 레슨 : 객체, 상속, 참조 ----------------------------------------
+    한 클래스에서 다른 클래스로 기능을 전달하는 것을 가능하게 하는 C++ 언어의 기능을 상속(Inheritance) 이라 부른다.
+    상속이라는 강력한 기능에 대해선 13장 '클래스의 상속'에서 자세히 논의한다. 상속의 또 한가지 측면은,
+    데이터형의 변환 없이 기초 클래스 참조가 파생 클래스 객체를 참조할 수 있다는 것이다.
+    다음 예제는, 동일한 함수를 함수 호출 매개변수만 다르게 사용하여, 데이터를 파일에 쓰고
+    화면상에도 디스플레이함으로써 이를 설명한다. 
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        void file_it(ostream& os, double fo, const double fe[], int n);
+        const int LIMIT{ 5 };
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            ofstream fout;
+            const char* fn = "ep=data.txt";
+            fout.open(fn);
+        
+            if (!fout.is_open())
+            {
+                cout << fn << " 파일을 열 수 없습니다. 끝.\n";
+                exit(EXIT_FAILURE);
+            }
+            double objective;
+            cout << "대물렌즈 초점 거리를 mm 단위로 입력하십시오 : ";
+            cin >> objective;
+            double eps[LIMIT];
+        
+            cout << LIMIT << " 가지 대안렌즈의 초점거리를 mm단위로 입력하십시오 : \n";
+        
+            for (int i{}; i < LIMIT; i++)
+            {
+                cout << "대안렌즈 #" << i + 1 << ": ";
+                cin >> eps[i];
+            }
+        
+            file_it(fout, objective, eps, LIMIT);
+            file_it(cout, objective, eps, LIMIT);
+            cout << "종료\n";
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        void file_it(ostream& os, double fo, const double fe[], int n)
+        {
+            ios_base::fmtflags initial;
+            initial = os.setf(ios_base::fixed);     // 초기 포멧팅 상태 저장
+            os.precision(0);
+            os << "대물렌즈의 초점 거리 : " << fo << "mm\n";
+            os.setf(ios::showpoint);
+            os.precision(1);
+            os.width(17);
+            os << "대안렌즈 초점거리";
+            os.width(15);
+            os << "확대 배율 " << endl;
+            for (int i{}; i < n; i++)
+            {
+                os.width(17);
+                os << fe[i];
+                os.width(15);
+                os << int(fo / fe[i] + 0.5) << endl;
+            }
+            os.setf(initial);                   // 초기 포멧팅 상태 복원
+        }
+        
+    프로그램 실행 결과 :
+        대물렌즈 초점 거리를 mm 단위로 입력하십시오 : 10
+        5 가지 대안렌즈의 초점거리를 mm단위로 입력하십시오 :
+        대안렌즈 #1: 1
+        대안렌즈 #2: 2
+        대안렌즈 #3: 3
+        대안렌즈 #4: 4
+        대안렌즈 #5: 5
+        대물렌즈의 초점 거리 : 10mm
+        대안렌즈 초점거리     확대 배율
+                      1.0             10
+                      2.0              5
+                      3.0              3
+                      4.0              3
+                      5.0              2
+        종료
+
+    이 예제의 중요한 점은, ostream &형인 os 매개변수가 cout과 같은 ostream 객체와
+    fout과 같은 ofstream 객체를 참조할 수 있다는 것이다.
+    또한 이 프로그램은 두 가지 데이터형에 대해 ostream 포맷팅 메서드를 어떻게 사용할 수 있는지 설명한다.
+    
+    setf() 메서드는 다양한 포맷팅 상태를 설정할 수 있게 한다.
+    setf(ios_base::fixed)는 고정 소수점 표기를 사용하는 모드에 객체를 놓는다.
+    메서드 호출 setf(ios_base::showpoint)는 뒤따르는 숫자들이 0인 경우에도 뒤에 붙은 소수점을
+    표시하는 모드에 객체를 놓는다. precision() 메서드는, 소수점의 오른쪽에 표시할 수 있는
+    숫자들의 개수를 지정한다. 이 모든 설정들은 다른 메서드 호출에 의해 재설정될 때까지
+    효력을 그대로 유지한다. width(0 호출은 다음 출력 동작에 사용할 필드 폭을 설정한다.
+    이 설정은 하나의 값을 디스플레이 하는 데에만 사용되고, 디폴트로 다시 돌아간다.
+
+    file_it() 함수는 흥미 있는 두 개의 메서드 호출을 사용한다.
+    
+        ios_base::fmtflags initial;
+        initial = os.setf(ios_base::fixed);     // 초기 포멧팅 상태 저장
+        ...
+        os.setf(initial);                       // 초기 포멧팅 상태 복원
+
+    setf() 메서드는 호출 하기 전, 유효한 모든 포멧팅 설정들의 복사본을 리턴한다.
+    ios_base::fmtflags 는 이 정보를 저장하는데 필요한 데이터형의 장식적 이름이다.
+    그래서 initial 에 대입하는 것은 file_it() 함수가 호출되기 전의 유효한 설정들을 저장한다.
+    그러고 나서, initial 변수를 setf()에 매개변수로 사용하여 모든 포멧팅 설정을 리셋할 수 있다.
+
+    결정적 요점 :
+    각 객체는 자기 자신의 포맷팅 설정을 저장한다. 그래서 프로그램이 file_it()에 cout을 전달했을 때 cout의 설정이 변경되었다가 다시 원래 상태로 복원된다.
+    프로그램이 file_it()에 fout을 전달했을 때 fout의 설정이 변경 되었다가 다시 원래 상태로 복원된다.
+    */
+    #pragma endregion
+    #pragma region 08.참조 매개변수는 언제 사용하는가?
+    /*
+    ---------------------------------------- 08.참조 매개변수는 언제 사용하는가? ----------------------------------------
+    참조 매개변수를 사용하는 주된 이유는 다음 두 가지이다.
+        
+        * 호출 함수에 있는 데이터 객체의 변경을 허용하기 위헤
+        * 전체 데이터 객체 대신, 참조를 전달하여 프로그램의 속도를 높이기 위해
+    
+    두 번째 이유는 구조체나 클래스 객체와 같이 덩치 큰 데이터 객체를 다룰 때 가장 중요하다.
+    위의 두가지 이유는 포인터를 매개변수로 사용하는 것과 같은 이유이다.
+    사실상 참조 매개변수는 포인터를 사용하도록 짜여진 코드의 또 다른 인터페이스이기 때문에,
+    이것은 이치에 맞는다. 그렇다면 참조는 언제 사용하는가? 포인터는 언제 사용하는가?
+    값으로 전달은 언제 사용하는가? 다음은 이를 위한 몇 가지 지침이다.
+
+    함수가 전달된 데이터를 변경하지 않고 사용만 하는 경우 :
+        * 데이터 객체가 기본 데이터형이나 작은 구조체라면 값으로 전달한다.
+        * 데이터 객체가 배열이라면 포인터가 유일한 선택이므로 포인터를 사용한다. 
+          포인터를 const를 지시하는 포인터로 만든다.
+        * 데이터 객체가 덩치 큰 구조체라면 const 포인터나 const 참조를 사용하여
+          프로그램의 속도를 높인다. 이것은 구조체나 클래스 설계를 복사하는데 드는
+          시간과 공간을 절약한다. 포인터나 참조를 const로 만든다
+        * 데이터 객체가 클래스 객체라면 const 참조를 사용한다. 클래스 설계 자체가
+          흔히 참조를 사용할 것을 요구한다. 이것이 C++에 const 기능을 추가한
+          주된 이유이기도 하다. 클래스 객체 매개변수의 전달은 참조로 전달하는 것이 표준이다.
+
+    함수가 호출 함수의 데이터를 변경하는 경우 :
+        * 데이터 객체가 기본 데이터형이면 포인터를 사용한다. fixit(&x)와 같은 코드가 있다면
+          (여기서 x는 int형), 이 함수의 목적은 x를 변경하려는 것이 분명하다.
+        * 데이터 객체가 배열이면 유일한 선택은 포인터를 사용하는 것이다.
+        * 데이터 객체가 구조체이면 참조 또는 포인터를 사용한다.
+        * 데이터 객체가 클래스 객체면 참조를 사용한다.
+     
+    이것은 단지 지침일 뿐이다. 다른 방식을 사용한다면, 그 나름대로 이유가 있을 것이다.
+    예를 들어, cin은 cin >> &n 대신, cin >> n 을 사용할 수 있도록 기본 형에 대한 참조를 사용한다.
+    */
+    #pragma endregion
+    #pragma region 08.디폴트 매개변수
+    /*
+    ---------------------------------------- 08.디폴트 매개변수 ----------------------------------------
+    C++에 새로 추가된 기능인 디폴트 매개변수를 살펴보자.
+    디폴트 매개변수는 함수 호출에서 실제 매개변수를 생략했을 경우 실제 매개변수 대신 사용되는 값이다.
+    예를 들어, void wow(int n)에서 n이 1로 내정되도록 디폴트 값을 지정했다면,
+    wow()는 wow(1)과 같다. 디폴트 매개변수는 함수 사용에 매우 큰 융통성을 부여한다.
+    
+    디폴트 값은 어떻게 설정하는가? 함수 원형을 사용해야 한다. 컴파일러는 함수 원형을 살펴보고
+    그 함수가 몇 개의 매개변수를 사용하는지를 알아내므로, 함수 원형이 디폴트 매개변수의 존재 여부를
+    프로그램에게 알려주어야 한다. 다음은 이것을 설명하는 left() 함수의 원형이다.
+
+        char* left(const char* str, int n{1} );
+
+    함수가 새로운 문자열을 리턴하므로 그것의 데이터형은 char*, 즉 문자를 지시하는 포인터여야한다.
+    원본 문자열은 변경하지 않을 생각이므로 첫 번째 매개변수에 const 제한자를 사용하여야 한다.
+    그리고 n이 1이라는 디폴트 값을 가져야 하므로 n에 1을 대입한다. 디폴트 매개변수의 디폴트 값은 초기화 값이다.
+    그러므로 앞에 제시한 함수 원형은 n을 1이라는 값으로 초기화한다. 따라서 n을 그대로 두면 n은 1이라는 값을 가진다.
+    그러나 매개변수를 전달하면 새로운 값이 1을 대체한다.
+
+    매개변수 리스트를 사용할 때에는 디폴트 매개변수를 오른쪽에서 왼쪽의 순서로 첨가해야 한다.
+    즉, 어떤 매개변수를 디폴트 매개변수로 만드려면, 그 매개변수보다 오른쪽에 있는 모든 매개변수를 디폴트 매개변수로 만들어야 한다.
+
+        int harpo(int n, int m = 4, int j = 5);         // 맞다
+        int chico(int n, int m = 6, int j);             // 틀리다
+        int groucho(int k = 1, int m = 2, int n = 3)    // 맞다
+
+    실제 매개변수는 왼쪽에서 오른쪽으로 가면서 해당하는 형식 매개변수에 대입된다.
+    매개변수를 건너 뛸 수는 없다. 즉, 다음은 허용되지 않는다.
+
+        beeps = harpo(3,,8);                            // 틀리다, m을 4로 설정하지 않는다.
+
+    디폴트 매개변수는 기술의 발전이 아닌 편리한 도구일 뿐이다. 다음 예제를 보자
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        const int ArSize = 80;
+        char* left(const char* str, int n = 1);
+        
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            char sample[ArSize];
+            cout << "문자열을 입력하시오 : \n";
+            cin.get(sample, ArSize);
+            char* ps = left(sample, 4);
+            cout << ps << endl;
+            delete[] ps;
+            ps = left(sample);
+            cout << ps << endl;
+            delete[] ps;
+            
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        char* left(const char* str, int n)
+        {
+            if (n < 0)
+            {
+                n = 0;
+            }
+            char* p = new char[n + 1];
+            int i{};
+            for (i = 0; i < n && str[i]; i++)
+            {
+                p[i] = str[i];                  // 문자들을 복사한다
+            }
+            while (i <= n)
+            {
+                p[i++] = '\0';                  // 문자열의 나머지를 '\n'으로 설정한다
+            }
+            return p;
+        }
+
+    프로그램 실행 결과 :
+        문자열을 입력하시오 :
+        forthcoming
+        fort
+        f
+    
+        
+        i < n && str[i]
+
+    i < n 이라는 조건 검사는 루프가 n개의 문자를 복사한 후 중단한다는 것을 의미한다.
+    조건 검사의 두 번째 부분은 str[i] 라는 표현식이다. 이것은 복사될 문자의 코드이다.
+    루프가 널 문자에 도달하면 그 문자 코드가 0이 되어 루프를 탈출한다.
+    마지막에 있는 while 루프는 새로운 문자열을 널 문자로 종결시킨다. 그러고도 대입된 
+    메모리가 남아 있다면, 모두 널 문자로 설정한다.
+
+    새 문자열의 크기를 정하는 또 하나의 방법은 n을, 전달된 값과 문자열의 길이를 비교하여 더 작은 값으로 지정하는 것이다.
+
+        int len = strlen(str);
+        n = (n < len)? n : len;
+        char* p = new char[n+1];
+
+    이렇게 하면, new가 새 문자열을 저장하는데 꼭 필요한 만큼의 공간만 대입한다.
+    이것은 left("HI!", 32767)과 같은 함수 호출이 발생했을 떄 유용하다.
+    앞에서 다룬 첫번째 방법은 Hi! 를 32767 크기의 배열의 복사하고
+    처음 세 문자를 제외한 나머지 모든 공간을 널 문자로 설정한다.
+    그러나 방금 다룬 방법은, Hi! 를 고작 네 문자 크기의 배열에 복사한다.
+    그러나 strlen()을 호출함으로써 프로그램의 덩치가 커지고 처리속도가 느려진다.
+    또한, cstring 헤더 파일의 포함이 요구된다. C++에서는 신뢰성을 더 중시한다.
+    조금 느리더라도 정확하게 작동하는 프로그램이 빠르기만한 프로그램보다는 훨씬 낫다.
+    */
+    #pragma endregion
+    #pragma region 08.함수 오버로딩
+    /*
+    ---------------------------------------- 08.함수 오버로딩 ----------------------------------------
+    함수의 다형(Polymorphism)은 C++에 새로 추가된 기능이다.
+    디폴트 매개변수는 매개변수의 개수를 다르게 사용함으로써 같은 함수를 호출하는 반면,
+    함수 오버로딩(Function Overloading)은 서로 다른 여러 개의 함수가 하나의 이름을 공유하는 것이다.
+    여기서 '다형' 이라는 말은, 다양한 형태를 가진다는 뜻이다. 이와 비슷하게, '함수 오버로딩' 이라는 표현은
+    여러 개의 함수를 같은 이름으로 연결한다는 뜻이다. 즉, 이름을 오버로딩 하는 것이다. 함수 오버로딩은,
+    본질적으로는 같은 일을 처리하지만, 매개변수 리스트가 서로 다른 여러 개의 함수를 하나의 이름으로
+    만들 수 있게 해준다. 
+
+    함수 오버로딩의 열쇠는 함수의 매개변수 리스트이다. 이것을 함수 시그니쳐(Function Signature)라고 한다.
+    만약, 두 함수가 같은 개수, 같은 데이터형의 매개변수를 가지고 있고, 매개변수의 순서까지 동일하다면,
+    두 함수의 시그니처는 같다. 이때 변수의 이름은 달라도 상관 없다.
+    다음 예제를 보자..
+
+        void print(const char* str, int width);             // #1
+        void print(double d, int width);                    // #2
+        void print(long l, int width);                      // #3
+        void print(int i, int width);                       // #4
+        void print(const char* str);                        // #5
+    ---------------------------------------------------------------
+        print("Pancakes", 15);                              // #1 사용
+        print("Syrup");                                     // #5 사용
+        print(1999.0, 10);                                  // #2 사용
+        print(1999, 12);                                    // #4 사용
+        print(1999L, 15);                                   // #3 사용
+
+    오버로딩된 함수를 사용할 때에는, 함수 호출에서 올바른 데이터형의 매개변수를 사용하는지 확인해야 한다.
+
+        unsigned int year = 3210;
+        print(year, 6);                 // 모호한 함수 호출이다.
+
+    print() 함수의 이러한 호출은 대응하는 원형이 없다. 대응하는 원형이 없을 경우,
+    C++는 표준적인 데이터형 변환을 시도하여 어떻게든 대응이 이루어지도록 노력하기에, 여러 원형 중에서
+    어느 것이 사용될지 장담할 수 없다.
+
+    시그니처들은 서로 다른 것처럼 보이더라도 함께 공존할 수 없다. 예를 들어, 다음과 같은 두 원형을 생각해보자.
+
+        double cube(double x);
+        double cube(double& x);
+
+    여기에서 함수 오버로딩을 사용할 수 있으리라고 잘못 생각할 수 있다. 왜냐하면 함수 시그니처가 서로 달라 보이기 때문이다.
+    그러나 모든 것을 컴파일러 입장에서 생각해야 한다. 다음과 같은 코드가 있다고 가정해 보자.
+
+        cout << cube(x);
+
+    매개변수 x는 double x를 사용하는 원형이나 double& x를 사용하는 원형에 둘 다 일치한다. 컴파일러는
+    어느 함수를 사용해야 할지 알지 못한다. 그러므로 컴파일러는 함수 시그니처를 검사할 때,
+    그러한 혼동을 피하기 위해, 어떤 데이터형에 대한 참조와 그 데이터형 자체를 같은 시그니처로 간주한다.
+
+    대응하는 함수를 찾는 과정에서 const와 const가 아닌 변수는 구분된다. 다음 예제를 보자.
+
+        void dribble(char* bits);           // #1 오버로딩 된다
+        void dribble(const char* cbits);    // #2 오버로딩 된다 
+        void dabble(char* bits);           // #3 오버로딩 되지 않는다
+        void drivel(const char* bits);     // #4 오버로딩 되지 않는다
+
+    함수 오버로딩을 가능하게 하는 것은 함수의 데이터형이 아닌 시그니처라는 사실을 명심하라.
+    예를 들어, 다음 두 선언은 함께 공존할 수 없다.
+
+        long gronk(int n, float m);             // 같은 시그니처이므로
+        double gronk(int n, float m);           // 공존할 수 없다.
+
+    함수 시그니처가 다른 경우에만 다른 리턴형을 가질 수 있다.
+
+        long gronk(int n, float m);             // 서로 다른 시그니처이므로
+        double gronk(float n, float m);         // 공존할 수 있다.
+
+
+    */
+    #pragma endregion
+    #pragma region 08.오버로딩 예제
+    /*
+    ---------------------------------------- 08.오버로딩 예제 ----------------------------------------
+    이 장에서 우리는, 어떤 문자열에서 처음 n개의 문자를 취하여 리턴하는 elft() 함수를 만들었다.
+    이제 어떤 정수에서 처음 n자리의 숫자를 취하여 리턴하는 또 다른 left() 함수를 만들어보자.
+
+    정수 처리 함수는 문자열 처리 함수에 비해 약간 어렵다. 왜냐하면 정수는 각각의 자리가 배열 원소에 하나씩
+    저장되어 있지 않기 때문이다. 이것을 해결하는 한 가지 방법은, 정수를 나타내는 숫자가 몇 개인지 먼저
+    카운트 하는 것이다. 어떤 수를 10으로 나누면 하나의 숫자가 떨어져 나간다. 그러므로 나눗셈을 이용하여
+    그 정수를 나타내는 숫자가 몇 개인지 카운트 할 수 있다.
+
+        usgined digits{1};
+        while (n /= 10)
+        {
+            digits++;
+        }
+
+    이 루프는 아무것도 남지 않을 때까지 n으로부터 몇 개의 숫자를 제거할 수 있는지 카운트한다.
+    n /= 10은 n = n/10보다 간결하다. 만일 n이 8이면, 8/10이 되고, 정수 나눗셈이므로 n에 0이 대입된다.
+    그럼 즉각 루프를 탈출하고 digits에는 1이 남는다. 이제 정수가 5자리의 숫자이고, 처음 세 자리를
+    리턴하기를 원한다고 가정하자. 그 정수를 10으로 나눈 결과를 다시 한 번 10으로 나누면 구할 수 있다.
+    10으로 나눌 때마다 오른쪽 끝 자리가 떨어져 나가기 때문이다. 잘라버릴 숫자 개수는
+    전체 숫자 개수에서 알고 싶은 숫자 개수를 빼면 된다. 예를 들어, 전체가 9자리인데 앞의 네 자리를 알고 싶다면
+    끝에 5자리를 잘라버리면 된다.
+
+        ct = digits - ct;
+        while(ct--)
+        {
+             num /= 10;
+        }
+        return num;
+
+    다음 예제를 보자..
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        unsigned long left(unsigned long num, unsigned ct);
+        char* left(const char* str, int n = 1);
+        
+        //-------------------------[   FBody   ]-----------------------------------//   
+        int main()
+        {
+            char trip[80] = "Hawaii!!";
+            char* ptrip = trip;
+            unsigned long n = 12345678;
+            int i{};
+            char* temp;
+            
+            for (int i{ 1 }; i < 10; i++)
+            {
+                cout << left(n, i) << endl;
+                temp = left(ptrip, i);
+                cout << temp << endl;
+                delete[] temp;
+            }
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        unsigned long left(unsigned long num, unsigned ct)
+        {
+            unsigned digits = 1;
+            unsigned long n = num;
+        
+            if (ct == 0 || num == 0)
+            {
+                return 0;                   // 숫자가 없으면 0을 리턴
+            }
+        
+            while (n /= 10)
+            {
+                digits++;
+            }
+            if (digits > ct)
+            {
+                ct = digits - ct;
+                while (ct--)
+                {
+                    num /= 10;
+                }
+                return num;                 // 남아 있는 ct개의 숫자를 리턴
+            }
+        
+            else
+            {
+                return num;                 // 'ct >= 전체 숫자 개수' 이면
+            }                               // 그 정수 자체를 리턴
+        }
+        
+        char* left(const char* str, int n)
+        {
+            if (n < 0)
+            {
+                n = 0;
+            }
+            char* p = new char[n + 1];
+            int i{};
+            for (i; i < n && str[i]; i++)
+            {
+                p[i] = str[i];
+            }
+            while (i<=n)
+            {
+                p[i++] = '\0';
+            }
+            return p;
+        }
+
+    프로그램 실행 결과 : 
+        1
+        H
+        12
+        Ha
+        123
+        Haw
+        1234
+        Hawa
+        12345
+        Hawai
+        123456
+        Hawaii
+        1234567
+        Hawaii!
+        12345678
+        Hawaii!!
+        12345678
+        Hawaii!!
+    */
+    #pragma endregion
+    #pragma region 08.템플릿
+    /*
+    ---------------------------------------- 08.템플릿 ----------------------------------------
+    */
+    #pragma endregion
+
+
 
 #pragma endregion
 
     
 
 
-//531페이지
+//547페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-string version1(const string& s1, const string& s2);
-const string& version2(string& s1, const string& s2);       // 부수 효과
-const string& version3(string& s1, const string& s2);       // 나쁜 설계
+unsigned long left(unsigned long num, unsigned ct);
+char* left(const char* str, int n = 1);
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    string input{};
-    string copy{};
-    string result{};
-
-    cout << "문자열을 입력하시오 : ";
-    getline(cin, input);
-    copy = input;
-    cout << "입력한 문자열 : " << input << endl;
-    result = version1(input, "***");
-    cout << "바뀐 문자열 : " << result << endl;
-    cout << "원래 문자열 : " << input << endl;
-
-    result = version2(input, "###");
-    cout << "바뀐 문자열 : " << result << endl;
-    cout << "원래 문자열 : " << input << endl;
-
-    cout << "원래 문자열 재설정\n";
-    input = copy;
-    result = version3(input, "@@@");
-    cout << "바뀐 문자열 : " << result << endl;
-    cout << "원래 문자열 : " << input << endl;
-
+    char trip[80] = "Hawaii!!";
+    char* ptrip = trip;
+    unsigned long n = 12345678;
+    int i{};
+    char* temp;
+    
+    for (int i{ 1 }; i < 10; i++)
+    {
+        cout << left(n, i) << endl;
+        temp = left(ptrip, i);
+        cout << temp << endl;
+        delete[] temp;
+    }
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-string version1(const string& s1, const string& s2)
+unsigned long left(unsigned long num, unsigned ct)
 {
-    string temp{};
-    
-    temp = s2 + s1 + s2;
-    return temp;
-}
-const string& version2(string& s1, const string& s2)
-{
-    s1 = s2 + s1 + s2;
-    return s1;
-}
-const string& version3(string& s1, const string& s2)
-{
-    string temp{};
+    unsigned digits = 1;
+    unsigned long n = num;
 
-    temp = s2 + s1 + s2;
-    return temp;
+    if (ct == 0 || num == 0)
+    {
+        return 0;                   // 숫자가 없으면 0을 리턴
+    }
+
+    while (n /= 10)
+    {
+        digits++;
+    }
+    if (digits > ct)
+    {
+        ct = digits - ct;
+        while (ct--)
+        {
+            num /= 10;
+        }
+        return num;                 // 남아 있는 ct개의 숫자를 리턴
+    }
+
+    else
+    {
+        return num;                 // 'ct >= 전체 숫자 개수' 이면
+    }                               // 그 정수 자체를 리턴
 }
+
+char* left(const char* str, int n)
+{
+    if (n < 0)
+    {
+        n = 0;
+    }
+    char* p = new char[n + 1];
+    int i{};
+    for (i; i < n && str[i]; i++)
+    {
+        p[i] = str[i];
+;   }
+    while (i<=n)
+    {
+        p[i++] = '\0';
+    }
+    return p;
+}
+
 #pragma endregion
