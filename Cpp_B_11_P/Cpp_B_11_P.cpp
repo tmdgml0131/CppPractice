@@ -6,6 +6,7 @@
 #include <ctime>
 #include <fstream>  // 파일 I/O 를 위해
 #include <cstdlib>  // exit() 지원
+#include <cmath>
 using namespace std;
 
 
@@ -5534,94 +5535,668 @@ using namespace std;
         Hawaii!!
     */
     #pragma endregion
-    #pragma region 08.템플릿
+    #pragma region 08.함수 오버로딩은 언제 사용하는가?
     /*
-    ---------------------------------------- 08.템플릿 ----------------------------------------
+    ---------------------------------------- 08.함수 오버로딩은 언제 사용하는가? ----------------------------------------
+    함수 오버로딩은 서로 다른 데이터형을 대상으로 하지만, 기본적으로는 같은 작업을 수행하는 함수들에만 사용하는 것이 바람직하다.
+    또한 독자는 디폴트 매개변수를 사용하여 같은 목적을 수행할 수 있는지 확인하는 것이 좋다.
+    
+        char* lef(const* str, unsigned n);          // 두 개의 매개변수
+        char* left(const char* str);                // 한 개의 매개변수
+
+    디폴트 매개변수를 사용하는 하나의 함수를 사용하는 것이 더 간단하다. 함수를 단지 하나만 작성하면 되고,
+    프로그램도 하나의 함수를 저장하기 위한 메모리만 요구한다. 그리고 함수를 수정할 필요가 생겼을 때도 하나의 함수만 수정하면 된다.
+    그러나 서로 다른 데이터형의 매개면수를 요구하고 디폴트 매개변수가 소용이 없을 땐, 함수 오버로딩을 사용해야 한다.
+    */
+    #pragma endregion
+    #pragma region 08.함수 템플릿
+    /*
+    ---------------------------------------- 08.함수 템플릿 ----------------------------------------
+    함수 템플릿은 함수의 일반화 서술이다. 즉, 함수 템플릿은 int형이나 double형과 같은 구체적인 데이터형을 포괄할 수 있는
+    일반형으로 함수를 정의한다. 어떤 데이터형을 템플릿에 매개변수로 전달하면, 컴파일러가 그 데이터형에 맞는 함수를 생성한다.
+    이것을 일반화 프로그래밍(Generic Programming) 이라고 한다.
+    데이터형이 매개변수에 의해 표현되므로, 템플릿을 때로는 매개변수화 데이터형(Parameterized Type)이라고 한다.
+
+    우리는 전 장에서 두 개의 int형을 교환하는 함수를 정의했다. 이번엔 두 개의 double 값을 교환하는 함수를 정의한다고 가정하자. 
+    이것을 해결하는 방법은, 기존에 만든 int 값 교환함수에서 int를 double로 각각 바꿔주는 방법이 있다.
+    두 개의 char 값을 교환해야 할 때에도 이와 똑같은 방법을 사용할 수 있다.
+    상황이 발생할 때마다 매번 이런 식으로 데이터형을 바꾼다는 것은 귀중한 시간을 낭비할 뿐만 아니라 실수를 저지를 위험도 있다.
+
+    C++의 함수 템플릿 기능은 이 과정을 자동화하여 시간을 절약하고 코드의 신뢰성을 높여준다.
+    함수 템플릿은 임의 데이터형으로 함수를 정의하는 것을 허용한다. 예를 들면, 두 변수의 값을 교환하는 다음과 같은 템플릿을 설정할 수 있다..
+        
+        template <class T>
+        void swap(T &a, T &b)
+        {
+            T temp{};
+            temp = a;
+            a = b;
+            b = temp;
+        }
+
+    첫 번째 행은 템플릿을 설정하고, 임의 데이터형의 이름을 T로 정한다는 뜻이다.
+    키워드 template와 class(class 대신 typename을 사용해도 된다.)를 반드시 사용해야 한다.
+    또한 각진 괄호를 사용해야 한다. 나머지 코드는 T형의 두 값을 교환하는 알고리즘을 서술한다.
+    이 템플릿은 함수를 만드는 것이 아닌 함수를 정의하는 방법을 컴파일러에게 알려 주는 것이다.
+    다음 예제를 보자..
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        template<typename T>
+        void Swap(T &a, T &b);
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            int i{ 10 };
+            int j{ 20 };
+            cout << "i, j = " << i << ", " << j << ".\n";
+            cout << "컴파일러가 생성한 int형 덧셈기를 사용하면\n";
+            Swap(i,j);
+            cout << "이제 i, j = " << i << ", " << j << ".\n";
+        
+            double x{ 24.5 };
+            double y{ 81.7 };
+            cout << "x, y = " << x << ", " << y << ".\n";
+            cout << "컴파일러가 생성한 double형 교환기를 사용하면\n";
+            Swap(x, y);
+            cout << "이제 x, y = " << x << ", " << y << ".\n";
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        template <typename T>
+        void Swap(T &a, T &b)
+        {
+            T temp;
+            temp = a;
+            a = b;
+            b = temp;
+        }
+    
+    프로그램 실행 결과 :
+        i, j = 10, 20.
+        컴파일러가 생성한 int형 덧셈기를 사용하면
+        이제 i, j = 20, 10.
+        x, y = 24.5, 81.7.
+        컴파일러가 생성한 double형 교환기를 사용하면
+        이제 x, y = 81.7, 24.5.
+    */
+    #pragma endregion
+    #pragma region 08.템플릿의 오버로딩
+    /*
+    ---------------------------------------- 08.템플릿의 오버로딩 ----------------------------------------
+    모든 데이터형이 항상 같은 알고리즘을 사용할 리는 없기에, 일반적 오버로딩처럼 템플릿의 정의를 오버로딩 할 수 있다.
+    다음 예시를 보자..
+
+    //-------------------------[ ProtoType ]-----------------------------------//
+    template<typename T>
+    void Swap(T &a, T &b);
+
+    template<typename T>
+    void Swap(T *a, T *b, int n);
+
+    void Show(int a[]);
+
+    const int Lim{ 8 };
+
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        int i{ 10 };
+        int j{ 20 };
+        cout << "i, j = " << i << ", " << j << ".\n";
+        cout << "컴파일러가 생성한 int형 덧셈기를 사용하면\n";
+        Swap(i,j);
+        cout << "이제 i, j = " << i << ", " << j << ".\n";
+
+        int d1[Lim]{1, 2, 3, 4, 5, 6, 7, 8};
+        int d2[Lim]{2, 4, 6, 8, 10, 12, 14, 16 };
+        cout << "원본 배열 : \n";
+        Show(d1);
+        Show(d2);
+        Swap(d1, d2, Lim);
+        cout << "교환된 배열 :\n";
+        Show(d1);
+        Show(d2);
+
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    template <typename T>
+    void Swap(T &a, T &b)
+    {
+        T temp;
+        temp = a;
+        a = b;
+        b = temp;
+    }
+
+    template<typename T>
+    void Swap(T a[], T b[], int n)
+    {
+        T temp;
+        for (int i{}; i < n; i++)
+        {
+            temp = a[i];
+            a[i] = b[i];
+            b[i] = temp;
+        }
+    }
+
+    void Show(int a[])
+    {
+        cout << a[0] << a[1] << "/";
+        cout << a[2] << a[3] << "/";
+        for (int i{ 4 }; i < Lim; i++)
+        {
+            cout << a[i];
+        }
+        cout << endl;
+    }
+
+프로그램 실행 결과 :
+    i, j = 10, 20.
+    컴파일러가 생성한 int형 덧셈기를 사용하면
+    이제 i, j = 20, 10.
+    원본 배열 :
+    12/34/5678
+    24/68/10121416
+    교환된 배열 :
+    24/68/10121416
+    12/34/5678
+    */
+    #pragma endregion
+    #pragma region 08.템플릿 제한
+    /*
+    ---------------------------------------- 08.템플릿 제한 ----------------------------------------
+    다음과 같은 템플릿 함수가 있다고 가정해 보자.
+
+        template <Class T>
+        void f(T a, T b)
+        (...)
+
+    종종 코드에서 형에 따라 어떠한 연산이 가능할 것인지에 대한 가정을 한다.
+    예를 들면, 다음 구문처럼 대입이 정의되고 있고, T형이 built-in 배열형이라면 해당 구문은 참이 아니다.
+
+        a = b;
+
+    이와 유사하게 다음 구문은 >가 정의되었다고 가정하지만, T가 일반 구조체라면 참이 아니다.
+
+        if(a > b)
+
+    또한 > 연산자는 배열 이름으로 정의되지만, 배열 이름은 주소이기 때문에 배열의 주소를 비교한다.
+    따라서 사용자가 의도하는 바와 다를 수 있다. 다음의 구문은 곱셈 연산자가 T형으로 정의된 경우인데,
+    T가 배열이나 포인터 또는 구조체인 경우에는 해당되지 않는다.
+
+        T c = a * b;
+
+   어던 형을 다루지 않는 템플릿 함수를 사용하는 것은 쉬운 작업이다. 한편 C++ 구문이 허용하지 않아도
+   템플릿 함수를 일반화 하는 것이 때론 이치에 맞다. 예로, + 연산자가 구조체에는 적용되지 않더라도
+   구조체를 재편성 하도록 연산자를 재정의하는 것은 괜찮을 수 있다.
+   이러한 연산자의 오버로드는 11장에서 다룬다. 
+    */
+    #pragma endregion
+    #pragma region 08.명시적 특수화
+    /*
+    ---------------------------------------- 08.명시적 특수화 ----------------------------------------
+    다음과 같은 구조조체를 정의한다고 가정하자.
+
+        struct job
+        {
+            char name[40];
+            double salary{};
+            int floor{};
+        }
+
+    이러한 구조체 두 개를 만들고 두 구조체의 내용을 교환하려 한다. 원본 템플릿은 다음과 같은
+    코드를 사용하여 내용을 교환한다.
+
+        temp = a;
+        a = b;
+        b = temp;
+
+    C++에서는 하나의 구조체를 다른 하나의 구조체에 대입할 수 있기 때문에, Any형이 job 구조체인 경우도 코드는 동작한다.
+    그러나 salary와 floor 멤버만 교환하고, name 멤버는 그대로 두고 싶다고 가정하자.
+    이 경우는, 이제 코드가 달라져야 한다. 그러나 Swap()에 넘겨주는 매개변수는 첫 번째 경우와 같아야한다.
+    그렇다면 새로운 코드에 템플릿 오버로딩을 사용할 수 없다.
+
+    그러나 명시적 특수화(Explicit Specialization)라는 특수화된 함수 정의를, 필요한 코드와 함께 제공할 수 있다.
+    컴파일러가 함수 호출에 정확히 대응하는 특수화된 정의를 발견하면, 템플릿을 찾기 않고 그 정의를 사용한다.
+    이러한 특수화 형식은 C++가 발전하면서 계속 변화해 왔다.
+
+    **3세대 특수화**
+    특수화 방식을 모두 실험한 후, C++98 표준은 이 방식을 다음과 같이 정립하였다.
+
+        * 함수 이름이 하나 주어지면, 사용자는 템플릿이 아닌 함수, 템플릿 함수, 명시적 특수화 템플릿 함수를 가질 수 있다.
+          또한, 이 모든 것들의 오버로딩 버전도 가질 수 있다.
+        * 명시적 특수화를 위한 원형과 정의 앞에 template <>가 와야한다. 그리고 특수형의 이름을 서술해야 한다.
+        * 특수화는 템플릿을 무시하고, 템플릿이 아닌 함수는 특수화와 템플릿 둘 다 무시한다.
+    
+    다음은 job형 구조체를 교환하는 세 가지 형식의 함수 원형이다.
+
+        // 템플릿이 아닌 함수 원형
+        void Swap(job &, job &);
+
+        // 템플릿 원형
+        template <typename T>
+        void Swap(T &, T &);
+
+        // job형을 위한 명시적 특수화
+        template <> void Swap<job>(job&, job&);
+    ------------------------------------------------------------------------------
+
+        template <Class T>
+        void Swap(T &, T &);
+
+        // job 형에 대한 명시적 특수화
+        template <> void Swap<job>(job&, job&);
+        int main()
+        {
+            double u, v;
+            ...
+            Swap(u, v);     // 템플릿 사용
+            job a, b;
+            ...
+            Swap(a,b);      // void Swap<job>(job&, job &) 사용
+        }
+
+    이것이 job을 위한 특수화라는 것을 함수 매개변수의 데이터형이 알려주기에,
+    Swap<job>에 있는 <job>은 생략할 수 있다. 그러므로 원형도 다음처럼 간단히 나타낼 수 있다.
+
+        template<> void Swap(job&, job&);
+    */
+    #pragma endregion
+    #pragma region 08.명시적 특수화 예제
+    /*
+    ---------------------------------------- 08.명시적 특수화 예제 ----------------------------------------
+        //-------------------------[ ProtoType ]-----------------------------------//
+        template <typename T>
+        void Swap(T& a, T& b);
+        
+        struct job
+        {
+            char name[40]{};
+            double salary{};
+            int floor{};
+        };
+        
+        //명시적 특수화
+        template <> void Swap<job>(job& j1, job& j2);
+        
+        void Show(job& j);
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            cout.precision(2);
+            cout.setf(ios::fixed, ios::floatfield);
+            
+            int i{ 10 };
+            int j{ 20 };
+        
+            cout << "i, j = " << i << ", " << j << ".\n";
+            cout << "컴파일러가 생성한 int형 교환기를 사용하면\n";
+            Swap(i, j);
+            cout << "이제 i, j = " << i << ", " << j << ".\n";
+        
+            job sue = { "Susan", 73000.60, 7 };
+            job sidney = { "sidney", 78000.00, 9 };
+            cout << "job 교환 전 : \n";
+            Show(sue);
+            Show(sidney);
+            Swap(sue, sidney);
+        
+            cout << "job 교환 후 : \n";
+            Show(sue);
+            Show(sidney);
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        template <typename T>
+        void Swap(T &a, T &b)
+        {
+            T temp;
+            temp = a;
+            a = b;
+            b = temp;
+        }
+        
+        template<> void Swap<job>(job& j1, job& j2)
+        {
+            double t1;
+            int t2;
+            t1 = j1.salary;
+            j1.salary = j2.salary;
+            j2.salary = t1;
+            t2 = j1.floor;
+            j1.floor = j2.floor;
+            j2.floor = t2;
+        }
+        
+        void Show(job& j)
+        {
+            cout << j.name << ": (" << j.floor << "층에 거주)" << "$" << j.salary << endl;
+        }
+    */
+    #pragma endregion
+    #pragma region 08.구체화와 특수화
+    /*
+    ---------------------------------------- 08.구체화와 특수화 ----------------------------------------
+    소스 코드에 함수 템플릿을 넣는다고 해서 함수 정의가 저절로 생성되는 것은 아니다.
+    그것은 단지 함수 정의를 생성할 계획을 세우는 것에 불과하다. 컴파일러가 특정 데이터형에 맞는 함수 정의를
+    생성하기 위해 템플릿을 사용할 떄, 그 결과를 템플릿의 구체화(Instantiation)이라고 한다. 이전 예제에서
+    Swap(i,j) 함수 호출은, 컴파일러가 int형을 사용하는 Swap()을 구체화하게 만든다.
+    템플릿은 함수 정의가 아니며, int형을 사용하는 특정 구체화가 함수 정의다. 이러한 구체화를
+    암시적 구체화(implicit Instantiation) 이라고 한다. 그 이유는, 프로그램이 int형 매개변수를 요구하는
+    Swap() 함수를 사용한다는 사실을 컴파일러에게 알림으로써, 그에 맞는 함수 정의를 만들 필요가 있다는 것을
+    컴파일러가 암시적으로 인식하기 때문이다. 지금은 C++가 명시적 구체화(Explicit instantiation)도 허용한다.
+    이것은 컴파일러가 Swap<int>() 와 같은 특정 구체화를 생성하도록 사용자가 지시할 수 있는 것을 의미한다.
+
+        template void Swap<int>(int, int);          // 명시적 구체화
+
+    명시적 구체화를 명시적 특수화와 서로 비교해보자. 명시적 특수화는 다음 두 선언 중 어느 하나를 사용한다.
+
+        template <> void Swap<int>(int &, int &);
+        template <> void Swap(int &, int &);
+
+    이 선언들은 함수 정의를 생성하기 위해 Swap() 템플릿을 사용하지 말고, int형에 맞게 특별히 명시적으로
+    정의된 함수 정의를 사용하라. 는 것을 의미한다. 명시적 특수화 선언은
+    키워드 template 뒤에 <>를 가지는 반면에, 명시적 구체화는 <>를 생략한다
+
+    명시적 구체화는 프로그램에서 함수를 사용하여 생성할 수 있다. 예를 들면, 다음의 내용을 생각해 볼 수 있다.
+
+        template <class T>
+        T Add(T a, T b)
+        {
+            return a+b;
+        }
+        ...
+        int m = 6;
+        double x = 10.2;
+        cout << Add<double>(x, m);      // 명시적 구체화
+
+    이 템플릿은 함수 호출(x,m)와 매치되지 않을 것이다. 매개변수가 서로 다르기 때문이다.
+    그러나 Add<double> (x,m) 을 사용하게 되면 double 구체화를 강요하게 되고
+    매개변수 m은 double형의 cast로서, 두 매개변수가 일치하게 된다.
+
+        template <class T>
+        void Swap(T &, T &);        // 템플릿 원형
+
+        template <> void Swap<job>(job &, job &);           // job을 위한 명시적 특수화
+        int main()
+        {
+            template void Swap<char>(char &, char&);        // char를 위한 명시적 구체화
+        
+            short a, b;
+            ...
+            Swap(a, b);                                         // short를 위한 암시적 템플릿 구체화
+            job n, m;
+            ...
+            Swap(n, m);                                         // job을 위한 명시적 특수화
+            char g,h;
+            ...
+            Swap(g,h);                                          // char를 위한 명시적 템플릿 구체화
+            ...
+        }
+
+
+
+    */
+    #pragma endregion
+    #pragma region 08.컴파일러는 어느 함수를 선택할까?
+    /*
+    ---------------------------------------- 08.컴파일러는 어느 함수를 선택할까? ----------------------------------------
+    함수 오버로딩, 템플릿, 템플릿 오버로딩 등이 있기 때문에, 어느 함수 정의를 사용할 것인지 C++는 전략을 가지고 있다.
+    이러한 전략을 오버로딩 분석(Overloading Resolution) 이라 한다.
+
+        * 1단계 : 후보 함수들의 목록을 만든다. 호출 함수와 이름이 동일한 함수와 템플릿들이다.
+        * 2단계 : 후보 중, 계속 존속하는 함수들의 목록을 만든다. 매개변수의 개수가 일치하는 함수들이다.
+                  이들에 대해서 암시적 변환 절차가 이루어진다. 실제 매개변수의 각 데이터형이, 대응하는 형식
+                  매개변수의 데이터형과 정확하게 일치하는 경우도 포함한다. float가 double형으로 변환 될 수 있는 것 같은 예이다.
+        * 3단계 : 가장 적당한 함수가 있는지 판단한다. 그런 함수가 없다면 함수 호출은 에러로 간주한다.
+    
+    C++는 정확한 대응을 만들기 위해 몇 가지 사소한 변환 ( Trival Conversion )을 허용한다.
+    9장에서는 volatile이라는 키워드도 설명한다.
+
+    **부분순서화 규칙을 설명하는 예제**
+    다음 예제는 어떤 템플릿 정의를 사용할 것인지 결정하는 부분순서화 규칙을 나타내는 프로그램이다.
+
+        //-------------------------[ ProtoType ]-----------------------------------//
+        template <typename T>
+        void ShowArray(T arr[], int n);             // 템플릿 A
+        
+        template <typename T>
+        void ShowArray(T* arr[], int n);            // 템플릿 B
+        
+        struct debts
+        {
+            char name[40]{};
+            double amount{};
+        };
+        
+        //-------------------------[   FBody   ]-----------------------------------//    
+        int main()
+        {
+            int things[6]{ 1, 2, 3, 4, 5, 6 };
+            struct debts mr_E[3] =
+            {
+                {"A", 200.0},
+                {"B", 400.0},
+                {"C", 600.0}
+            };
+        
+            double* pd[3];
+        
+            // 포인터들을 배열 mr_E에 있는 구조체들의 amount 멤버로 설정
+            for (int i{}; i < 3; i++)
+            {
+                pd[i] = &mr_E[i].amount;
+            }
+        
+            cout << "Mr.E의 재산 목록 : \n";
+        
+            // things는 int형의 배열이다.
+            ShowArray(things, 6);               // 템플릿 A를 사용
+            cout << "Mr.E의 채무 목록 : \n";
+        
+            // pd는 double형을 지시하는 포인터들의 배열이다.
+            ShowArray(pd, 3);                   // 더 특수화된 템플릿 B를 사용했다
+        
+            return 0;
+        }
+        
+        //-------------------------[ Func.Def. ]-----------------------------------//
+        template <typename T>
+        void ShowArray(T arr[], int n)
+        {
+            cout << "템플릿 A\n";
+            for (int i{}; i < n; i++)
+            {
+                cout << arr[i] << " ";
+            }
+            cout << endl;
+        }
+        
+        template <typename T>
+        void ShowArray(T* arr[], int n)
+        {
+            cout << "템플릿 B\n";
+            for (int i{}; i < n; i++)
+            {
+                cout << *arr[i] << " ";
+            }
+            cout << endl;
+        }
+
+    프로그램 실행 결과 : 
+        Mr.E의 재산 목록 :
+        템플릿 A
+        1 2 3 4 5 6
+        Mr.E의 채무 목록 :
+        템플릿 B
+        200 400 600
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_1
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_1 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_2
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_2 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_3
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_3 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_4
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_4 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_5
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_5 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_6
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_6 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
+    */
+    #pragma endregion
+    #pragma region 08.프로그래밍 연습_7
+    /*
+    ---------------------------------------- 08.프로그래밍 연습_7 ----------------------------------------
+    문제 :
+
+
+    해답 :
+
+
     */
     #pragma endregion
 
 
 
+
 #pragma endregion
+
 
     
 
 
-//547페이지
+//586페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-unsigned long left(unsigned long num, unsigned ct);
-char* left(const char* str, int n = 1);
+template <typename T>
+void ShowArray(T arr[], int n);             // 템플릿 A
+
+template <typename T>
+void ShowArray(T* arr[], int n);            // 템플릿 B
+
+struct debts
+{
+    char name[40]{};
+    double amount{};
+};
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    char trip[80] = "Hawaii!!";
-    char* ptrip = trip;
-    unsigned long n = 12345678;
-    int i{};
-    char* temp;
-    
-    for (int i{ 1 }; i < 10; i++)
+    int things[6]{ 1, 2, 3, 4, 5, 6 };
+    struct debts mr_E[3] =
     {
-        cout << left(n, i) << endl;
-        temp = left(ptrip, i);
-        cout << temp << endl;
-        delete[] temp;
+        {"A", 200.0},
+        {"B", 400.0},
+        {"C", 600.0}
+    };
+
+    double* pd[3];
+
+    // 포인터들을 배열 mr_E에 있는 구조체들의 amount 멤버로 설정
+    for (int i{}; i < 3; i++)
+    {
+        pd[i] = &mr_E[i].amount;
     }
+
+    cout << "Mr.E의 재산 목록 : \n";
+
+    // things는 int형의 배열이다.
+    ShowArray(things, 6);               // 템플릿 A를 사용
+    cout << "Mr.E의 채무 목록 : \n";
+
+    // pd는 double형을 지시하는 포인터들의 배열이다.
+    ShowArray(pd, 3);                   // 더 특수화된 템플릿 B를 사용했다
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-unsigned long left(unsigned long num, unsigned ct)
+template <typename T>
+void ShowArray(T arr[], int n)
 {
-    unsigned digits = 1;
-    unsigned long n = num;
-
-    if (ct == 0 || num == 0)
+    cout << "템플릿 A\n";
+    for (int i{}; i < n; i++)
     {
-        return 0;                   // 숫자가 없으면 0을 리턴
+        cout << arr[i] << " ";
     }
-
-    while (n /= 10)
-    {
-        digits++;
-    }
-    if (digits > ct)
-    {
-        ct = digits - ct;
-        while (ct--)
-        {
-            num /= 10;
-        }
-        return num;                 // 남아 있는 ct개의 숫자를 리턴
-    }
-
-    else
-    {
-        return num;                 // 'ct >= 전체 숫자 개수' 이면
-    }                               // 그 정수 자체를 리턴
+    cout << endl;
 }
 
-char* left(const char* str, int n)
+template <typename T>
+void ShowArray(T* arr[], int n)
 {
-    if (n < 0)
+    cout << "템플릿 B\n";
+    for (int i{}; i < n; i++)
     {
-        n = 0;
+        cout << *arr[i] << " ";
     }
-    char* p = new char[n + 1];
-    int i{};
-    for (i; i < n && str[i]; i++)
-    {
-        p[i] = str[i];
-;   }
-    while (i<=n)
-    {
-        p[i++] = '\0';
-    }
-    return p;
+    cout << endl;
 }
+
 
 #pragma endregion
