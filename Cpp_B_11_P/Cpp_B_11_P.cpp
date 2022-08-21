@@ -11,15 +11,15 @@ using namespace std;
 
 
 
-#pragma region 08.템플릿
+#pragma region 09.템플릿
 /*
----------------------------------------- 08.템플릿 ----------------------------------------
+---------------------------------------- 09.템플릿 ----------------------------------------
 */
 #pragma endregion
 
-#pragma region 08.프로그래밍 연습_템플릿
+#pragma region 09.프로그래밍 연습_템플릿
 /*
----------------------------------------- 08.프로그래밍 연습_템플릿 ----------------------------------------
+---------------------------------------- 09.프로그래밍 연습_템플릿 ----------------------------------------
 문제 :
 
 
@@ -6045,10 +6045,48 @@ using namespace std;
     /*
     ---------------------------------------- 08.프로그래밍 연습_1 ----------------------------------------
     문제 :
+    평상시에는 문자열의 주소를 하나의 매개변수로 취하여, 그 문자열을 한 번 출력하는 함수를 작성하라.
+    그러다가 0이 아닌 int형 값을 두 번째 매개변수로 제공하면, 그 시점에 도달할 때까지 그 함수가
+    호출되었던 횟수만큼 그 문자열을 반복해서 출력해야한다.
 
 
     해답 :
+    //-------------------------[ ProtoType ]-----------------------------------//
+    void PrintA(char* a, int n = 0);
 
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        char a[50]{};
+        int n{};
+
+        while (true)
+        {
+            cout << "문자열 입력 : \n";
+            cin.getline(a, 50);
+            cout << "숫자 입력 : \n";
+            (cin >> n).get();
+            if (n != 0)
+            {
+                for (int i{}; i < n; i++)
+                {
+                    PrintA(a);
+                }
+                break;
+            }
+            PrintA(a, n);
+        }
+
+        cout << "프로그램 종료";
+
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    void PrintA(char* a, int n)
+    {
+        cout << a << endl;
+    }
 
     */
     #pragma endregion
@@ -6056,9 +6094,44 @@ using namespace std;
     /*
     ---------------------------------------- 08.프로그래밍 연습_2 ----------------------------------------
     문제 :
-
+    CandyBar 구조체는 세 개의 멤버 상표명, 중량, 칼로리를 가진다.
+    CandyBar에 대한 참조, char형을 지시하는 포인터, double형, int형을 매개변수로 취하고,
+    마지막 세 매개변수의 값을 사용하여 구조체의 해당 멤버를 설정하는 프로그램을 작성하라.
+    마지막 세 매개변수는, "CandyCandy", 1.99, 300의 디폴트 값을 가져야한다.
 
     해답 :
+    //-------------------------[ ProtoType ]-----------------------------------//
+    struct CandyBar
+    {
+        char name[80]{};
+        double weight{};
+        int kcal{};
+    };
+
+    void setBar(CandyBar& a, const char* b = "CandyCandy", double c = 1.99, int d = 300);
+    void print(CandyBar& a);
+
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        CandyBar a;
+        setBar(a);
+        print(a);
+
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    void setBar(CandyBar& a, const char* b, double c, int d)
+    {
+        strcpy_s(a.name, b);
+        a.weight = c;
+        a.kcal = d;
+    }
+    void print(CandyBar& a)
+    {
+        cout << a.name << " " << a.weight << " " << a.kcal;
+    }
 
 
     */
@@ -6067,9 +6140,48 @@ using namespace std;
     /*
     ---------------------------------------- 08.프로그래밍 연습_3 ----------------------------------------
     문제 :
-
+    string 객체의 참조를 매개변수로 취하고, string의 내용을 대문자로 변환하는 함수를 작성하라.
+    실행 예는 다음과 같아야 한다.
+    
+        문자열을 입력하시오 (끝내려면 q) : go away
+        GO AWAY
+        
+        다음 문자열을 입력하시오 (끝내려면 q) : q
+        끝.
 
     해답 :
+    //-------------------------[ ProtoType ]-----------------------------------//
+    void setString(string& a);
+
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        string a{};
+        cout << "문자열을 입력하시오 (끝내려면 q) : ";
+        getline(cin, a);
+        while (a != "q")
+        {
+            setString(a);
+            cout << a << endl;
+            cout << "다음 문자열을 입력하시오 (끝내려면 q) : ";
+            getline(cin, a);
+        }
+        cout << "끝.";
+
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    void setString(string& a)
+    {
+        for (int i{}; a[i] != '\0'; i++)
+        {
+            if (isalpha(a[i]))
+            {
+                a[i] = toupper(a[i]);
+            }
+        }
+    }
 
 
     */
@@ -6078,9 +6190,55 @@ using namespace std;
     /*
     ---------------------------------------- 08.프로그래밍 연습_4 ----------------------------------------
     문제 :
-
+    T형 항목 5개를 원소로 가진 배열을 매개변수로 취하고, 그 배열에서 가장 큰 항목을 찾아
+    리턴하는 템플릿 함수를 작성하라. 
 
     해답 :
+    //-------------------------[ ProtoType ]-----------------------------------//
+    template <class T>
+    T compare(T arr[]);
+
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        int arr[5]{};
+        double arr2[5]{};
+        int big{};
+        double bigbig{};
+
+        for (int i{}; i < 5; i++)
+        {
+            cout << "배열의 " << i+1 << "번쨰 int 형 원소 : ";
+            cin >> arr[i];
+        }
+        for (int i{}; i < 5; i++)
+        {
+            cout << "배열의 " << i + 1 << "번쨰 double 형 원소 : ";
+            cin >> arr2[i];
+        }
+
+        big = compare(arr);
+        bigbig = compare(arr2);
+        cout << "int 형 중 최고는 : " << big << "\ndouble 형 중 최고는 : " << bigbig;
+
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    template <class T>
+    T compare(T arr[])
+    {
+        T big{};
+        big = arr[0];
+        for (int i{}; i < 5; i++)
+        {
+            if (arr[i] >= big)
+            {
+                big = arr[i];
+            }
+        }
+        return big;
+    }
 
 
     */
@@ -6089,32 +6247,81 @@ using namespace std;
     /*
     ---------------------------------------- 08.프로그래밍 연습_5 ----------------------------------------
     문제 :
-
-
-    해답 :
-
-
-    */
-    #pragma endregion
-    #pragma region 08.프로그래밍 연습_6
-    /*
-    ---------------------------------------- 08.프로그래밍 연습_6 ----------------------------------------
-    문제 :
-
+    T형 항목들을 원소로 가진 배열과, 그 배열의 원소 개수를 나타내는 정수를 매개변수로 취하고,
+    그 배열에서 가장 큰 항목을 리턴하는 템플릿함수를 작성하라.
+    이 함수는, char를 지시하는 포인터의 배열과, 포인터의 개수를 매개변수로 취하고,
+    가장 긴 문자열의 주소를 리턴하는 특수화를 제공해야 한다.
+    여러 개의 문자열이 가장 긴 길이를 갖는 것으로 나온다면, 가장 먼저 나오는 문자열의 주소를 리턴해야 한다.
 
     해답 :
+    //-------------------------[ ProtoType ]-----------------------------------//
+    template <class T>
+    T compare(T arr[], int n = 0);
 
+    template <> char* compare(char* arr[], int n);
 
-    */
-    #pragma endregion
-    #pragma region 08.프로그래밍 연습_7
-    /*
-    ---------------------------------------- 08.프로그래밍 연습_7 ----------------------------------------
-    문제 :
+    //-------------------------[   FBody   ]-----------------------------------//
+    int main()
+    {
+        int arr[5]{};
+        double arr2[5]{};
+        int big{};
+        double bigbig{};
+        const char* arr3[5] =
+        {
+            "1", "12", "123", "1234", "12345"
+        };
+        const char* char_max{};
 
+        for (int i{}; i < 5; i++)
+        {
+            cout << "배열의 " << i+1 << "번쨰 int 형 원소 : ";
+            cin >> arr[i];
+        }
+        for (int i{}; i < 5; i++)
+        {
+            cout << "배열의 " << i + 1 << "번쨰 double 형 원소 : ";
+            cin >> arr2[i];
+        }
 
-    해답 :
+        big = compare(arr);
+        bigbig = compare(arr2);
+        cout << "int 형 중 최고는 : " << big << "\ndouble 형 중 최고는 : " << bigbig << endl;
+        cout << "--------------------------------------------------------------\n";
+        char_max = compare(arr3, 5);
+        cout << "char 형 중 최고는 : " << char_max;
 
+        return 0;
+    }
+
+    //-------------------------[ Func.Def. ]-----------------------------------//
+    template <class T>
+    T compare(T arr[], int n)
+    {
+        T big{};
+        big = arr[0];
+        for (int i{}; i < 5; i++)
+        {
+            if (arr[i] >= big)
+            {
+                big = arr[i];
+            }
+        }
+        return big;
+    }
+
+    template <> char* compare(char* arr[], int n)
+    {
+        char* max = arr[0];
+        for (int i{}; i < n; i++)
+        {
+            if (strlen(arr[i]) > strlen(max))
+            {
+                max = arr[i];
+            }
+        }
+        return max;
+    }
 
     */
     #pragma endregion
@@ -6124,79 +6331,93 @@ using namespace std;
 
 #pragma endregion
 
+#pragma region Chapter 9. 메모리 모델과 이름 공간
 
+    #pragma region 09.분할 컴파일
+    /*
+    ---------------------------------------- 09.분할 컴파일 ----------------------------------------
+    */
+    #pragma endregion
+
+
+
+#pragma endregion
     
 
 
-//586페이지
+//590페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-template <typename T>
-void ShowArray(T arr[], int n);             // 템플릿 A
+template <class T>
+T compare(T arr[], int n = 0);
 
-template <typename T>
-void ShowArray(T* arr[], int n);            // 템플릿 B
-
-struct debts
-{
-    char name[40]{};
-    double amount{};
-};
+template <> char* compare(char* arr[], int n);
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    int things[6]{ 1, 2, 3, 4, 5, 6 };
-    struct debts mr_E[3] =
+    int arr[5]{};
+    double arr2[5]{};
+    int big{};
+    double bigbig{};
+    const char* arr3[5] =
     {
-        {"A", 200.0},
-        {"B", 400.0},
-        {"C", 600.0}
+        "1", "12", "123", "1234", "12345"
     };
+    const char* char_max{};
 
-    double* pd[3];
-
-    // 포인터들을 배열 mr_E에 있는 구조체들의 amount 멤버로 설정
-    for (int i{}; i < 3; i++)
+    for (int i{}; i < 5; i++)
     {
-        pd[i] = &mr_E[i].amount;
+        cout << "배열의 " << i+1 << "번쨰 int 형 원소 : ";
+        cin >> arr[i];
+    }
+    for (int i{}; i < 5; i++)
+    {
+        cout << "배열의 " << i + 1 << "번쨰 double 형 원소 : ";
+        cin >> arr2[i];
     }
 
-    cout << "Mr.E의 재산 목록 : \n";
-
-    // things는 int형의 배열이다.
-    ShowArray(things, 6);               // 템플릿 A를 사용
-    cout << "Mr.E의 채무 목록 : \n";
-
-    // pd는 double형을 지시하는 포인터들의 배열이다.
-    ShowArray(pd, 3);                   // 더 특수화된 템플릿 B를 사용했다
+    big = compare(arr);
+    bigbig = compare(arr2);
+    cout << "int 형 중 최고는 : " << big << "\ndouble 형 중 최고는 : " << bigbig << endl;
+    cout << "--------------------------------------------------------------\n";
+    char_max = compare(arr3, 5);
+    cout << "char 형 중 최고는 : " << char_max;
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-template <typename T>
-void ShowArray(T arr[], int n)
+template <class T>
+T compare(T arr[], int n)
 {
-    cout << "템플릿 A\n";
-    for (int i{}; i < n; i++)
+    T big{};
+    big = arr[0];
+    for (int i{}; i < 5; i++)
     {
-        cout << arr[i] << " ";
+        if (arr[i] >= big)
+        {
+            big = arr[i];
+        }
     }
-    cout << endl;
+    return big;
 }
 
-template <typename T>
-void ShowArray(T* arr[], int n)
+template <> char* compare(char* arr[], int n)
 {
-    cout << "템플릿 B\n";
+    char* max = arr[0];
     for (int i{}; i < n; i++)
     {
-        cout << *arr[i] << " ";
+        if (strlen(arr[i]) > strlen(max))
+        {
+            max = arr[i];
+        }
     }
-    cout << endl;
+    return max;
 }
+
+
 
 
 #pragma endregion
