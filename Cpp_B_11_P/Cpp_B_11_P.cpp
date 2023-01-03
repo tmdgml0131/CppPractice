@@ -6748,19 +6748,15 @@ struct chaff
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    chaff* p1;
-    int i;
-    char* buffer = new char[500];
-    p1 = new(buffer) chaff[2];
-    strcpy_s(p1[0].dross, "Yahoo");
-    p1[0].slag = 5;
-    strcpy_s(p1[1].dross, "Korea");
-    p1[1].slag = 5;
+    int j{};
 
-    for (i = 0; i < 2; i++)
-    {
-        cout << p1[i].dross << ": " << p1[i].slag << endl;
-    }
+    cout << "J 값을 입력하세요.";
+    
+    cin >> j;
+
+    cout << endl << "입력한 값은 : " << j << "입니다." << endl; 
+    
+    
 
     return 0;
 }
