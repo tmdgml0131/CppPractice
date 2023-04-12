@@ -6909,6 +6909,702 @@ using namespace std;
     멤버 함수의 함수 머리는 그 함수가 어느 클래스에 속하는지 나타내기 위해서 사용 범위 결정 연산자 ( :: )를 사용해야 한다.
     예를 들어, update() 멤버 함수의 머리는 다음과 같아야 한다.
 
+    ```cpp
+        void Stock::update(double price)
+    ```
+
+    이것은 Stock 클래스의 멤버 함수인 update() 함수를 정의한다는 의미이다.
+    사용 범위 결정자 (::)는 그 메서드의 정의가 어느 클래스에 적용되는 것인지를 알려 준다.
+    Stock 클래스에 속해 있는 다른 멤버 함수들은 사용 범위 결정 연산자를 사용하지 않고도 update() 메서드를 사용할 수 있다.
+    하지만 클래스 선언이나 메서드 정의 밖에서 update()를 사용하려면 특별한 수단이 필요하다. 이는 후에 다룬다.
+
+    메서드가 가지고 있는 두 번째 특별한 특징은, 메서드가 클래스의 private 멤버들에 접근할 수 있다는 것이다.
+
+    ```cpp
+    cout << "회사명: " << company;
+    ```
+
+    이 간단한 코드에서, company는 Stock 클래스의 private 데이터 멤버이다. 멤버가 아닌 함수들을 사용하여
+    데이터 멤버에 접근을 시도하면, 컴파일러가 즉각 멈추게 한다. 다음 예시를 보자.
+
+    ```cpp
+    #include <iostream>
+    #include "stock00.h"
+
+    void Stock::acquire(const std::string& co, long n, double pr)
+    {
+        company = co;
+        if ( n < 0 )
+        {
+            std::cout << "주식 수는 음수가 될 수 없으므로, " << company << " shares를 0으로 설정합니다.\n";
+            shares = 0;
+        }
+        else
+        {
+            shares = n;
+            share_val = pr;
+            set_tot();
+        }
+    }
+
+    void Stock::buy(long num, double price)
+    {
+        if ( num < 0 )
+        {
+            std::cout << "매입 주식 수는 음수가 될 수 없으므로, 거래가 취소되었습니다. \n";
+        }
+        else
+        {
+            shares += num;
+            share_val = price;
+            set_tot();
+        }
+    }
+
+    void Stock::sell(long num, double price)
+    {
+        using std::cout;
+        if ( num < 0 )
+        {
+            cout << "매도 주식 수는 음수가 될 수 없으므로, 거래가 취소되었습니다. \n";
+        }
+        else if ( num > shares )
+        {
+            cout << "보유 주식보다 많은 주식을 매도 할 수 없으므로, 거래가 취소되었습니다. \n";
+        }
+        else
+        {
+            shares -= num;
+            share_val = price;
+            set_tot();
+        }
+    }
+
+    void Stock::update()
+    {
+        share_val = price;
+        set_tot();
+    }
+
+    void Stock::show()
+    {
+        std::cout << "회사명: " << company
+                  << " 주식 수 : " << shares << "\n"
+                  << "주가: $" << share_val
+                  << " 주식 총 가치 : $" << total_val << "\n";
+    }
+
+    ***
+    **멤버 함수 설명**
+    멤버 함수들 중에서 네 개가 total_val 멤버의 값을 설정 또는 재설정한다.
+    이것을 수행하는 계산을 네 번 작성하지 않고, 그 클래스는 각 함수로 하여금
+    set_tot() 함수를 호출하게 한다. 이 함수는 단순히 그 코드를 구현하는 수단일 뿐
+    public 인터페이스의 일부가 아니므로, 그 클래스는 set_tot()를 private 멤버 함수로 만들었다.
+    ```
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.인라인 메서드
+    /*
+    ---------------------------------------- 10.인라인 메서드 ----------------------------------------
+    # 인라인 메서드
+    ***
+    클래스 선언 안에 정의를 가지는 모든 함수는 자동으로 인라인 함수가 된다.
+    클래스 선언은 짧은 멤버 함수들에 대해서 인라인 함수를 사용하는 경우가 많다.
+    원한다면 클래스 선언의 외부에 멤버 함수를 정의하고, 그것을 인라인 함수로 만들 수 있다.
+    그렇게 하려면, 클래스 세부 구현 부분에서 그 함수를 정의할 때 **inline** 이라는 제한자를 앞에 붙이면 된다.
+
+    ```cpp
+        class Stock
+        {
+        private:
+            ...
+            void set_tot();             // 정의를 따로 분리한다.
+        public:
+            ...
+        };
+
+        inline void Stock::set_tot()    // 정의에 inline을 사용한다.
+        {
+            total_val = shares * share_val;
+        }
+    ```
+    인라인 함수에 적용되는 특별한 규칙은, 인라인 함수들은 그들이 사용되는 각각의 파일에서 정의될 것을 요구한다.
+    코드 수정 규칙에 따르면, 클래스 선언 안에 메서드를 정의하는 것은, 그 메서드 정의를 원형으로 대체하고,
+    클래스 선언 바로 뒤에 그 메서드 정의를 인라인 함수로 다시 작성하는 것과 같다.
+    ***
+    # 어느 객체가 메서드를 사용할까?
+    객체 사용에서 가장 중요한 측면 중의 하나를 알아보자.
+
+    ```cpp
+        shares += num;
+    ```
+
+    어떤 객체의 shares 멤버를 사용하고 있다. 그런데 그 객체가 과연 어느 객체인가?
+    먼저, 객체를 생성하는 방법부터 알아보자. 가장 간단한 것은 클래스 변수를 선언하는 것이다.
+
+    ```cpp
+        Stock kate, joe;
+    ```
+
+    이것은 kate와 joe라는, Stock 클래스의 두 객체를 생성한다.
+
+    ```cpp
+        kate.show();        // kate 객체가 멤버 함수를 호출한다.
+        joe.show();         // joe 객체가 멤버 함수를 호출한다.
+    ```
+
+    여기서 첫 번째 kate.show() 호출은 kate 객체의 멤버 함수인 show()를 호출하는 것이다.
+    이것은 show() 메서드가 shares를 kate.shares로, share_val을 kate.share_val로 해석하는 의미이다.
+    마찬가지로 joe.show()의 호출은 각각 joe.shares, joe.share_val로 해석한다는 뜻이다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.클래스 사용하기
+    /*
+    ---------------------------------------- 10.클래스 사용하기 ----------------------------------------
+    # 클래스 사용하기
+    ***
+    C++의 목표는, 클래스 사용을 마치 int나 char와 같은 내장된 기본 데이터형을 사용하는 것과 비슷하게 만드는 것이다.
+    다음 예시를 통해 간단하지만, 클래스 관련 기능들을 알아보자.
+
+    ```cpp
+    #include <iostream>
+    #include "stock00.h"
+
+    int main()
+    {
+        Stock cat;
+        cat.acquire("Smart", 20, 12.50);
+        cat.show();
+        cat.buy(15, 18.125);
+        cat.show();
+        cat.sell(400, 20.00);
+        cat.show();
+        cat.buy(300000, 40.125);
+        cat.show();
+        cat.sell(300000, 0.125);
+        cat.show();
+        return 0;
+    }
+    ```
+    프로그램의 출력 :
+        회사명: Smart : 주식수 20
+        주가: $12.5 주식 총 가치: $250
+        회사명: Smart : 주식수 35
+        주가: $18.125 주식 총 가치: $634.375
+        보유 주식보다 많은 주식을 매도할 수 없으므로, 거래가 취소되었습니다.
+        회사명: Smart : 주식수 35
+        주가: $18.125 주식 총 가치: $634.375
+        회사명: Smart : 주식수 300035
+        주가: $40.125 주식 총 가치: $1.20389e+07
+        회사명: Smart : 주식수 35
+        주가: $0.125 주식 총 가치: $4.375
+        
+    # 실행상의 변경
+    Cat의 재정적인 감각은 논외로 하고, 프로그램의 결과가 일관적이지 않은 숫자 양식으로 인해
+    사용자를 곤혹스럽게 하는 경우가 있을 수 있다. 여기 인터페이스를 변경하지 않은 상태에서 문제를 개선하는 방법이 있다.
+    ostream 클래스는 양식을 컨트롤하는 멤버 함수를 지녔다. 
+
+    ```cpp
+        std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    ```
+
+    이것은 플래그를 고정 소수점 표기를 사용하기 위해 cout 개체 안에 플래그를 세팅한다.
+    이와 유사하게 다음 구문으로 소수점 이하 세자리까지 보여줄 수 있다.
+
+    ```cpp
+        std::cout.precision(3);
+    ```
+
+    하지만 이렇게 메서드에 대한 변경 사항을 구현할 때에는, 다시 양식이 변경되기 전까진
+    존재하기 때문에, 클라이언트 프로그램의 차후 output에 영향을 줄 수 있다.
+    그러므로, show()가 호출되기 이전의 상태로 정보를 리셋하는 것이 안정된 사용법이다.
+
+    ```cpp
+        std::sreamsize prec =
+            std::cout.precision(3);     // 정확성을 위해 이전 값을 저장
+        ...
+
+        std::cout.precision(prec);      // 과거 값으로 리턴
+
+        // 원본 플래그를 저장
+        std::ios_base::fmtflags orig = std::cout.setf(std::ios_base::fixed);
+
+        // 저장된 값을 리셋
+        std::cout.setf(orig, std::ios_base::floatfield);
+    ```
+
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.중간 요약
+    /*
+    ---------------------------------------- 10.중간 요약 ----------------------------------------
+    # 중간 요약
+    ***
+    클래스 설계의 첫 단계는 클래스의 선언이다.
+    클래스의 선언은 구조체 선언과 모양이 비슷하다.
+    선언부는 데이터 멤버, 함수 멤버를 가지며 클래스 선언은 private 부분을 가진다.
+    private 부분에 선언된 멤버들은 멤버 함수들을 통해서만 접근할 수 있다.
+    클래스 선언은 또한 public 부분을 가진다. public 부분에 선언된 멤버들은
+    클래스 객체를 사용하여 프로그램이 직접 접근 가능하다.
+    일반적으로 데이터 멤버들은 private, 멤버 함수는 public에 들어간다.
+
+    ```cpp
+        class className
+        {
+        private:
+            // data member declarations
+        public:
+            // member function prototypes
+        };
+    ```
+
+    public 부분에 있는 내용은 설계의 추상화 부분인 public 인터페이스가 된다.
+    private 부분에 데이터를 넣어 캡슐화 하는 것은, 데이터의 무결성을 보호하기 위한 것으로, 데이터 은닉이라고 한다.
+    따라서 클래스의 사용은 추상화, 데이터 은닉, 캡슐화라는 OOP의 목표를 쉽게 구현할 수 있게 해 주는 C++의 방법이다.
+
+    클래스 설계의 두 번째 단계는 클래스 멤버 함수의 구현이다.
+    클래스 선언에 함수 원형 대신 완전한 함수를 넣을 수 있지만, 일반적으로, 매우 짧은 함수를 제외하고,
+    함수 정의들을 따로 분리하여 제공한다.
+    그런 경우, 멤버 함수가 어느 클래스에 속하는지를 나타내기 위해 사용 범위 결정 연산자를 사용한다.
+    예를 들어, Bozo 클래스가 char를 지시하는 포인터를 리턴하는 Retort()라는 멤버 함수를 가진다고 가정하자.
+    함수 머리는 다음과 같아야 한다.
+
+    ```cpp
+    char* Bozo::Retort();
+    ```
+
+    다시 말해, Retort()는 단순히 char* 형 함수가 아닌, Bozo 클래스에 속한 char*형 함수다.
+    즉, 이 함수의 완전한 이름은 Bozo::Retort()이다.
+    ***
+    어떤 클래스의 객체를 생성하려면, 클래스 이름을 마치 데이터형처럼 사용하면 된다.
+
+    ```cpp
+        Bozo Bozetta;
+    ```
+    
+    사용자는, 클래스 객체를 사용함으로써 클래스 멤버 함수(또는 메서드)를 호출한다.
+    도트 멤버 연산자를 사용하여 그러한 호출을 수행할 수 있다.
+
+    ```cpp
+        cout << bozetta.Retort();
+    ```
+
+    이것은 Retort() 멤버 함수를 호출한다. 그리고 Retort() 함수가 특정 데이터 멤버를 언급할 때마다
+    그 함수는 bozetta 객체 안에 선언된 데이터들을 사용한다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.클래스 생성자와 파괴자_1
+    /*
+    ---------------------------------------- 10.클래스 생성자와 파괴자_1 ----------------------------------------
+    # 클래스 생성자와 파괴자_1
+    ***
+    클래스를 사용할 때 일반적으로 제공해야 하는 생성자 ( Constructor ) 와 파괴자 ( Destructor )라는 표준 함수가 있다.
+    C++가 내세우는 목표 중의 하나는, 클래스 객체를 표준 데이텨형 사용하듯 사용할 수 있게 만드는 것이다.
+    
+    ```cpp
+        int year = 2001;                    // 적법한 초기화
+
+        struct thing
+        {
+            char* pn;
+            int m;
+        };
+
+        thing amabob = {"wodget", -23};     // 적법한 초기화
+        Stock hot = {"Sukie's Autos, Inc.", 200, 50.25};  // 컴파일 에러
+    ```
+
+    Stock 객체를 초기화할 수 없는 이유는, 데이터들이 private 접근 제어를 가져, 프로그램이 데이터 멤버에 접근할 수 없기 때문이다.
+    프로그램이 데이터 멤버에 접근할 수 있는 유일한 방법은 멤버 함수의 이용이다. 그러므로 초기화를 위해
+    적당한 멤버 함수를 하나 고안할 필요가 있다.
+    C++는 이를 위해, 객체가 생성될 때 자동으로 초기화 시켜주는 **클래스 생성자 ( Class Constructor )**라는 특별한 멤버 함수를 제공한다.
+    클래스 생성자는 새로운 객체를 생성하고 그들의 데이터 멤버에 값을 대입해준다.
+    생성자의 이름은 클래스의 이름과 같다. 예를 들어, Stock이라는 클래스의 생성자는 Stock()이다.
+    생성자는 리턴값이 없는데도 불구하고 void로 선언하지 않고, 생성자에는 데이터형을 선언하지 않는다.
+    ***
+    Stock 객체는 생성자에 세 개의 매개변수를 제공해야 한다.
+    company 멤버의 값만 제공하고, 다른 값들은 0으로 설정하기를 원한다고 가정하자.
+    디폴트 매개변수를 사용함으로써 이것을 할 수 있다.
+
+    ```cpp
+        Stock(const string& co, long n = 0, double pr = 0.0);
+    ```
+    
+    이제, 그 생성자를 위한 한 가지 정의 예를 살펴보자.
+
+    ```cpp
+        //생성자 정의
+        Stock::Stock(const string& co, long n, double pr)
+        {
+        company = co;
+
+            if ( n<0 )
+            {
+                std::cerr <<"주식 수는 음수가 될 수 없으므로, " << company << " shares를 0으로 설정합니다.\n";
+                shares = 0;
+            }
+            else
+            {
+                shares = n;
+            }
+
+            share_val = pr;
+            set_tot();
+        }
+    ```
+
+    
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.클래스 생성자와 파괴자_2
+    /*
+    ---------------------------------------- 10.클래스 생성자와 파괴자_2 ----------------------------------------
+    # 클래스 생성자와 파괴자_2
+    ***
+    ## 생성자 사용하기
+
+    C++는 생성자를 이용하여 객체를 초기화하는 두 가지 방법을 제공한다.
+    그 중 하나는 생성자를 명시적으로 호출하는 것이다.
+
+    ```cpp
+        Stock food = Stock("World Cabbage", 250, 1.25);
+    ```
+
+    이것은 food 객체의 company 멤버를 문자열 "World Cabbage"로 설정하고, shares 멤버를 250, share_val 멤버를 1.25로 지정한다.
+
+    두 번째 방법은 생성자를 암시적으로 호출하는 것이다.
+
+    ```cpp
+        Stock food("Wolrd Cabbage", 250, 1.25);
+    ```
+
+    두 방법 모두 호출은 같다. 
+
+    C++는 해당 클래스의 객체를 생성할 때마다 클래스 생성자를 사용한다.
+    동적 메모리 대입을 위해 new를 사용할 때에도 마찬가지이다.
+
+    ```cpp
+        Stock* pstock = new Stock("Electroshock Games", 18, 19.0);
+    ```
+    이 구문은 Stock 객체를 생성하고, 매개변수를 통해 제공되는 값으로 그것을 초기화 한다.
+    그 후, 그 객체의 주소를 pstock 포인터에 대입한다. 이 경우 객체는 이름을 가지지 않는다.
+    그러나 그 포인터를 사용하여 객체를 다룰 수 있는데, 객체를 지시하는 포인터는 11장에서 자세히 설명한다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.클래스 생성자와 파괴자_3
+    /*
+    ---------------------------------------- 10.클래스 생성자와 파괴자_3 ----------------------------------------
+    # 클래스 생성자와 파괴자_3
+    ***
+    ## 디폴트 생성자
+    
+    디폴트 생성자 ( Default constructor )는 명시적인 초기화 값을 제공하지 않을 때 객체를 생성하는 데 사용된다.
+
+    ```cpp
+        Stock cat;      // 디폴트 생성자를 사용한다
+    ```
+
+    Stock 클래스의 경우, 디폴트 생성자는 다음과 같이 될 것이다.
+
+    ```cpp
+        Stock::Stock() {};
+    ```
+
+    이것의 결과는, 멤버들이 초기화되지 않은 stock 객체를 생성하는 것이다.
+    이것은 마치 다음과 같은 구문이 x에 값을 제공하지 안호 변수 x를 생성하는 것과 같다.
+
+    ```cpp
+        int x;
+    ```
+
+    디폴트 생성자는 매개변수를 갖지 않으므로 그 선언에 아무런 값도 나타나지 않는다.
+    디폴트 생성자는 사용자가 어떠한 생성자도 정의하지 않을 경우에만 컴파일러가 제공한다.
+    사용자가 디폴트가 아닌 Stock(const char* co, int n, double pr)와 같은
+    생성자를 제공하며 디폴트 생성자를 제공하지 않으면, 다음과 같은 선언은 에러가 된다.
+
+    ```cpp
+        Stock stock1;       // 에러
+    ```
+
+    에러가 발생하는 이유는, 초기화되지 않은 객체의 생성을 사용자가 원하지 않을지도 모르기 때문이다.
+    그러나 명시적 초기화 없이 객체를 생성하고 싶을 경우, 사용자 자신의 디폴트 생성자를 정의해야 한다.
+
+    디폴트 생성자는 두 가지 방법으로 정의할 수 있다.
+
+    첫 번째 방법은, 기존의 생성자에 있는 모든 매개변수에 디폴트 값을 제공하는 것이다.
+
+    ```cpp
+        Stock(const string& co = "Error", int n = 0, double pr = 0.0);
+    ```
+
+    두 번째 방법은 함수 오버로딩을 사용하여 매개변수가 없는 또 하나의 생성자를 정의하는 것이다.
+
+    ```cpp
+        Stock();
+    ```
+
+    사용자는 하나의 디폴트 생성자만 가질 수 있다.
+    실제적으로는 반드시 모든 멤버들이 알려진 적당한 값을 가져야하므로, 대개 디폴트 생성자는
+    모든 멤버들의 값에 암시적인 초기화를 제공한다.
+
+    ```cpp
+        Stock::Stock()      //디폴트 생성자
+        {
+            company = "no name";
+            shares = 0;
+            share_val = 0.0;
+            total_val = 0.0;
+        }
+    ```
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+#pragma endregion
+    #pragma region 10.클래스 생성자와 파괴자_4
+    /*
+    ---------------------------------------- 10.클래스 생성자와 파괴자_4 ----------------------------------------
+    # 클래스 생성자와 파괴자_4
+    ***
+    ## 파괴자
+    생성자를 사용할 때, 프로그램은 객체의 수명이 다할 때까지 그 객체를 추적하는 책임을 맡는다.
+    객체의 수명이 끝나는 시점에서, 프로그램은 파괴자(Destructor)라는 특별한 멤버 함수를 자동으로 호출한다.
+    Stock 클래스를 위한 파괴자를 하나 살펴보자.
+
+    파괴자는 틸데(~)가 붙은 클래스 이름으로 만들어진다.
+    그래서, Stock 클래스의 파괴자는 ~Stock()이다.
+    생성자와 같이 파괴자는 리턴값, 선언된 데이터형을 갖지 않지만, 파괴자는 매개변수 또한 가지면 안된다.
+    따라서 Stock 파괴자의 원형은 다음과 같아야 한다.
+
+    ```cpp
+        ~Stock();
+    ```
+    
+    파괴자가 언제 호출되는지 알 수 있도록 하기 위해, 파괴자를 다음과 같이 코딩할 수 있다.
+
+    ```cpp
+        Stock::~Stock()     //클래스 파괴자
+        {
+            std::cout<< "안녕, " << company << "!\n";
+        }
+    ```
+
+    파괴자의 호출 결정은 컴파일러가 처리한다. 일반적으로 사용자가
+    코드에 명시적으로 파괴자를 호출하면 안된다.
+    클래스 객체의 수명이 다했을 때, 파괴자는 자동으로 호출되는 것이기 때문에,
+    반드시 파괴자가 있어야 한다. 사용자가 파괴자를 제공하지 않으면, 컴파일러가 디폴트 파괴자를 선언한다.
+    객체를 파괴하는 코드를 발견하면, 컴파일러는 그 파괴자를 위한 정의를 제공한다.
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 10.클래스 개선하기
+    /*
+    ---------------------------------------- 10.클래스 개선하기 ----------------------------------------
+    # 클래스 개선하기
+    ***
+    
+    ## 헤더 파일
+
+    ```cpp
+    // stock10.h
+    #ifndef STOCK10_H_
+    #define STOCK10_H_
+    #include <string>
+
+    class Stock
+    {
+    private:
+        std::string company;
+        long shares;
+        double share_val;
+        double total_val;
+        void set_tot() { total_val = shares * share_val; }
+
+    public:
+    // 두 개의 생성자
+        Stock();        // 디폴트 생성자
+        Stock(const std::string& co, long n = 0, double pr = 0.0);
+        ~Stock();       // 파괴자
+        void buy(long num, double price);
+        void sell(long num, double price);
+        void update(double price);
+        void show();
+    };
+    #endif
+    ```
+
+    ## 세부 구현 파일
+    ```cpp
+    // stock10.cpp
+    #include <iostream>
+    #include "stock10.h"
+
+    // 생성자들
+    Stock::Stock()
+    {
+        std::cout << "디폴트 생성자가 호출되었습니다.\n;
+        company = "no name";
+        shares = 0;
+        share_val = 0.0;
+        total_val = 0.0;
+    }
+
+    Stock::Stock(const std::string& co, long n, double pr)
+    {
+        std::cout << co << "를 사용하는 생성자가 호출되었습니다.\n";
+        company = co;
+
+        if( n < 0 )
+        {
+            std::cerr << "주식 수는 음수가 될 수 없으므로, " << company << " shares를 0으로 설정합니다.\n";
+            shares = 0;
+        }
+        else
+            shares = n;
+
+        share_val = pr;
+        set_tot();
+    }
+
+    // 클래스 파괴자
+    Stock::~Stock()
+    {
+        std::cout << "안녕, " << company << "!\n"; 
+    }
+
+    // 다른 메서드들
+    void Stock::buy(long num, double price)
+    {
+        if ( num < 0 )
+            std::cout << "매입 주식 수는 음수가 될 수 없으므로, 거래가 취소되었습니다.\n"; 
+        else
+        {
+            shares += num;
+            share_val = price;
+            set_tot();
+        }
+    }
+
+    void Stock::sell(long num, double price)
+    {
+        if ( num < 0 )
+            std::cout << "매도 주식 수는 음수가 될 수 없으므로, 거래가 취소되었습니다.\n";
+        else
+        {
+            shares -= num;
+            share_val = price;
+            set_tot();
+        }
+    }
+
+    void Stock::update(double price)
+    {
+        share_val = price;
+        set_tot();
+    }
+
+    void Stock::show()
+    {
+        using std::cout;
+        using std::ios_base;
+        // set format to #.###
+        ios_base::fmtflags orig = cout.setf(ios_base::fixed, ios_base::floatfield);
+        std::streamsize prec = cout.precision(3);
+
+        cout << "회사명 : " << company 
+             << " 주식 수 : " << shares << '\n';
+
+        cout << " 주가 : $" << share_val;
+        // set format to #.##
+        cout.precision(2);
+        cout << "주식 총 가치 : $ " << total_val << '\n';
+
+        // 원본 포맷 저장
+        cout.setf(orig, ios_base::floatfield);
+        cout.precision(prec);
+    }
+    ```
+
+    ## 클라이언트 파일
+    
+    ```cpp
+    // usestock1.cpp
+    #include <iostream>
+    #include "stock10.h"
+
+    int main()
+    {
+        using std::cout;
+        cout << "생성자 를 사용하여 새로운 객체들을 생성한다.\n";
+        Stock stock1("NanoSmart", 12, 20.0);
+        stock1.show();
+        Stock stock2 = Stock("Boffo Objects", 2, 2.0);
+        stock2.show();
+
+        cout << "stock1을 stock2에 대입한다.\n";
+        stock2 = stock1;
+        cout << "stock1과 stock2를 출력한다.\n";
+        stock1.show();
+        stock2.show();
+
+        cout << "생성자를 사용하여 객체를 재설정한다.\n";
+        stock1 = Stock("Nifty Foods", 10, 50.0);
+        cout << "갱신된 stock1:\n";
+        stock1.show();
+        cout << "프로그램을 종료합니다.\n";
+
+        return 0;
+    }
+
+    프로그램 결과:
+        생성자들을 사용하여 새로운 객체들을 생성한다.
+        NanoSmart를 사용하는 생성자가 호출되었습니다.
+        회사명: NanoSmart   주식 수: 12
+          주가: $20.00         주식 총 가치: $240.00
+        Boffo Objects를 사용하는 생성자가 호출되었습니다.
+        회사명: Boffo Objects    주식 수: 2
+          주가: $2.00            주식 총 가치: $4.00
+        stock1을 stock2에 대입한다.
+        stock1과 stock2를 출력한다.
+        회사명: NanoSmart   주식 수: 12
+          주가: $20.00         주식 총 가치: $240.00
+        회사명: NanoSmart   주식 수: 12
+          주가: $20.00         주식 총 가치: $240.00
+        생성자를 사용하여 객체를 재설정한다.
+        Nifty Foods를 사용하는 생성자가 호출되었습니다.
+        안녕, Nifty Foods!
+        갱신된 stock1:
+        회사명: Nifty Foods    주식 수:10
+          주가: $50.00         주식 총 가치 : $500.00
+        프로그램을 종료합니다.
+        안녕, NanoSmart!
+        안녕, Nifty Foods!
+    ```
+
     ***
     출처 : C++ 기초 플러스 6판 / 성안당
     ***
@@ -6918,26 +7614,20 @@ using namespace std;
 #pragma endregion
 
 
-//643페이지
+//704페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-struct chaff 
+class A
 {
-    char dross[20];
-    int slag;
+public:
+    A() { cout << "호출"; }
 };
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    int j{};
-
-    cout << "J 값을 입력하세요.";
-    
-    cin >> j;
-
-    cout << endl << "입력한 값은 : " << j << "입니다." << endl; 
+    A a{};
     
     
 
