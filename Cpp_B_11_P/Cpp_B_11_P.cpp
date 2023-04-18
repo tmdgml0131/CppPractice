@@ -11,9 +11,9 @@ using namespace std;
 
 
 
-#pragma region 10.템플릿
+#pragma region 11.템플릿
 /*
----------------------------------------- 10.템플릿 ----------------------------------------
+---------------------------------------- 11.템플릿 ----------------------------------------
 # 템플릿
 ***
 
@@ -24,9 +24,9 @@ using namespace std;
 */
 #pragma endregion
 
-#pragma region 10.프로그래밍 연습_템플릿
+#pragma region 11.프로그래밍 연습_템플릿
 /*
----------------------------------------- 09.프로그래밍 연습_템플릿 ----------------------------------------
+---------------------------------------- 11.프로그래밍 연습_템플릿 ----------------------------------------
 문제 :
 
 
@@ -8023,29 +8023,624 @@ using namespace std;
 
 #pragma region Chapter 11. 클래스의 활용
     
+    #pragma region 11.Intro
+    /*
+    ---------------------------------------- 11.Intro ----------------------------------------
+    # Intro
+    ***
+    이 장에서는 클래스의 일반적인 규칙보다는 클래스 설계 테크닉에 더 중점을 두면서
+    클래스의 특성에 대해 좀 더 알아본다. 이 장에서는 **연산자 오버로딩**에 대해 먼저 설명한다.
+    연산자 오버로딩은 =나 +와 같은 C++의 표준 연산자를 클래스 객체에 사용할 수 있게 해 주는 것이다.
+    그 다음 프렌드(friend)를 설명한다. 프렌드는 멤버 함수가 아닌 함수가 private 데이터에
+    접근할 수 있게 해 주는 C++의 메커니즘이다. 마지막으로, 클래스를 가지고 자동 데이터형 변환을
+    수행하도록 C++에 지시하는 방법을 설명한다. 
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.연산자 오버로딩
+    /*
+    ---------------------------------------- 11.연산자 오버로딩 ----------------------------------------
+    # 연산자 오버로딩
+    ***
+    연산자 오버로딩은 C++ 연산자들에 다중적인 의미를 부여하는 것이다.
+    실제로 C++나 C의 연산자는 이미 오버로딩되어 있다. 예를 들어, *연산자는 주소에 적용되면
+    그 주소에 저장되어 있는 값을 산출한다. 그러나 두 값 사이에 *를 적용하면, 그 값들의 곱을 산출한다.
+    C++는 피연산자의 개수와 데이터형을 판단하여 어떤 연산을 수행해야 하는지를 결정한다.
 
+    C++에서는 연산자 오버로딩을 사용자 정의 데이터형에까지 확장할 수 있다.
+    예를 들면, 두 객체를 더하는 데 + 기호를 사용할 수 있다.
+    일반적으로 2개의 배열을 더하는 것은 아주 흔하게 수행하는 계산이다.
+    일반적으로는 다음과 같은 for 루프를 사용하여 이러한 계산을 처리한다.
+
+    ```cpp
+        for(int i = 0; i < 20; i++)
+        {
+            evening[i] = sam[i] + janet[i];
+        }
+    ```
+
+    그러나 C++에서는 배열을 나타내는 클래스를 정의하고, + 연산자를 오버로딩하여 그 계산을 다음과 같이 처리할 수 있다.
+
+    ```cpp
+        evening = sam + janet;
+    ```
+
+    연산자를 오버로딩하려면, 연산자 함수 ( Operator function )라는 특별한 함수를 사용해야 한다.
+    연산자 함수의 형식은 다음과 같다.
+
+    ```cpp
+        operatorop(argument-list)
+    ```
+
+    여기서 op는 오버로딩할 연산자를 나타내는 기호이다.
+    예를들어, operator*()는 * 연산자를 오버로딩한다.
+    op는 적법한 C++ 연산자여야 한다. 즉, C++에는 @ 연산자가 없기 때문에, operator@() 함수를 만들 수 없다.
+    그러나 operator[]() 함수는 []가 배열 인덱스 연산자이기 때문에 오버로딩할 수 있다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.연산자 오버로딩 예제
+    /*
+    ---------------------------------------- 11.연산자 오버로딩 예제 ----------------------------------------
+    # 연산자 오버로딩 예제
+    ***
+    아침에 2시간 35분을 일하고, 오후에 2시간 40분을 일했다면, 전체 근무 시간은 얼마인가?
+    이러한 종류의 덧셈을 수행하는 예제를 하나 살펴보자.
+
+    ```cpp
+    // mytime0.h
+    #ifndef MYTIME0_H_
+    #define MYTIME0_H_
+
+    class Time
+    {
+    private:
+        int hours;
+        int minutes;
+
+    public:
+        Time();
+        TIme(int h, int m = 0);
+        void AddMin(int m);
+        void AddHr(int h);
+        void Reset(int h = 0. int m = 0);
+        Time Sum(const Time& t) const;
+        void Show() const;
+    };
+    #endif
+    ```
+    ***
+    ```cpp
+    // mytime0.cpp
+    #include <iostream>
+    #include "mytime0.h"
+
+    Time::Time()
+    {
+        hours = munutes = 0;
+    }
+
+    Time::Time(int h, int m)
+    {
+        hours = h;
+        minutes = m;
+    }
+
+    void Time::AddMin(int m)
+    {
+        minutes += m;
+        hours += minutes / 60;
+        minutes %= 60;
+    }
+
+    void Time::AddHr(int h)
+    {
+        hours += h;
+    }
+
+    void Time::Reset(int h, int m)
+    {
+        hours = h;
+        minutes = m;
+    }
+
+    Time Time::Sum(const Time& t) const
+    {
+        Time sum;
+        sum.minutes = minutes + t.minutes;
+        sum.hours = hours + t.hours + sim.minutes / 60;
+        sum.minutes %= 60;
+        return sum;
+    }
+
+    void Time::Show() const
+    {
+        std::cout << hours << "시간, " << minutes << "분";
+    }
+    ```
+
+    Sum() 함수의 코드를 살펴보자. 그 함수의 매개변수는 참조이다. 그러나 리턴형은 참조가 아니다.
+    매개변수를 참조하는 이유는 효율성 때문이다. Time 객체를 값으로 전달해도, 참조로 전달해도 그 코드는 동일한 결과를 낸다.
+    일반적으로 간단히 참조를 전달하는 것이 더 빠르고, 메모리 측면에서도 좀 더 효율적이다.
+
+    그러나 리턴값은 참조가 될 수 없다. Sum() 함수가 두 개의 Time 객체를 더한 결과를 나타내는, 새로운 Time 객체(sum)을 만들기 때문이다.
+    객체를 리턴하는 것은 그 함수를 호출한 함수 ( Calling Function )가 사용할 수 있는 복사본 객체를 생성한다.
+    만약 리턴형이 참조로 Time& 라면, 그 참조는 sum 객체 자신이 될 것이다.
+    그러나 sum 객체는 지역 변수이고 그 함수가 종료될 때 파괴된다. 따라서 그러한 참조는 존재하지 않는 객체에 대한 참조가 되어 버린다.
+    그러나 Time을 리턴형으로 사용하면, sum 객체를 파괴하기 전에 프로그램이 sum 객체의 복사본을 생성한다.
+    결과적으로 호출한 함수는 그 복사본을 사용하게 된다.
+
+    ***
+    ```cpp
+    // usetime0.cpp
+    #include <iostream>
+    #include "mytime0.h"
+
+    int main()
+    {
+        using std::cout;
+        using std::endl;
+        Time planning;
+        Time coding(2, 40);
+        Time fixing(5,55);
+        Time total;
+
+        cout << "planning time = ";
+        planning.Show();
+        cout << endl;
+
+        cout << "coding time = ";
+        coding.Show();
+        cout << endl;
+
+        cout << "fixing time = ";
+        fixing.Show();
+        cout << endl;
+
+        total = coding.Sum(fixing);
+        cout << "coding.Sum(fixing) = ";
+        total.Show();
+        cout << endl;
+
+        return 0;
+    }
+
+    프로그램 출력:
+        planning time = 0시간, 0분
+        coding time = 2시간, 40분
+        fixing time = 5시간 55분
+        coding.Sum(fixing) = 8시간, 35분
+    ```
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.덧셈 연산자의 추가
+    /*
+    ---------------------------------------- 11.덧셈 연산자의 추가 ----------------------------------------
+    # 덧셈 연산자의 추가
+    ***
+    TIme 클래스를 오버로딩된 덧셈 연산자를 사용하는 버전으로 변환하는 것은 어렵지 않다.
+    Sum()의 이름을 operator+()라는 약간 기이한 이름으로 바꾸기만 하면 된다.
+
+    ```cpp
+    // mytime1.h
+    #ifndef MYTIME1_H_
+    #define MYTIME1_H_
+
+    class Time
+    {
+    private:
+        int hours;
+        int minutes;
+
+    public:
+        Time();
+        TIme(int h, int m = 0);
+        void AddMin(int m);
+        void AddHr(int h);
+        void Reset(int h = 0. int m = 0);
+        Time operator+(const Time& t) const;        // 바뀐 부분
+        void Show() const;
+    };
+    #endif
+    ```
+
+
+    ```cpp
+    // mytime1.cpp
+    #include <iostream>
+    #include "mytime1.h"
+
+    Time::Time()
+    {
+        hours = munutes = 0;
+    }
+
+    Time::Time(int h, int m)
+    {
+        hours = h;
+        minutes = m;
+    }
+
+    void Time::AddMin(int m)
+    {
+        minutes += m;
+        hours += minutes / 60;
+        minutes %= 60;
+    }
+
+    void Time::AddHr(int h)
+    {
+        hours += h;
+    }
+
+    void Time::Reset(int h, int m)
+    {
+        hours = h;
+        minutes = m;
+    }
+
+    Time Time::operator+(const Time& t) const
+    {
+        Time sum;
+        sum.minutes = minutes + t.minutes;
+        sum.hours = hours + t.hours + sim.minutes / 60;
+        sum.minutes %= 60;
+        return sum;
+    }
+
+    void Time::Show() const
+    {
+        std::cout << hours << "시간, " << minutes << "분";
+    }
+    ```
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.오버로딩 제약
+    /*
+    ---------------------------------------- 11.오버로딩 제약 ----------------------------------------
+    # 오버로딩 제약
+    ***
+    오버로딩된 연산자들이 반드시 멤버 함수일 필요는 없다. 그러나 피연사 중에 적어도 하나는
+    사용자 정의 데이터형이어야 한다. 다음은 C++가 사용자 정의 연산자 오버로딩에 부가하고 있는 제약이다.
+
+    * 오버로딩된 연산자는, 적어도 하나의 피연산자가 사용자 정의 데이터형일 것을 요구한다.
+      이 제약은 표준 데이터형을 위해서 사용되는 연산자들을 오버로딩하는 것을 막아 준다.
+      그러므로 뺄셈 연산자(-)를 두 개의 double형 값의 차(difference)가 아닌 합(sum)을 산출하도록
+      재정의 할 수 없다.
+
+    * 오버로딩된 연산자를, 오리지널 연산자에 적용되는 문법 규칙을 위반하는 방식으로 사용할 수 없다.
+      예를 들면, 하나의 피연산자에만 적용할 수 있도록 나머지 연산자(%)를 오버로딩할 수 없다.
+
+    ```cpp
+        int x;
+        Time shiva;
+        % x;            // 나머지 연산자로 사용할 수 없다.
+        % shiva;        // 오버로딩된 연산자로 사용할 수 없다.
+    ```
+
+    마찬가지로, 연산자 우선순위도 변경할 수 없다.
+
+    * 연산자 기호를 새로 만들 수 없다. 예를 들면, 거듭제곱을 나타낼 목적으로 operator**() 같은 함수를 정의할 수 없다.
+     
+    * 다음과 같은 연산자들은 오버로딩 할 수 없다.
+      'sizeof',,  '.',,      '.*',,     '::',,      '?:'
+      'typeid',,    const_cast,,    dynamic_cast,,      reinterpret_cast,,      static_cast
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.프렌드의 도입
+    /*
+    ---------------------------------------- 11.프렌드의 도입----------------------------------------
+    # 프렌드의 도입
+    ***
+    일반적으로 객체의 private 부분에 접근할 수 있는 유일한 통로는 public 클래스 메서드들이다.
+    그러나 때로는 이 제약이 너무나 엄격하여 특정 프로그래밍 문제를 해결하지 못하는 경우가 있다.
+    그러한 경우, C++는 프렌드(friend)라는 또 하나의 접근 통로를 제공한다.
+    프렌드는 다음과 같은 세 가지 형태로 사용된다.
+
+    * 프렌드 함수
+    * 프렌드 클래스
+    * 프렌드 멤버 함수
+    
+    함수를 어떤 클래스에 대해 프렌드로 만들면, 그 프렌드 함수는 클래스의 멤버 함수들이 가지는 것과 동등한
+    접근 권한을 갖는다. 이 장에서는 프렌드 함수에 대해 알아본다.
+
+    흔히, 어떤 클래스에 대해 이항 연산자 ( Binary Operator )를 오버로딩하면, 프렌드를 만들 필요성이 생긴다.
+    다음 예제를 보자,
+
+    ```cpp
+        A = B * 2.75;
+        // 이는 다음과 같은 멤버 함수 호출로 번역된다.
+
+        A = B.operator*(2.75);
+        // 그럼 다음과 같은 표현은 어떻게 될까?
+
+        A = 2.75 * B;       // 멤버 함수에 대응시킬 수 없다.
+    ```
+
+    개념적으로 생각하면 2.75*B는 B*2.75와 같아야 한다. 그러나 2.75*B는 Time 객체형이 아니기 때문에
+    멤버 함수에 대응시킬 수 없다. 왼쪽 피연산자가 호출하는 객체라는 사실을 다시 기억하라.
+
+    이 문제를 해결하는 방법은, 멤버가 아닌 함수를 사용하는 것이다.
+    멤버가 아닌 함수는 객체를 사용하여 호출하지 않는다. 그 대신 멤버가 아닌 함수는, 객체를 포함하여
+    어떤 값을 명시적 매개변수로 사용하여 호출한다. 그래서 컴파일러는 다음과 같은 표현을
+
+    ```cpp
+        A = 2.75*B;     // 멤버 함수에 대응시킬 수 없다.
+    ```
+
+    멤버가 아닌 함수 호출로 다음과 같이 대응시킬 수 있다.
+
+    ```cpp
+        A = operator*(2.75, B);
+        // 이 함수의 원형은 다음과 같다.
+
+        Time operator*(double  m, const Time& t);
+    ```
+
+    멤버가 아닌 오버로딩 연산자 함수를 사용할 때, 연산자 표현식의 왼쪽 피연산자는
+    그 연산자 함수의 첫 번째 매개변수에 대응하고, 오른쪽 피연산자는 두 번째 매개변수에 대응한다.
+    반면에, 오리지널 멤버 함수는 멤버가 아닌 연산자 오버로딩 함수와 반대 순서로 피연산자들을 처리한다.
+    즉, B * 2.75와 같이 Time 객체 곱하기 double형 값의 순서로 처리한다.
+
+    멤버가 아닌 연산자 오버로딩 함수를 사용하면, 2.75 * B와 같이, 우리가 원했던 순서대로
+    피연산자들을 사용할 수 있다. 하지만 이는 다른 문제를 야기한다. 
+    멤버가 아닌 함수들은 클래스에 들어 있는 private 데이터에 직접 접근할 수 없다.
+    멤버가 아닌 일반 함수들은 private 데이터에 접근할 통로를 가지고 있지 않다.
+    그러나 멤버 함수는 아니지만 클래스의 private 멤버에 접근할 수 있는 프렌드(friend)라는 특별한 함수가 있다.
+
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.프렌드 생성하기
+    /*
+    ---------------------------------------- 11.프렌드 생성하기 ----------------------------------------
+    # 프렌드 생성하기
+    ***
+    프렌드 함수를 만드는 첫 번째 단계는, 클래스 선언에 원형을 넣는 것이다. 이때 friend라는 키워드를 앞에 붙여야 한다.
+
+    ```cpp
+        friend Time operator* (double m, const Time& t);
+    ```
+    이 원형은 두 가지 함축적인 의미를 가지고 있다.
+
+    * operator*() 함수는, 클래스 선언 안에 선언되지만 멤버 함수가 아니다. 그러므로 멤버 연산자를 사용하여 호출되지 않는다.
+    * operator*() 함수는, 그것이 비록 멤버 함수는 아니지만 멤버 함수와 동등한 접근 권한을 가진다.
+
+    두 번째 단계는 함수 정의를 작성하는 것이다. 그것은 멤버 함수가 아니기 때문에, Time:: 제한자를 사용하지 않는다.
+    또한, 그 정의에 frined라는 키워드도 사용하지 않는다. 그 정의는 다음과 같아야 한다.
+
+    ```cpp
+        Time operator* (double m, const Time& t)    // 정의에는 friend가 없다.
+        {
+            Time result;
+            long totalminutes = t.hours * mult * 60 + t.minutes * mult;
+
+            result.hours = totalmuinutes / 60;
+            result.minutes = totalminutes % 60;
+            return result;
+        }
+    ```
+
+    이와 같이 선언하고 정의하면, 다음과 같은 구문은
+
+    ```cpp
+        A = 2.75 * B;
+    ```
+
+    와 같이 번역되어, 방금 정의한 멤버가 아닌 프렌드 함수를 호출한다.
+    ```cpp
+        A = operator* (2.75, B);
+    ```
+
+    간단히 말해서, 어떤 클래스에 대한 프렌드 함수는 멤버 함수와 동등한 접근 권한을 가지는, 멤버가 아닌 함수다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.프렌드 : << 연산자의 오버로딩
+    /*
+    ---------------------------------------- 11.프렌드 : << 연산자의 오버로딩 ----------------------------------------
+    # 프렌드 : << 연산자의 오버로딩
+    ***
+    클래스의 매우 유용한 기능 중의 하나는, << 연산자를 오버로딩하여 cout과 함께 사용함으로써
+    객체의 내용을 출력할 수 있다는 것이다.
+
+    Trip이 TIme 객체라고 가정하자. Time 값들을 출력하기 위해 우리는 그동안 show()를 사용했다.
+    그런데 다음과 같이 할 수 있다면 얼마나 멋질까?
+
+    ```cpp
+        cout << trip;
+    ```
+
+    <<이 오버로딩할 수 있는 연산자 중의 하나이기 때문에 이것이 가능하다.
+    사실, << 연산자는 이미 많이 오버로딩 되어 있다. ostream 클래스는 << 연산자를
+    오버로딩하여 출력 도구로 변환시킨다. cout이 ostream 객체이며, C++의 모든 기본 데이터형을
+    인식할 만큼 영리하다는 사실을 기억하라. 그것은 ostream 클래스 선언이, 기본 데이터형 각각에 대해
+    오버로딩된 operator<<() 정의를 하나씩 가지고 있기 때문이다. 그래서 cout이 Time 객체를 인식하도록
+    가르치는 방법은, ostream 클래스 선언에 새로운 연산자 함수의 정의를 추가하는 것이다.
+
+    그러나 사용자가 iostream 파일에 접근하여 표준 인터페이스를 집적거리는 것은 위험한 생각이다.
+    Time 클래스 선언을 사용하여 Time 클래스에게 cout을 사용하는 법을 가르치는 것이 훨씬 바람직하다.
+
+    * 오버로딩 << 의 첫 번째 버전
+    Time 클래스에게 cout을 사용하는 법을 가르치려면, 프렌드 함수를 사용해야 한다. 그 이유는 다음과 같은 구문이
+
+    ```cpp
+        cout << trip;
+    ```
+
+    두 개의 객체를 사용하고 있지만, ostream 클래스 객체 (cout)를 첫 번째 피연산자로 사용하기 때문이다.
+    만약 <<를 오버로딩하기 위해 Time 클래스의 멤버 함수를 사용한다면, 멤버 함수를 사용하여
+    * 연산자를 오버로딩했을 때 그랬던 것처럼, Time 객체가 첫 번째 피연산자가 되어야 한다.
+    그것은 우리가 << 연산자를 다음과 같은 방식으로 사용해야 한다는 것을 의미한다.
+
+    ```cpp
+        trip << cout;       // operator<<()가 Time 멤버 함수일 경우에
+    ```
+
+    이것은 당연히 혼동을 줄 것이다. 그러나 프렌드 함수를 사용한다면, 우리는 그 연산자를 다음과 같이 오버로딩 할 수 있다.
+
+    ```cpp
+        void operator<<(ostream& os, const Time& t)
+        {
+            os << t.hours << "시간, " << t.minutes << "분";
+        }
+    ```
+
+    이제 우리는 다음과 같은 구문을 사용할 수 있다.
+    
+    ```cpp
+        cout << trip;
+    ```
+    
+    * 오버로딩 <<의 두 번째 버전
+    앞에서 방금 설명한 구현은 하나의 문제점을 가지고 있다. 다음과 같은 구문은
+    
+    ```cpp
+        cout << trip;
+    ```
+
+    잘 동작할 것이다. 그러나 그 오버로딩 << 연산자는 우리가 평상시에 cout을 사용하는 방식인 다음과 같은 표현에는 동작하지 않는다.
+
+    ```cpp
+        cout << "여행 일시 : " << trip;     // 동작하지 않는다
+    ```
+
+    이는, 다음과 같은 구문이 있을 때,
+    ```cpp
+        int x = 5;
+        int y = 8;
+        cout << x << y;
+    ```
+
+    C++는 마지막의 출력 구문을 왼쪽에서부터 오른쪽으로 읽는다. 이것은 그 출력 구문이 다음과 같은 구문과 동등하다는 것이다.
+    ```cpp
+        (cout << x) << y;
+    ```
+
+    << 연산자는 ostreamㄱ 객체를 왼쪽 피연산자로 요구한다. cout << x 라는 표현은, cout이 ostream 객체이기 때문에
+    그 요구를 명백하게 만족시킨다. 그러나 그 출력 구문은 또한, (cout << x)라는 표현 전체가 << y의 왼쪽에 놓여 있기 때문에,
+    (cout << x)라는 표현 자체가 ostream 형의 객체일 것을 요구한다. 그래서 ostream 클래스는 ostream 객체를 리턴하도록
+    operator<<() 함수를 구현하고 있다. 특별히 이 경우에는 호출한 객체인 cout을 리턴한다. 따라서 (cout << x) 라는 표현 자체가
+    ostream 객체가 되므로, << 연산자의 왼쪽에서 사용될 수 있다.
+
+    프렌드 함수에 대해서도 같은 접근 방식을 취할 수 있다. 즉, operator<<() 함수가 ostream 객체에 대한 참조를 리턴하도록 개정하면 된다.
+    ```cpp
+        ostream& operator<<(ostream& os, const Time& T)
+        {
+            os << t.hours << "시간, " << t.minutes << "분";
+            return os;
+        }
+    ```
+
+    리턴형이 ostream&이라는 것에 주목하라. 이것은 그 함수가 ostream 객체에 대한 참조를 리턴한다는 것을 의미한다.
+    프로그램이 처음 시작할 때, 그 함수에 객체에 대한 참조를 전달하기 때문에, 결과적으로 그 함수의 리턴값은 그 함수에
+    전달된 객체 자신이다. 즉, 다음과 같은 구문은
+
+    ```cpp
+        cout << trip;   //
+        // ==
+        operator<<(cout, trip);
+    ```
+
+    그리고 이 함수 호출은 cout 객체를 리턴한다.
+    
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
 
 #pragma endregion
 
-//740페이지
+//771페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-class A
+class Time
 {
+private:
+    int test{};
+    int doubletest{};
+
 public:
-    A() { cout << "호출"; }
+    Time() {};
+    Time(int a, int b);
+    Time operator+(const Time& t) const;
+    
+    void show() const;
 };
+
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    cout << (2  << 4  << 3 >> 1);
+    int num;
+    cout << "Enter the number of rows: ";
+    cin >> num;
+
+    for (int i = 1; i <= num; i++)
+    {
+        for (int j = 1; j <= num - i; j++)
+        {
+            cout << " ";
+        }
+        for (int k = 1; k <= 2 * i - 1; k++)
+        {
+            if (k == 1 || k == 2 * i - 1) // 양쪽 끝에 있는 별표 처리
+                cout << "*";
+            else
+                cout << " ";
+        }
+        cout << endl;
+    }
 
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
+
+
+void Time::show() const
+{
+    cout << test << " : " << doubletest << endl;
+}
+
+Time::Time(int a, int b)
+{
+    test = a;
+    doubletest = b;
+}
+
+Time Time::operator+(const Time& t) const
+{
+    Time sum(0, 0);
+    sum.test = test + t.test;
+    sum.doubletest = doubletest + t.doubletest;
+    return sum;
+}
+
+
+
 
 
 
