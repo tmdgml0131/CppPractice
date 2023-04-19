@@ -8569,10 +8569,288 @@ using namespace std;
     ***
     */
     #pragma endregion
+    #pragma region 11.오버로딩 연산자 : 멤버 함수와 멤버가 아닌 함수
+    /*
+    ---------------------------------------- 11.오버로딩 연산자 : 멤버 함수와 멤버가 아닌 함수 ----------------------------------------
+    # 오버로딩 연산자 : 멤버 함수와 멤버가 아닌 함수
+    ***
+    많은 연산자들에 대해서 연산자 오버로딩을 구현할 때, 멤버 함수로 구현할 것인지 멤버가 아닌 함수로 구현할 것인지를 선택해야 한다.
+    일반적으로는 멤버가 아닌 함수가, 클래스의 private 데이터에 직접 접근할 수 있는 프렌드 함수이다. 예를 들면, Time 클래스를 위한
+    덧셈 연산자를 생각해 보자. 그것은 Time 클래스 선언에 다음과 같은 원형을 가지고 있다.
+
+    ```cpp
+        Time operator+(const Time& t) const;                        // 멤버 함수
+    ```
+
+    이것 대신, Time 클래스는 다음과 같은 원형을 가질 수도 있다.
+
+    ```cpp
+        friend Time operator+(const Time& t1, const Time& t2);      // 멤버가 아닌 함수
+    ```
+
+    이 덧셈 연산자는 두 개의 피연산자를 요구한다. 
+    멤버 함수 버전은 this 포인터를 통하여 암시적으로 하나가 전달되고,
+    다른 하나는 함수 매개변수로 명시적으로 전달된다. 프렌드 함수 버전은 둘 다 매개변수로 전달된다.
+
+    고로, 다음과 같은 구문을 다음 둘 중 어느 하나로 변환할 수 있다.
+    ```cpp
+        T1 = T2 + T3;
+
+        // ==
+
+        T1 = T2.operator+(T3);      // 멤버 함수
+        T1 = operator+(T2, T3);     // 멤버가 아닌 함수
+    ```
+
+    주어진 하나의 연산자를 정의할 때, 사용자는 두 형식 중 반브시 어느 한 형식을 선택해야 한다.
+    두 형식이 동일한 표현식에 해당하므로, 두 형식을 모두 정의하는 것은, 컴파일 에러를 일으키는
+    모호성 에러로 간주된다. 일부 연산자들에 대해서는 멤버 함수가 유일하고도 적절한 선택이다.
+    그 밖의 경우는 별다른 차이가 없다.
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
+    #pragma region 11.오버로딩 보충 : Vecotr 클래스
+    /*
+    ---------------------------------------- 11.오버로딩 보충 : Vecotr 클래스 ----------------------------------------
+    # 오버로딩 보충 : Vecotr 클래스
+    ***
+    공학과 물리학에서 사용하는 용어인, 벡터(vector)는 크기와 방향을 함께 가지는 물리량이다.
+    컴퓨터 사이언스에서 사용하는 벡터는, 16장, "string 클래스와 표준 템플릿 라이브러리"에서 설명한다.
+    벡터에 연산자 오버로딩을 사용하는 것은 당연한 선택이다. 
+    첫째, 벡터는 하나의 값으로 나타낼 수 없으므로, 벡터를 나타내는 클래스를 정의하는 것이 필요하다.
+    둘째, 벡터 연산은 덧셈이나 뺄셈과 같은 일반적인 산술 연산과 비슷하다. 이 성질이 벡터와 함께 사용할 수 있도록
+    해당 연산자들을 오버로딩할 것을 제안한다.
+
+    ```cpp
+    // vect.h
+    #ifndef VECTOR_H_
+    #define VECTOR_H_
+    #include <iostream>
+    namespace VECTOR
+    {
+        class Vector
+        {
+        public:
+            enum Mode {RECT, POL};
+            // 직사각형을 위해서는 RECT를, Polar modes를 위해서는 POL을 사용한다.
+        
+        private:
+            double x;       // 수평 성분
+            double y;       // 수직 성분
+            double mag;     // 벡터의 길이
+            double ang;     // 방위(도)로 표시되는 벡터의 방향
+            Mode mode;      // POL을 위해서 RECT룰 (또는 반대) 
+        //값들을 설정하는 private 메서드들
+            void set_mag();
+            void set_ang();
+            void set_x();
+            void set_y();
+
+        public:
+            Vector();
+            Vector(double n1, double n2, Mode form = RECT);
+            void reset(double n1, double n2, MOode form = RECT);
+            ~Vector();
+            double xval() const {return x;}
+            double yval() const {return y;}
+            double magval() const {return mag;}
+            double angval() const {return ang;}
+            void polar_mode();
+            void rect_mode();
+        
+        // 연산자 오버로딩
+            Vector operator+(const Vecot& b) const;
+            Vector operator-(const Vecot& b) const;
+            Vector operator-() const;
+            Vector operator*(double n) const;
+
+        // 프렌드 함수
+            friend Vecotr operator*(double n, const Vector& a);
+            friend std::ostream& operator<<(std::ostream& os, const Vector& v);
+        };
+    };
+    #endif
+
+    ***
+
+    ```cpp
+    // vect.cpp
+    #include <cmathh>
+    #include "vect.h"
+    using std::sqrt;
+    using std::sin
+    using std::cos;
+    using std::atan;
+    using std::atan2;
+    using std::cout;
+
+    namespace VECTOR
+    {
+        // 1 라디안 내의 각도를 계산하여라
+        const double Rad_to_deg = 45.0 / atan(1.0);
+        // 반드시 약 57.2957795130823 값이 되어야 함
+
+        // private 메서드들
+        // x값과 y값으로 크기를 계산한다
+        void Vector::set_mag()
+        {
+            mag = sqrt(x*x + y*y);
+        }
+        void Vector::set_ang()
+        {
+            if ( x == 0.0 && y == 0.0 )
+                ang = 0.0;
+            else
+                ang = atan2(y,x);
+        }
+
+        // 극좌표를 사용하여 x를 설정
+        void Vector::set_x()
+        {
+            x = mag * cos(ang);
+        }
+
+        // 극좌표를 사용하여 y를 설정
+        void Vector::set_y()
+        {
+            y = mag * sin(ang);
+        }
+
+        // public 메서드들
+        Vector::Vector()
+        {
+            x = y = mag = ang = 0.0;
+            mode = RECT;
+        }
+
+        // form이 r이면 직각 좌표로부터 벡터를 구성
+        // form이 p이면 극 좌표로부터 벡터를 구성
+        Vector::Vector(double n1, double n2, Mode form)
+        {
+            mode = form;
+            if(form == RECT)
+            {
+                x = n1;
+                y = n2;
+                set_mag();
+                set_ang();
+            }
+            else if(form == POL)
+            {
+                mag = n1;
+                ang = n2 / Rad_to_deg;
+                set_x();
+                set_y();
+            }
+            else
+            {
+                cout << "Vector()에 전달된 제 3의 매개변수가 잘못되었다. \n";
+                cout << "그래서 벡터를 0으로 설정하였다. \n";
+                x = y = mag = ang = 0.0;
+                mode = RECT;
+            }
+        }
+
+        // form이 RECT이면 직각 좌표로부터 벡터를 구성한다.
+        // form이 POL이면 극 좌표로부터 벡터를 구성한다.
+        void Vector::reset(double n1, double n2, Mode form)
+        {
+            mode = form;
+            if(form == RECT)
+            {
+                x = n1;
+                y = n2;
+                set_mag();
+                set_ang();
+            }
+            else if (form == POL)
+            {
+                mag = n1;
+                ang = n2 / Rad_to_deg;
+                set_x();
+                set_y();
+            }
+            else
+            {
+                cout << "Vector()에 전달된 제 3의 매개변수가 잘못되었다.\n";
+                cout << "그래서 벡터를 0으로 설정하였다.\n";
+                x = y = mag = ang = 0.0;
+                mode = RECT;
+            }
+
+        }
+
+        void Vector::polar_mode()
+        {
+            mode = POL;
+        }
+
+        void Vector::rect_mode()
+        {
+            mode = RECT;
+        }
+
+
+        // 연산자 오버로딩
+        // 두 Vector 객체를 더한다
+        Vector Vector::operator+(const Vector& b) const
+        {
+            return Vector(x + b.x, y + b.y);
+        }
+
+        // Vector 객체 a에서 Vector 객체 b를 뺀다.
+        Vector Vector::operator-(const Vector& b) const
+        {
+            return (x - b.x, y - b.y);
+        }
+
+        // Vector 객체의 부호를 바꾼다.
+        Vector Vector::operator-() const
+        {
+            return Vector(-x, -y);
+        }
+
+        // Vector 객체에 n을 곱한다.
+        Vector Vector::operator*(double n) const
+        {
+            return Vector(n * x, n * y);
+        }
+
+        // 프렌드 메서드들
+        // n에 Vector 객체 a를 곱한다.
+        Vector operator*(double n, const Vector& a)
+        {
+            return a * n;
+        }
+
+        // mode가 RECT이면 직각 좌표를 출력한다
+        // mode가 POL이면 극 좌표를 출력한다.
+        std::ostream& operator<<(std::ostream& os, const VEctor& v)
+        {
+            if (v.mode == Vector::RECT)
+                os << "(x,y) = (" << v.x << ", " << v.y << ")";
+            else if (v.mode == Vector::POL)
+            {
+                os << "(m,a) = (" << v.mag << ", " << v.ang * Rad_to_deg << ")";
+            }
+            else
+                os << "Vector 객체의 모드 지정이 틀렸습니다. \n;
+
+                return os;
+        }
+    };
+    ```
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+    #pragma endregion
 
 #pragma endregion
 
-//771페이지
+//782페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
