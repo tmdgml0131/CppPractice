@@ -8872,11 +8872,87 @@ using namespace std;
     ***
     */
     #pragma endregion
+    #pragma region 12.[] 표기를 사용하여 개별 문자에 접근하기
+    /*
+    ---------------------------------------- 12.[] 표기를 사용하여 개별 문자에 접근하기 ----------------------------------------
+    # [] 표기를 사용하여 개별 문자에 접근하기
+    ***
+    C 스타일의 표준 문자열에 대해서, 우리는 [] 를 사용하여 개별적인 문자에 접근할 수 있다.
+    
+    ```cpp
+        char city[40] = "Amsterdam";
+        cout << city[0];                // 문자 A를 출력한다
+    ```
 
+    C++ 에서 [] 기호는 하나의 연산자이다. operator[]() 라는 메서드를 사용하여 이 연산자를 오버로딩할 수 있다.
+    대괄호 연산자는, 하나의 피연산자를 여는 대괄호 앞에 놓고, 나머지 하나의 피연산자는 열고 닫는 두 대괄호 사이에 놓는다.
+    즉, city[0]에서, city는 첫 번째 피연산자이고, []는 연산자이고, 0은 두 번째 피연산자이다.
+
+    ```cpp
+        String opera("The Magic Flute");
+    ```
+
+    프로그램에 opera[4]라는 표현이 사용되면, C++는 다음과 같은 이름과 시그내처를 가지고 있는 메서드를 찾는다.
+    ```cpp
+        String::operator[](int i)
+        // ->
+        opera.operator[](4)
+    ```
+
+    다음은 이 메서드를 간단하게 구현한 것이다.
+
+    ```cpp
+        char& String::operator[](int i)
+        {
+            return str[i];
+        }
+    ```
+
+    따라서
+    ```cpp
+        cout << opera[4];
+        // ==
+        cout << opera.operator[](4);
+    ```
+    ***
+    출처 : C++ 기초 플러스 6판 / 성안당
+    ***
+    */
+#pragma endregion
+    #pragma region 12.static 클래스 멤버 함수
+        /*
+        ---------------------------------------- 12.static 클래스 멤버 함수 ----------------------------------------
+        # static 클래스 멤버 함수
+        ***
+        멤버 함수를 static으로 선언하는 것이 가능하다. 이것은 두 가지 중요한 성질을 가지고 있다.
+
+        첫째, static 멤버 함수는 객체에 의해 호출될 필요가 없다. 사실 static 멤버 함수는 this 포인터도 갖지 않는다.
+        static 멤버 함수가 public 부분에 선언되면, 그 함수는 클래스 이름과 사영 범위 결정 연산자를 사용하여 호출된다.
+
+        ```cpp
+            static int HowMany() { return num_strings; }
+        ```
+
+        이것은 다음과 같이 호출될 수 있다.
+        ```cpp
+            int count = String::HowMany();  // static 멤버 함수를 호출한다.
+        ```
+
+        둘째, static 멤버 함수는 어떤 특정 객체와도 결합하지 않기 때문에, 사용할 수 있는 데이터 멤버는 static 데이터 멤버밖에 없다.
+        예를 들면, static 메서드 HowMany()는 str이나 len에는 접근할 수 없고, static 멤버 num_strings에만 접근할 수 있다.
+
+        마찬가지로, static 멤버 함수를 사용하여, 클래스 인터페이스의 몇 가지 상황을 어떻게 처리할 것인지 제어하는,
+        클래스 사용 범위의 플래그(flag)를 설정할 수 있다. 예를 들면, 클래스의 내용을 출력하는 메서드가 사용할 출력 형식을 제어할 수 있다.
+
+        ***
+        출처 : C++ 기초 플러스 6판 / 성안당
+        ***
+        */
+    #pragma endregion
          
 #pragma endregion
 
-//823페이지
+//854페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -8885,7 +8961,7 @@ class Time
 private:
     int test{};
     int doubletest{};
-
+    
 public:
     Time() {};
     Time(int a, int b);
@@ -8898,25 +8974,8 @@ public:
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    int num;
-    cout << "Enter the number of rows: ";
-    cin >> num;
-
-    for (int i = 1; i <= num; i++)
-    {
-        for (int j = 1; j <= num - i; j++)
-        {
-            cout << " ";
-        }
-        for (int k = 1; k <= 2 * i - 1; k++)
-        {
-            if (k == 1 || k == 2 * i - 1) // 양쪽 끝에 있는 별표 처리
-                cout << "*";
-            else
-                cout << " ";
-        }
-        cout << endl;
-    }
+    string str = "abc";
+    cout << char(str[0] - 32);
 
     return 0;
 }
