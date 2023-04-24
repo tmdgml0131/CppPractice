@@ -8949,59 +8949,83 @@ using namespace std;
         ***
         */
     #pragma endregion
+    #pragma region 12.생성자에 new를 사용할 때 주의할 사항
+        /*
+        ---------------------------------------- 12.생성자에 new를 사용할 때 주의할 사항 ----------------------------------------
+        # 생성자에 new를 사용할 때 주의할 사항
+        ***
+        * 생성자에서 new를 사용하여 포인터 멤버를 초기화한다면, 파괴자에 반드시 delete를 사용해야 한다.
+        * new와 delete의 사용은 서로 어울려야 한다. new는 delete와 짝을 이루고, new[]는 delete[]와 짝을 이루어야 한다.
+        * 생성자가 여러 개일 경우는, 모두 대괄호를 사용하든지 아니면 모두 대괄호 없이 사용하든지,
+          모든 생성자가 그 파괴자와 어울려야 한다. 그러나 하나의 생성자에서 new를 사용하여 포인터를 초기화하고, 다른 생성자에서
+          널 포인터로 초기화하는 것은 허용이 된다. 그 이유는 delete 연산자를 널 포인터에 적용할 수 있기 때문이다.
+        * 깊은 복사를 통해 하나의 객체를 다른 객체로 초기화하는, 복사 생성자를 정의해야 한다. 일반적으로는 다음과 같다.
+        ```cpp
+            String::String(const String& st)
+            {
+                num_strings++;          // static 멤버 갱신을 처리
+                len = st.len;           // 같은 크기로 설정
+                str = new  char[len+1]; // 기억 공간을 대입
+                strcpy(str, st.str);    // 문자열을 새 위치에 복사
+            }
+        ```
+        
+        특히 복사 생성자는 복사되는 데이터를 보관할 기억 공간을 대입해야 한다. 복사 생성자는
+        데이터의 주소가 아니라 데이터 그 자체를 복사해야 한다. 또 한 그 과정에서 값이 영향을 받을 수 있는
+        모든 Static 멤버들을 갱신해야 한다.
+
+        * 깊은 복사를 통해 하나의 객체를 다른 객체에 대입하는, 대입 연산자를 정의해야 한다. 일반적으로는 다음과 같다.
+        ```cpp
+            String& String::operator=(const String& st)
+            {
+                if(this ==&st)          // 객체가 자기 자신에 대입되었다면
+                    return *this;       // 이것으로 끝낸다
+                delete[] str;           // 옛 문자열을 해제한다.
+                len = st.len;
+                str = new char[len + 1];// 새 문자열을 위한 공간을 확보한다.
+                strcpy(str,st.str);     // 문자열을 복사한다
+                retrun *this;           // 호출한 객체에 대한 참조를 리턴한다
+            }
+        ```
+        특히, 그 메서드는 자기 자신에 대입하는지 검사해야 한다. 그것은 멤버 포인터가 이전에 지시하던
+        메모리를 해제해야 한다. 데이터의 주소가 아니라 데이터 자체를 복사해야 한다. 
+        그리고 호출한 객체에 대한 참조를 리턴해야 한다.
+
+        ***
+        출처 : C++ 기초 플러스 6판 / 성안당
+        ***
+        */
+#pragma endregion
          
 #pragma endregion
 
-//854페이지
+//864페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
 class Time
 {
 private:
-    int test{};
-    int doubletest{};
     
 public:
-    Time() {};
-    Time(int a, int b);
-    Time operator+(const Time& t) const;
     
-    void show() const;
 };
 
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
+    int s = 2;
     string str = "abc";
-    cout << char(str[0] - 32);
+    string ss = "ttt";
+    char t[80];
+    strcpy_s(t, str.c_str());
 
+    cout << t;
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-
-
-void Time::show() const
-{
-    cout << test << " : " << doubletest << endl;
-}
-
-Time::Time(int a, int b)
-{
-    test = a;
-    doubletest = b;
-}
-
-Time Time::operator+(const Time& t) const
-{
-    Time sum(0, 0);
-    sum.test = test + t.test;
-    sum.doubletest = doubletest + t.doubletest;
-    return sum;
-}
-
 
 
 
