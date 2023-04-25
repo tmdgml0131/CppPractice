@@ -7,6 +7,7 @@
 #include <fstream>  // 파일 I/O 를 위해
 #include <cstdlib>  // exit() 지원
 #include <cmath>
+#include <vector>s
 using namespace std;
 
 
@@ -8996,38 +8997,44 @@ using namespace std;
         ***
         */
 #pragma endregion
+#pragma region 12.사용하지 말아야
+        /*
+        ---------------------------------------- 12.템플릿 ----------------------------------------
+        # 템플릿
+        ***
+
+
+        ***
+        출처 : C++ 기초 플러스 6판 / 성안당
+        ***
+        */
+#pragma endregion
          
 #pragma endregion
 
-//864페이지
+//878페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
-class Time
-{
-private:
-    
-public:
-    
-};
+void ttest(int& t);
 
 
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    int s = 2;
-    string str = "abc";
-    string ss = "ttt";
-    char t[80];
-    strcpy_s(t, str.c_str());
+    int test = 17;
+    int* testd = &test;
+    ttest(*testd);
 
-    cout << t;
+    
     return 0;
 }
 
 //-------------------------[ Func.Def. ]-----------------------------------//
-
-
+void ttest(int& t)
+{
+    cout << *&t;
+}
 
 
 
