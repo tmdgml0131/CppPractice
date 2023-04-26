@@ -7,7 +7,8 @@
 #include <fstream>  // 파일 I/O 를 위해
 #include <cstdlib>  // exit() 지원
 #include <cmath>
-#include <vector>s
+#include <vector>
+#include <sstream>
 using namespace std;
 
 
@@ -9012,7 +9013,7 @@ using namespace std;
          
 #pragma endregion
 
-//878페이지
+//1000페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -9022,9 +9023,17 @@ void ttest(int& t);
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    int test = 17;
-    int* testd = &test;
-    ttest(*testd);
+    string my_string = "test test";
+    vector<string> answer;
+    string t = "";
+
+    string copy;
+    stringstream ss;
+    ss.str(my_string);
+    while (ss >> copy)
+    {
+        answer.push_back(copy);
+    }
 
     
     return 0;
