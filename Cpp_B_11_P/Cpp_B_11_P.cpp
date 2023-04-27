@@ -9013,7 +9013,7 @@ using namespace std;
          
 #pragma endregion
 
-//1000페이지
+//1014페이지
 
 #pragma region 메인
 //-------------------------[ ProtoType ]-----------------------------------//
@@ -9023,17 +9023,32 @@ void ttest(int& t);
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    string my_string = "test test";
     vector<string> answer;
-    string t = "";
-
-    string copy;
-    stringstream ss;
-    ss.str(my_string);
-    while (ss >> copy)
+    bool toLow = true;
+    vector<string> strArr = {"AAA", "BBB", "CCC"};
+    for (auto& v : strArr)
     {
-        answer.push_back(copy);
+        for (auto& t : v)
+        {
+            if (toLow && t >= 97)
+            {
+                t -= 32;
+            }
+            else if (!toLow && t < 97)
+            {
+                t += 32;
+            }
+        }
+
+        if (toLow)
+            toLow = false;
+        else
+            toLow = true;
+
+        answer.push_back(v);
     }
+    for (auto& v : answer)
+        cout << v << endl;
 
     
     return 0;
