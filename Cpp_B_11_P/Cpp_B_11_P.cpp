@@ -9023,33 +9023,20 @@ void ttest(int& t);
 //-------------------------[   FBody   ]-----------------------------------//    
 int main()
 {
-    vector<string> answer;
-    bool toLow = true;
-    vector<string> strArr = {"AAA", "BBB", "CCC"};
-    for (auto& v : strArr)
+    int n = 12;
+    int answer = 0;
+    int i = 1;
+    int fac = 1;
+    while (fac <= n)
     {
-        for (auto& t : v)
-        {
-            if (toLow && t >= 97)
-            {
-                t -= 32;
-            }
-            else if (!toLow && t < 97)
-            {
-                t += 32;
-            }
-        }
+        fac *= i;
+        i++;
 
-        if (toLow)
-            toLow = false;
-        else
-            toLow = true;
-
-        answer.push_back(v);
+        if (fac < n)
+            answer++;
     }
-    for (auto& v : answer)
-        cout << v << endl;
 
+    return answer;
     
     return 0;
 }
