@@ -1,5 +1,5 @@
 ﻿#include <bits/stdc++.h>
-// 현재 페이지 : 201
+// 현재 페이지 : 223
 using namespace std;
 
 #pragma region Chapter 00.템플릿
@@ -49,7 +49,15 @@ using namespace std;
 
 5장 :
     1. has-a 관계, is-a 관계
+    2. 다형성과 코드 재사용
+    3. 상속
+    4. 믹스인 클래스
+    5. 인터페이스
 
+6장 :
+    1. 응집도 / 결합도
+    2. 템플릿
+    3. 개방/폐쇄 원칙, 그리고 상속
 */
 #pragma endregion
 
