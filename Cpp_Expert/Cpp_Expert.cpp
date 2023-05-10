@@ -1,5 +1,5 @@
 ﻿#include <bits/stdc++.h>
-// 현재 페이지 : 223
+// 현재 페이지 : 274
 using namespace std;
 
 #pragma region Chapter 00.템플릿
@@ -58,6 +58,19 @@ using namespace std;
     1. 응집도 / 결합도
     2. 템플릿
     3. 개방/폐쇄 원칙, 그리고 상속
+    4. SOLID 원칙
+
+7장 :
+    1. 메모리 할당 / 스택과 힙
+    2. 메모리 누수
+    3. malloc() 과 new 그리고 realloc()
+    4. 힙 영역의 배열 할당
+    5. 포인터의 타입캐스팅
+    6. 포인터 연산
+    7. 가비지 컬렉션
+    8. unique_ptr
+    9. shared_ptr
+    
 */
 #pragma endregion
 
