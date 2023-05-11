@@ -1,5 +1,5 @@
 ﻿#include <bits/stdc++.h>
-// 현재 페이지 : 274
+// 현재 페이지 : 324
 using namespace std;
 
 #pragma region Chapter 00.템플릿
@@ -32,6 +32,7 @@ using namespace std;
     9. decltype
     10. 생성자 이니셜라이저
     11. 유니폼 초기화
+    12. 컴파일 에러 / 런타임 에러 / 링킹 에러 / 논리 에러 / 파스 에러
 
 2장 :
     1. 스트링 리터럴
@@ -70,7 +71,19 @@ using namespace std;
     7. 가비지 컬렉션
     8. unique_ptr
     9. shared_ptr
-    
+    10. 레퍼런스 카운팅
+    11. weak_ptr
+    12. 메모리 문제
+    13. 댕글링 포인터
+
+8장 :
+    1. struct와 class 그리고 접근 제한자
+    2. this 포인터
+    3. 객체의 라이프 사이클
+    4. 생성자 / 디폴트 생성자 / 생성자 이니셜라이저 순서 주의사항 / 복제 생성자
+    5. 생성자 정리
+    6. 레퍼런스 전달
+
 */
 #pragma endregion
 
