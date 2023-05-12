@@ -1,5 +1,5 @@
 ﻿#include <bits/stdc++.h>
-// 현재 페이지 : 324
+// 현재 페이지 : 341
 using namespace std;
 
 #pragma region Chapter 00.템플릿
@@ -83,6 +83,11 @@ using namespace std;
     4. 생성자 / 디폴트 생성자 / 생성자 이니셜라이저 순서 주의사항 / 복제 생성자
     5. 생성자 정리
     6. 레퍼런스 전달
+    7. 소멸자
+    8. 대입연산자
+
+9장 :
+    1. friend
 
 */
 #pragma endregion
