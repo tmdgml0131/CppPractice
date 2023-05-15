@@ -1,5 +1,5 @@
 ﻿#include <bits/stdc++.h>
-// 현재 페이지 : 341
+// 현재 페이지 : 364
 using namespace std;
 
 #pragma region Chapter 00.템플릿
@@ -88,6 +88,18 @@ using namespace std;
 
 9장 :
     1. friend
+    2. 얕은 복제, 깊은 복제
+    3. 복제 후 맞바꾸기 패턴
+    4. Lvalue, Rvalue
+    5. Rvalue Reference
+    6. 이동 의미론 ( Move Semantics )
+    7. 표준 라이브러리 std::swap
+    8. Rule of Three, Rule of Five, Rule of Zero
+    9. Static 메서드
+    10. const 메서드
+    11. mutable 변수
+    12. 오버로딩
+    13. const 기반 오버로딩
 
 */
 #pragma endregion
