@@ -6,7 +6,7 @@ int solution(vector<int> ingredient)
 {
     vector<int> vi = ingredient;
     int answer = 0;
-    int n = vi.size();  // 배열 크기
+    int n = vi.size();  
     
     for (int i = 0; i < n - 3; i++)
     {
@@ -14,8 +14,8 @@ int solution(vector<int> ingredient)
         {
             answer++;
             vi.erase(vi.begin() + i, vi.begin() + i + 4);
-            n -= 3;  // 배열 크기 갱신
-            i -= 3;  // 인덱스 이동
+            n -= 4;  
+            i -= 3;  
         }
     }
     
