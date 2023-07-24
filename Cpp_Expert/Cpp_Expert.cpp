@@ -728,7 +728,50 @@ using namespace std;
 
     */
     #pragma endregion
+    #pragma region 1.4 런타임, 컴파일 타임?
+    /*
+    ***
+    # 개요
+    이번에는 **컴파일 타임( Compile Time )**과 **런타임( Run Time )**의 의미를 알아보고,
+    각 타임에 해당되는 **Compile Error**와 **RunTime Error**도 함께 알아보도록 하겠습니다.
 
+    # Compile Time 이란?
+    이전 포스팅에도 언급 하였듯, 우리가 작성한 소스코드가 **컴파일( Compile )**이라는 과정을 통해
+    *기계가 읽을 수 있는 형태로 변환되는 과정*을 **컴파일 타임**이라고 합니다.
+
+    ## Compile Error란?
+    말 그대로, compile 중 발생되는 에러를 의미합니다.
+    대표적으로 **Syntax Error**가 여기에 해당 됩니다.
+
+    **Syntax 에러**란 우리가 사용하는 *언어 문법에 맞지 않는 코딩*을 했을 경우 발생하는 에러를 의미합니다.
+    
+    쉬운 예시로
+    ```cpp
+        cout << "Hello, World!';
+    ```
+    와 같이 큰 따옴표로 열었으나 작은 따옴표로 닫아 주는 경우 입니다.
+    
+    이외에도 요즘 ide에서는 빨간줄로 오류를 표시해 주는데요, 이러한 오류들이 **Compile Error**입니다.
+
+    # Run Time 이란?
+    Compile Time 이후 *프로그램이 동작되어지는 때*를 RunTime이라고 합니다.
+    흔히 말하는 exe 파일을 동작 시키는 과정입니다.
+
+    ## RunTime Error란?
+    RunTIme 에러는 실행이 되어야만 확인이 가능한 에러입니다.
+    즉, compile 중에는 *감지하지 못하는 에러들*입니다. (IDE 상 빨간줄로 뜨지 않음)
+
+    쉬운 예시로
+    ```cpp
+    int a = 3;
+    int b = 0;
+    int c = a / b;
+    cout << c;
+    ```
+    와 같이 *문법적( Syntax )으로는 오류가 없지만* 막상 실행을 해보니 발생되는 에러입니다.
+    
+    */
+    #pragma endregion
 
 
 #pragma endregion
