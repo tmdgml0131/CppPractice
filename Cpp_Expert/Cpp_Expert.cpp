@@ -1142,7 +1142,159 @@ using namespace std;
 
     ***
     # unique_ptr을 함수 인자로 전달하기
+    어떤 `unique_ptr` 을 함수 인자로 전달하고 싶다면 어떨까요?
+    `unique_ptr`은 복사 생성자가 없기 때문에 함수에 레퍼런스 전달을 하면 될까요?
 
+    ```cpp
+    #include <iostream>
+    #include <memory>
+    
+    class A {
+      int* data;
+    
+     public:
+      A() {
+        std::cout << "자원을 획득함!" << std::endl;
+        data = new int[100];
+      }
+    
+      void some() { std::cout << "일반 포인터와 동일하게 사용가능!" << std::endl; }
+    
+      void do_sth(int a) {
+        std::cout << "무언가를 한다!" << std::endl;
+        data[0] = a;
+      }
+    
+      ~A() {
+        std::cout << "자원을 해제함!" << std::endl;
+        delete[] data;
+      }
+    };
+    
+    // 올바르지 않은 전달 방식
+    void do_something(std::unique_ptr<A>& ptr) { ptr->do_sth(3); }
+    
+    int main() {
+      std::unique_ptr<A> pa(new A());
+      do_something(pa);
+    }
+    ```
+    일단, 함수 내부로 `unique_ptr`이 잘 전달 되었음을 알 수 있습니다.
+    하지만 위와 같이 `unique_ptr`을 전달하는 것이 문맥 상 맞는 코드 일까요?
+
+    만일 위와 같이 레퍼런스로 `unique_ptr`을 전달했다면, `do_something` 함수 내부에서는
+    `ptr`이 유일한 소유권을 의미하지 않습니다.
+    물론, `ptr`은 레퍼런스이기 때문에, `do_something` 함수가 종료되며 `pa`가 가리키고 있는 객체를
+    파괴하지는 않습니다. 하지만 `pa`가 **유일하게** 소유하고 있던 객체는 이제 적어도 `do_something`
+    내부에서는 `ptr`을 통해서도 소유할 수가 있게 되는 것입니다.
+
+    따라서 `unique_ptr`을 레퍼런스로 사용하는 것은 `unique_ptr`을 소유권이라는 중요한 의미를
+    망각한 채 단순히 포인터의 단순한 `Wrapper`로 사용하는 것에 불과합니다.
+
+    고로, 함수에 올바르게 `unique_ptr`을 전달하기 위해선, 원래의 포인터 주소값을 전달해 주면 됩니다.
+    ```cpp
+    void do_something(A* ptr) { ptr->do_sth(3); }
+
+    int main() {
+    std::unique_ptr<A> pa(new A());
+    do_something(pa.get());
+    }
+    ```
+
+    `unique_ptr`의 get 함수를 호출하면, 실제 객체의 주소값을 리턴합니다. 위 경우
+    `do_something` 함수가 일반적인 포인터를 받으며, 소유권이라는 의미는 버린 채,
+    `do_something` 함수 내부에서 객체에 접근할 수 있는 권한을 주는 것입니다.
+
+    정리하자면, 
+    * `unique_ptr`은 어떤 객체의 유일한 소유권을 나타내는 포인터이며, 소멸될 때, 가리키던 객체도 소멸된다.
+    * 다른 함수에서 `unique_ptr`이 소유한 객체에 접근하고 싶다면, get을 통해 객체 포인터를 전달한다.
+    * 소유권을 이동하고 싶다면, `unique_ptr`을 `move` 하면 된다.
+    ***
+    # unique_ptr을 쉽게 생성하기
+    C++14부터는 `unique_ptr`을 간단히 만들 수 있는, `std::make_unique` 함수를 제공합니다.
+
+    ```cpp
+    #include <iostream>
+    #include <memory>
+    
+    class Foo {
+      int a, b;
+    
+     public:
+      Foo(int a, int b) : a(a), b(b) { std::cout << "생성자 호출!" << std::endl; }
+      void print() { std::cout << "a : " << a << ", b : " << b << std::endl; }
+      ~Foo() { std::cout << "소멸자 호출!" << std::endl; }
+    };
+    
+    int main() {
+      auto ptr = std::make_unique<Foo>(3, 5);
+      ptr->print();
+    }
+    ```
+
+    이를 컴파일 하면
+    > 생성자 호출!
+    > a : 3, b : 5
+    > 소멸자 호출!
+
+    와 같이 잘 작동합니다.
+    ***
+    # unique_ptr을 원소로 가지는 컨테이너
+    ```cpp
+    #include <iostream>
+    #include <memory>
+    #include <vector>
+    
+    class A {
+      int *data;
+    
+     public:
+      A(int i) {
+        std::cout << "자원을 획득함!" << std::endl;
+        data = new int[100];
+        data[0] = i;
+      }
+    
+      void some() { std::cout << "일반 포인터와 동일하게 사용가능!" << std::endl; }
+    
+      ~A() {
+        std::cout << "자원을 해제함!" << std::endl;
+        delete[] data;
+      }
+    };
+    
+    int main() {
+      std::vector<std::unique_ptr<A>> vec;
+      std::unique_ptr<A> pa(new A(1));
+    
+      vec.push_back(pa);  // ??
+    }
+    ```
+    위 코드를 컴파일 하면 무시무시한 컴파일 오류가 발생합니다.
+
+    오류의 이유는 삭제된 `unique_ptr`의 복사 생성자에 접근하였기 때문입니다.
+    기본적으로 `vector`의 push_back 함수는 전달된 인자를 복사해서 집어 넣기 때문에
+    위와 같은 문제가 발생하게 되는 것입니다.
+
+    이의 방지를 위해 명시적으로 `pa`를 `vector`안으로 이동 시켜주어야 합니다.
+    즉, push_back의 우측값 레퍼런스를 받는 버전이 오버로딩 될 수 있도록 말이죠.
+
+    ```cpp
+    int main() {
+    std::vector<std::unique_ptr<A>> vec;
+    std::unique_ptr<A> pa(new A(1));
+
+    vec.push_back(std::move(pa));  // 잘 실행됨
+    }
+    ```
+
+    하지만 재미있게도, `emplace_back` 함수를 이용하면, vector 안에
+    `unique_ptr`을 직접 **생성**하며 집어넣을 수 있습니다.
+    즉, 불필요한 이동 과정을 생략할 수 있다는 것입니다.
+
+    `emplace_back` 함수는 전달된 인자를 **완벽한 전달(Perfect Forwarding)**을 통해,
+    직접 `unique_ptr<A>`의 생성자에 **전달**해서, `vector` 맨 뒤에 `unique_ptr<A>` 객체를
+    생성해버리게 됩니다. 따라서, 위에서처럼 불필요한 이동 연산이 필요 없게 됩니다.
     */
     #pragma endregion
 
