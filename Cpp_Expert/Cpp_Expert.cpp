@@ -1,4 +1,5 @@
 ﻿#include <bits/stdc++.h>
+#include "TestClass.h"
 // 현재 페이지 : 476
 using namespace std;
 
@@ -1297,6 +1298,412 @@ using namespace std;
     생성해버리게 됩니다. 따라서, 위에서처럼 불필요한 이동 연산이 필요 없게 됩니다.
     */
     #pragma endregion
+    #pragma region 1.7 스마트 포인터 - shared_ptr
+	/*
+    ***
+    # 개요
+    대부분의 경우 하나의 자원은 한 개의 스마트 포인터에 의해 소유되는 것이 바람직 하고,
+    나머지 접근은 (소유가 아닌) 그냥 일반 포인터로 처리하면 됩니다.
+
+    하지만, 때에 따라서는 여러 개의 스마트 포인터가 하나의 객체를 같이 소유해야 하는 경우가 발생합니다.
+    예를 들어, 여러 객체에서 하나의 자원을 사용하고자 합니다. 후에 자원을 해제하기 위해서는
+    이 자원을 사용하는 모든 객체들이 소멸되야 하는데, 어떤 객체가 먼저 소멸되는지 알 수 없기 때문에
+    이 자원 역시 어느 타이밍에 해제 시켜야 할 지 알 수 없게 됩니다.
+
+    따라서 이 경우, 좀 더 스마트한 포인터가 **특정 자원을 몇 개의 객체에서 가리키는지를 추적**한 다음에,
+    그 수가 0이 되야만 비로소 해제를 시켜주는 방식의 포인터가 필요합니다.
+    ***
+    # shared_ptr
+    `shared_ptr`로 객체를 가리킬 경우, 다른 `shared_ptr` 역시 그 객체를 가리킬 수 있습니다.
+    ```cpp
+        std::shared_ptr<A> p1(new A());
+        std::shared_ptr<A> p2(p1);          // p2 역시 생성된 객체 A를 가리킨다.
+
+        // 반면 unique_ptr의 경우
+        std::unique_ptr<A> p1(new A());
+        std::unique_ptr<A> p2(p1);          // 컴파일 오류!
+    ```
+
+    `p1`과 `p2`의 경우 같이 동일한 객체 `A()`를 가리키지만, `unique_ptr`의 경우
+    유일한 소유권만 인정되므로 컴파일 오류가 발생하게 됩니다.
+
+    
+    `shared_ptr`은 같은 객체를 가리킬 수 있습니다. 이를 위해서는 몇개의 `shared_ptr` 들이
+    원래 객체를 가리키는지 알아야만 합니다. 이를 참조 개수( Reference Count )라고 하는데,
+    참조 개수가 0이 되어야 가리키고 있는 객체를 해제할 수 있습니다.
+
+    사진 1
+
+    위 그림의 경우 `p1`과 `p2`가 같은 객체를 가리키고 있으므로, 참조 개수가 2가 됩니다.
+
+    ```cpp
+	#include <iostream>
+	#include <memory>
+	#include <vector>
+
+	class A {
+	  int *data;
+
+	 public:
+	  A() {
+		data = new int[100];
+		std::cout << "자원을 획득함!" << std::endl;
+	  }
+
+	  ~A() {
+		std::cout << "소멸자 호출!" << std::endl;
+		delete[] data;
+	  }
+	};
+
+	int main() {
+	  std::vector<std::shared_ptr<A>> vec;
+
+	  vec.push_back(std::shared_ptr<A>(new A()));
+	  vec.push_back(std::shared_ptr<A>(vec[0]));
+	  vec.push_back(std::shared_ptr<A>(vec[1]));
+
+	  // 벡터의 첫번째 원소를 소멸 시킨다.
+	  std::cout << "첫 번째 소멸!" << std::endl;
+	  vec.erase(vec.begin());
+
+	  // 그 다음 원소를 소멸 시킨다.
+	  std::cout << "다음 원소 소멸!" << std::endl;
+	  vec.erase(vec.begin());
+
+	  // 마지막 원소 소멸
+	  std::cout << "마지막 원소 소멸!" << std::endl;
+	  vec.erase(vec.begin());
+
+	  std::cout << "프로그램 종료!" << std::endl;
+	}
+    ```
+
+    성공적으로 컴파일 하였다면
+    
+	> 자원을 획득함!
+	> 첫 번째 소멸!
+	> 다음 원소 소멸!
+	> 마지막 원소 소멸!
+	> 소멸자 호출!
+	> 프로그램 종료!
+
+    위 프로그램의 참조 개수는 3이였다가, `2, 1, 0` 순으로 줄어들게 될겁니다.
+
+    현재 `shared_ptr`의 참조 개수가 몇 개인지는 `use_count`함수를 통해 알 수 있습니다.
+
+    만약에, `shared_ptr` 내부에 참조 개수를 저장한다면 아래와 같은 문제가 발생할 수 있습니다.
+    만약, 아래와 같이 한 개의 `shared_ptr`이 추가적으로 해당 객체를 가리킨다면 어떨까요?
+
+    ```cpp
+        std::shared_ptr<A> p3(p2);
+    ```
+
+    와 같이 말이죠. `p2`의 참조 카운트를 증가시킬 수 있다 해도, `p1`에 저장되어 있는
+    참조 개수를 건드릴 수 없습니다. 즉, 아래와 같은 상황이 발생합니다.
+
+    사진 2
+
+    따라서 이와 같은 문제를 방지하기 위해, 처음으로 실제 객체를 가리키는 `shared_ptr`이
+    **제어 블록( Control Block )을 동적으로 할당 후, `shared_ptr`들이 이 제어 블록에 필요한
+    정보를 공유하는 방식으로 구현됩니다. 아래 그림과 같이 말이죠.
+
+    사진 3
+
+    `shared_ptr`은 복사 생성할 때 마다 해당 제어 블록의 위치만 공유하면 되고,
+    `shared_ptr`이 소멸할 때 마다 제어 블록의 참조 개수를 하나 줄이고,
+    생성할 때 마다 하나 늘리는 방식으로 작동할 것입니다.
+    ***
+    # make_shared로 생성하자
+    ```cpp
+        std::shared_ptr<A> p1(new A());
+    ```
+    동적 할당은 상당히 비싼 연산입니다. 위 처럼 `shared_ptr`을 생성하면,
+    A를 생성하기 위해 동적 할당이 한 번 일어나야 하고, 그 다음 `shared_ptr`의 제어 블록 역시
+    동적으로 할당해야 하기 때문이죠.
+
+    어차피 동적 할당을 두 번 할 것이라는 것을 알고 있다면, **아예 두 개 합친 크기로 한 번 할당하는 것이 훨씬 빠릅니다.**
+
+    ```cpp
+        std::shared_ptr<A> p1 = std::make_shared<A>();
+    ```
+    ***
+    # shared_ptr 생성 시 주의 할 점
+    `shared_ptr`은 인자로 주소 값이 전달된다면, 마치 자기가 해당 객체를 첫번째로 소유하는
+    `shared_ptr`인 것 마냥 행동합니다. 예를 들어,
+    ```cpp
+        A* a = new A();
+        std::shared_ptr<A> pa1(a);
+        std::shared_ptr<A> pa2(a);
+    ```
+
+    를 하면, 아래와 같이 두 개의 제어블록이 따로 생성됩니다.
+
+    사진 4
+
+    만일 `pa1`이 소멸되면 참조 카운트가 0이 되어 A를 소멸시킵니다.
+    `pa2`가 아직 가리키고 있는데도 말이죠!
+
+    ```cpp
+	#include <iostream>
+	#include <memory>
+
+	class A {
+	  int* data;
+
+	 public:
+	  A() {
+		data = new int[100];
+		std::cout << "자원을 획득함!" << std::endl;
+	  }
+
+	  ~A() {
+		std::cout << "소멸자 호출!" << std::endl;
+		delete[] data;
+	  }
+	};
+
+	int main() {
+	  A* a = new A();
+
+	  std::shared_ptr<A> pa1(a);
+	  std::shared_ptr<A> pa2(a);
+
+	  std::cout << pa1.use_count() << std::endl;
+	  std::cout << pa2.use_count() << std::endl;
+	}
+    ```
+    위를 컴파일 하면, 소멸자가 두 번 호출되며 오류가 발생합니다.
+    위와 같은 상황을 방지하려면 `shared_ptr`을 주소값을 통해서 생성하는 것을 삼가해야 합니다.
+
+    하지만, 객체 내부에서 자기 자신을 가리키는 `shared_ptr`을 만들 때처럼 어쩔 수 없는 상황도 있습니다.
+
+    이 문제는 `enable_shared_from_this` 를 통해 깔끔하게 해결이 가능합니다.
+    ***
+    # enable_shared_from_this
+    우리가 `this`를 사용해서 `shared_ptr`을 만들고 싶은 클래스가 있다면,
+    `enable_shared_from_this`를 상속 받으면 됩니다. 
+
+    ```cpp
+	#include <iostream>
+	#include <memory>
+
+	class A : public std::enable_shared_from_this<A> {
+	  int *data;
+
+	 public:
+	  A() {
+		data = new int[100];
+		std::cout << "자원을 획득함!" << std::endl;
+	  }
+
+	  ~A() {
+		std::cout << "소멸자 호출!" << std::endl;
+		delete[] data;
+	  }
+
+	  std::shared_ptr<A> get_shared_ptr() { return shared_from_this(); }
+	};
+
+	int main() {
+	  std::shared_ptr<A> pa1 = std::make_shared<A>();
+	  std::shared_ptr<A> pa2 = pa1->get_shared_ptr();
+
+	  std::cout << pa1.use_count() << std::endl;
+	  std::cout << pa2.use_count() << std::endl;
+	}
+    ```
+    위를 컴파일 하면
+
+	> 자원을 획득함!
+	> 2
+	> 2
+	> 소멸자 호출!
+    
+    와 같이 작동합니다.
+    `enable_shared_from_this` 클래스에는 `shared_from_this`라는 멤버 함수를 정의하고 있는데,
+    이 함수는 이미 정의되어 있는 제어 블록을 사용해서 `shared_ptr`을 생성합니다.
+
+    따라서, 이전처럼 같은 객체에 두 개의 다른 제어 블록이 생성되는 일을 막을 수 있습니다.
+
+    한 가지 중요한 점은 `shared_from_this`가 잘 작동하기 위해서는 해당 객체의 `shared_ptr`이 반드시
+    먼저 정의가되어 있어야합니다. 즉, `shared_from_this`는 **존재하는** 제어 블록을 확인만 할 뿐,
+    없는 제어 블록을 만들지 않습니다. 즉, 다음 코드는 오류가 발생합니다.
+
+    ```cpp
+        A* a = new A();
+        std::shared_ptr<A> pa1 = a->get_shared_ptr();
+    ```
+    ***
+    # 서로 참조하는 shared_ptr
+    `shared_ptr`은 참조 개수가 0이되면 가리키는 객체를 메모리에서 해제시킨다고 했습니다.
+    그런데, 객체들을 더 이상 사용하지 않음에도 불구하고 참조 개수가 0이 될 수 없는 상황이 있습니다.
+
+    사진 5
+
+    위 그림의 경우 각 객체는 `shared_ptr`을 하나씩 가지고 있는데, 이 `shared_ptr`이 다른 객체를 가리키고 있습니다.
+    즉, 객체 1의 `shared_ptr`은 객체 2를 가리키고 있고, 객체 2의 `shared_ptr`은 객체 1을 가리키고 있죠.
+
+    만약 객체 1이 파괴가 되기 위해서는 객체 1을 가리키고 있는 `shared_ptr`의 참조 개수가 0이 되어야만 합니다.
+    즉, 객체 2가 파괴가 되어야겠죠. 하지만 객체 가 파괴되기 위해서는 마찬가지로 객체 2를 가리키고 있는
+    `shared_ptr`의 참조 개수가 0이 되어야하는데, 그러기 위해서는 객체 1이 파괴되어야만 합니다.
+    ```cpp
+	#include <iostream>
+	#include <memory>
+
+	class A {
+	  int *data;
+	  std::shared_ptr<A> other;
+
+	 public:
+	  A() {
+		data = new int[100];
+		std::cout << "자원을 획득함!" << std::endl;
+	  }
+
+	  ~A() {
+		std::cout << "소멸자 호출!" << std::endl;
+		delete[] data;
+	  }
+
+	  void set_other(std::shared_ptr<A> o) { other = o; }
+	};
+
+	int main() {
+	  std::shared_ptr<A> pa = std::make_shared<A>();
+	  std::shared_ptr<A> pb = std::make_shared<A>();
+
+	  pa->set_other(pb);
+	  pb->set_other(pa);
+	}
+    ```
+    성공적으로 컴파일 하였다면,
+
+    > 자원을 획득함!
+    > 자원을 획득함!
+
+    위와 같이 소멸자가 제대로 호출되지 않음을 알 수 있습니다.
+    이 문제는 `shared_ptr`자체에 내재되어 있는 문제이기에 `shared_ptr`을 통해서는 이를 해결할 수 없습니다.
+    이러한 순환 참조 문제를 해결하기 위해 나타난 것이 바로 `weak_ptr`입니다.
+    ***
+    # weak_ptr
+    `weak_ptr`은 일반 포인터와 `shared_ptr` 사이에 위치한 스마트 포인터로, 스마트 포인터처럼
+    객체를 안전하게 참조할 수 있게 해주지만, `shared_ptr`과는 다르게 참조 개수를 늘리지는 않습니다.
+    이름 그대로 **약한** 포인터 인것이지요
+
+    이 때문에, `weak_ptr` 자체로는 원래 겍체를 참조할 수 없고, 반드시 `shared_ptr`로 변환해서 사용해야 합니다.
+    이 때 가리키고 있는 객체가 이미 소멸되었다면, 빈 `shared_ptr`로 변환되고, 아닐경우 해당 객체를 가리키는 `shared_ptr`로 변환됩니다.
+    ```cpp
+	#include <iostream>
+	#include <memory>
+	#include <string>
+	#include <vector>
+
+	class A {
+	  std::string s;
+	  std::weak_ptr<A> other;
+
+	 public:
+	  A(const std::string& s) : s(s) { std::cout << "자원을 획득함!" << std::endl; }
+
+	  ~A() { std::cout << "소멸자 호출!" << std::endl; }
+
+	  void set_other(std::weak_ptr<A> o) { other = o; }
+	  void access_other() {
+		std::shared_ptr<A> o = other.lock();
+		if (o) {
+		  std::cout << "접근 : " << o->name() << std::endl;
+		} else {
+		  std::cout << "이미 소멸됨 ㅠ" << std::endl;
+		}
+	  }
+	  std::string name() { return s; }
+	};
+
+	int main() {
+	  std::vector<std::shared_ptr<A>> vec;
+	  vec.push_back(std::make_shared<A>("자원 1"));
+	  vec.push_back(std::make_shared<A>("자원 2"));
+
+	  vec[0]->set_other(vec[1]);
+	  vec[1]->set_other(vec[0]);
+
+	  // pa 와 pb 의 ref count 는 그대로다.
+	  std::cout << "vec[0] ref count : " << vec[0].use_count() << std::endl;
+	  std::cout << "vec[1] ref count : " << vec[1].use_count() << std::endl;
+
+	  // weak_ptr 로 해당 객체 접근하기
+	  vec[0]->access_other();
+
+	  // 벡터 마지막 원소 제거 (vec[1] 소멸)
+	  vec.pop_back();
+	  vec[0]->access_other();  // 접근 실패!
+	}
+    ```
+
+    성공적으로 컴파일 시,
+	> 자원을 획득함!
+    > 자원을 획득함!
+    > vec[0] ref count : 1
+    > vec[1] ref count : 1
+    > 접근 : 자원 2
+    > 소멸자 호출!
+    > 이미 소멸됨 ㅠ
+    > 소멸자 호출!
+
+    와 같이 나옵니다.
+
+    일단 `weak_ptr`의 정의부를 봅시다.
+
+    ```cpp
+	    vec[0]->set_other(vec[1]);
+        vec[1]->set_other(vec[0]);
+    ```
+
+    `set_other`함수는 `weak_ptr<A>`를 인자로 받는데, 여기에 `shared_ptr`을 전달했습니다.
+    즉, `weak_ptr`은 생성자로 `shared_ptr`이나 다른 `weak_ptr`을 받습니다.
+    또한, `shared_ptr`과는 다르게 이미 제어 블록이 만들어진 객체만이 의미를 가지기에,
+    평범한 포인터 주소 값으로 `weak_ptr`의 생성은 불가합니다.
+
+    그 다음으로 살펴볼 부분은 실제 `weak_ptr`을 `shared_ptr`로 변환하는 과정입니다.
+
+    ```cpp
+	void access_other() 
+    {
+      std::shared_ptr<A> o = other.lock();
+	  if (o) 
+      {
+		std::cout << "접근 : " << o->name() << std::endl;
+	  } 
+      else 
+      {
+		std::cout << "이미 소멸됨 ㅠ" << std::endl;
+	  }
+	}
+    ```
+    앞서 말했듯이, `weak_ptr` 그 자체로는 원소를 참조할 수 없고, `shared_ptr`로 변환해야 한다고 했습니다.
+    이 작업은 lock 함수를 통해 수행할 수 있습니다.
+
+    `weak_ptr`에 정의된 lock 함수는 만일 `weak_ptr`이 가리키는 객체가 메모리에서 살아있다면
+    해당 객체를 가리키는 `shared_ptr`을 반환하고, 이미 해제가 되었다면
+    아무것도 가리키지 않는 `shared_ptr`을 반환합니다.
+
+    앞서 제어블록에는 몇개의 `shared_ptr`이 가리키고 있는지를 나타내는 참조 개수가 있다고 했습니다.
+    그리고 참조 개수가 0이되면 해당 객체를 메모리에서 해제하는 것도 알고 있지요.
+    그렇다면 참조 개수가 0이 될 때, 제어 블록역시 메모리에서 해제해야 할까요?
+
+    아닙니다. 만약에 가리키는 `shared_ptr`은 0이지만, 아직 `weak_ptr`이 남아있다면
+    객체는 해제 되어 있겠지만, 제어 블록을 해제하면 제어 블록에서 참조 카운트가 0인걸 알 수가 없습니다.
+
+    즉, 제어 블록을 메모리에서 해제하기 위해서는 이를 가리키는 `weak_ptr`역시 0개여야합니다.
+    따라서 제어 블록에는 참조 개수와 더불어 **약한 참조 개수**를 기록하게 됩니다.
+
+    ***
+    참조 : 모두의 코드
+    ***
+
+	*/
+    #pragma endregion
 
 #pragma endregion
 
@@ -1420,7 +1827,12 @@ using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    auto A = std::make_unique<TestClass>();
+    cout << A->get_Test() << endl;
+    A->do_Something();
+    cout << A->get_Test() << endl;
+    A->set_Test(1000);
+    cout << A->get_Test();
     
 }
 
