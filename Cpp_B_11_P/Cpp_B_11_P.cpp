@@ -9035,7 +9035,7 @@ int main()
         if (fac < n)
             answer++;
     }
-
+    
     return answer;
     
     return 0;
