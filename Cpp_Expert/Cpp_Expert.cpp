@@ -1704,11 +1704,88 @@ using namespace std;
 
 	*/
     #pragma endregion
-    #pragma region 1.8 참조 전달 방식
+    #pragma region 1.8 전달 방식
 	/*
-  mac test
+    ***
+    # 개요
+    C++에서는 크게 값으로 전달 / 참조로 전달 하는 두 가지의 전달 방식이 있습니다.
+    각 전달 방식 모두 장단점과 사용해야 하는 경우, 사용하지 않아야 하는 경우가 있습니다.
+    ***
+    # 값으로 전달 ( Pass by Value )
+    C++에서 포인터가 아닌 인수는 값으로 전달 됩니다. 
+    인수가 값으로 전달되면, 인수의 값은 해당 함수 매개 벼수의 값으로 복사됩니다.
 
+    ```cpp
+        void foo(int y)
+        {
+            cout << "y = " << y << endl;
+        }
 
+        int main()
+        {
+            foo(5);     // first call
+
+            int x  = 6;
+            foo(x);     // second call
+            foo(x+1);   // third call
+
+            return 0;
+        }
+    ```
+    첫 번재 foo(5) 호출에서 인수는 리터럴 5다. foo(5)가 호출되면 변수 y가 만들어지고
+    값 5가 y로 복사된다. 변수 y는 foo() 함수가 종료되면 소멸한다.
+    두 번째, 세 번째 call 도 마찬가지다.
+
+    즉, **인수의 복사본이 함수로 전달되므로 원래 인수는 함수 안에서 수정할 수 없다.**
+
+    ```cpp
+	#include <iostream>
+
+	void foo(int y)
+	{
+		std::cout << "y = " << y << '\n';
+
+		y = 6;
+
+		std::cout << "y = " << y << '\n';
+	} // y is destroyed here
+
+	int main()
+	{
+		int x = 5;
+		std::cout << "x = " << x << '\n';
+
+		foo(x);
+
+		std::cout << "x = " << x << '\n';
+		return 0;
+	}
+	> x = 5
+	> y = 5
+	> y = 6
+	> x = 5
+    ```
+
+    main 함수의 시작 부분에서 변수 x의 값은 5다. foo(X)가 호출되면 foo의 매개변수 y에 값 5가 복사되어 전달된다.
+    foo() 함수 내부에서 y의 값은 6으로 변경되고 소멸하지만, y가 변경되더라도 변수 x의 값은 아무런 영향을 받지 않는다.
+
+    ## 값으로 전달의 장단점
+    
+    ### 값으로 전달의 장점
+    * 호출되는 함수에 의해 인수가 변경되지 않으므로 예기치 못한 부작용이 발생하지 않는다.
+    
+    ### 값으로 전달의 단점
+    * 함수를 여러 번 호출하는 경우, 구조체(struct) 및 클래스(class)를 복사하는데 큰 비용이 들어 성능이 저하될 수 있다.
+    
+    ### 값으로 전달을 사용해야 하는 경우
+    * 기본 자료형과 열거자를 전달할 때(함수가 인수를 변경할 필요가 없을 때)
+    
+    ### 값으로 전달을 사용하지 않아야 하는 경우
+    * 배열(array), 구조체(struct), 및 클래스(class) 를 전달할 때
+    ***
+    # 주소로 전달 ( Pass by address )
+
+    
 	*/
     #pragma endregion
 #pragma endregion
@@ -1723,7 +1800,7 @@ using namespace std;
     2. 런타임, 컴파일 타임?
     3. 메모리 구조
     4. 스마트 포인터
-    5. 참조 전달 방식
+    5. 전달 방식
     6. const 참조 전달 방식
     7. 예외 처리
     8. 타입 추론 auto
@@ -1838,7 +1915,6 @@ int main()
     A->do_Something();
     cout << A->get_Test() << endl;
     A->set_Test(1000);
-    cout << A->get_Test();
-    
+    cout << A->get_Test() << endl;
 }
 
