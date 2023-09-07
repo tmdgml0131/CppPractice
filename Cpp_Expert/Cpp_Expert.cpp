@@ -1924,7 +1924,220 @@ using namespace std;
 
     하지만 C++에서는 위와 같은 불편한 처리 방식을 획기적으로 해결했습니다.
     ***
-    #
+    # 예외 발생시키기 - throw
+    C++에서는 예외가 발생했다는 사실을 `throw`를 통해 명시적으로 나타낼 수 있습니다
+	```cpp
+		vector<int> v(3);       // 크기가 3인 벡터를 만듬
+		cout << v.at(4);        // ??
+	```
+    v의 크기가 3이지만 at(4)를 통해 크기를 초과한 원소에 접근하려합니다.
+    문제는 `at` 함수가 `const T&' 를 리턴하기에 "오류 메세지"를 리턴할 수 없는 점입니다.
+    하지만 C++에서는 다음과 같이 예외를 명시적으로 알려줄 수 있습니다.
+    ```cpp
+        const T& at(size_t index) const
+        {
+            if(index >=size)
+            {
+                throw std::out_of_range("Vector의 범위 초과");
+            }
+            return data[index]
+
+        }
+    ```
+    예외를 발생시키는 부분을 보겠습니다.
+    > throw std::out_of_range("Vector의 범위 초과");
+
+    C++에는 예외를 던지고 싶다면, **`throw`로 예외로 전달하고 싶은 객체를 써주면 됩니다.**
+    아무 객체나 던져도 상관 없지만, C++ 표준 라이브러리에는 이미 여러가지 종류의 예외들이 정의되어 있어서
+    이를 활용하는 것도 좋습니다. `out_of_range` 외에도
+    `overflow_error`, 'length_error', 'runtime_error' 등등 여러가지가 정의되어 있습니다.
+
+    이렇게 예외를 `throw`하게 되면, `throw`한 위치에서 함수가 종료됩니다.
+    한 가지 중요한 점은, 함수를 빠져나가면서 `stack`에 생성되었던 객체들을 **빠짐없이 소멸** 시킨다는 점입니다.
+    ***
+    # 예외 처리하기 - try와 catch
+    그렇다면 예외를 어떻게 처리할까요?
+    ```cpp
+	#include <iostream>
+	#include <stdexcept>
+
+	template <typename T>
+	class Vector {
+	 public:
+	  Vector(size_t size) : size_(size) {
+		data_ = new T[size_];
+		for (int i = 0; i < size_; i++) {
+		  data_[i] = 3;
+		}
+	  }
+	  const T& at(size_t index) const {
+		if (index >= size_) {
+		  throw std::out_of_range("vector 의 index 가 범위를 초과하였습니다.");
+		}
+		return data_[index];
+	  }
+	  ~Vector() { delete[] data_; }
+
+	 private:
+	  T* data_;
+	  size_t size_;
+	};
+	int main() {
+	  Vector<int> vec(3);
+
+	  int index, data = 0;
+	  std::cin >> index;
+
+	  try {
+		data = vec.at(index);
+	  } catch (std::out_of_range& e) {
+		std::cout << "예외 발생 ! " << e.what() << std::endl;
+	  }
+	  // 예외가 발생하지 않았다면 3을 이 출력되고, 예외가 발생하였다면 원래 data 에
+	  // 들어가 있던 0 이 출력된다.
+	  std::cout << "읽은 데이터 : " << data << std::endl;
+	}
+    ```
+    성공적으로 컴파일 하였다면,
+    > 1
+    > 읽은 데이터 :3
+    > 4
+    > 예외 발생 ! vector 의 index 가 범위를 초과하였습니다.
+    > 읽은 데이터 : 0
+
+    와 같이 나옵니다.
+
+    그렇다면 예외가 어떻게 처리되었는지 살펴봅시다.
+    ```cpp
+	try 
+    {
+        data = vec.at(index);
+    }
+    ```
+    `try` 블록에서는 무언가 예외가 발생할만한 코드가 실행됩니다.
+    만약에 예외가 발생하지 않았다면 `try`..`catch` 부분이 없는 것과 동일하게 실행 됩니다.
+
+    반면에 예외가 발생하는 경우, 그 즉시 `stack`에 생성된
+    모든 객체들의 소멸자들이 호출되고, 가장 가까운 `catch`문으로 점프합니다.
+
+    ```cpp
+	if (index >= size_) 
+    {
+        throw std::out_of_range("vector 의 index 가 범위를 초과하였습니다.");
+    }
+    ```
+    의 `throw` 다음으로 실행되는 문장이 바로
+    ```cpp
+	catch (std::out_of_range& e) 
+    {
+        std::cout << "예외 발생 ! " << e.what() << std::endl;
+    }
+    ```
+    `throw`된 예외를 받는 부분입니다.
+    우리 `Vector`의 경우, `out_of_range`를 `throw` 하였는데,
+    위 `catch`문이 `out_of_range`를 받으므로 예외처리가 가능합니다.
+    ***
+    # 스택 풀기 ( Stack Unwinding )
+    앞서 `throw`를 하게 된다면, 가장 가까운 `catch`로 점프한다고 하였습니다. 아래 예제를 봅시다.
+    ```cpp
+	#include <iostream>
+	#include <stdexcept>
+
+	class Resource {
+	 public:
+	  Resource(int id) : id_(id) {}
+	  ~Resource() { std::cout << "리소스 해제 : " << id_ << std::endl; }
+
+	 private:
+	  int id_;
+	};
+
+	int func3() {
+	  Resource r(3);
+	  throw std::runtime_error("Exception from 3!\n");
+	}
+	int func2() {
+	  Resource r(2);
+	  func3();
+	  std::cout << "실행 안됨!" << std::endl;
+	  return 0;
+	}
+	int func1() {
+	  Resource r(1);
+	  func2();
+	  std::cout << "실행 안됨!" << std::endl;
+	  return 0;
+	}
+
+	int main() {
+	  try {
+		func1();
+	  } catch (std::exception& e) {
+		std::cout << "Exception : " << e.what();
+	  }
+	}
+    ```
+    이를 성공적으로 실행하였으면
+    > 리소스 해제 : 3
+    > 리소스 해제 : 2
+    > 리소스 해제 : 1
+    > Exception : Exception from 3!
+
+    와 같이 나옵니다. 실행 결과를 보면 소멸자들이 호출되며 
+    각 함수들에 정의되어 있던 객체들이 잘 소멸되었다는 점입니다.
+
+    이와 같이 `catch`로 점프하면서 스택 상에서 정의된 객체들을 소멸시키는 과정을
+    **스택 풀기 ( Stack Unwinding )** 이라고 합니다.
+    
+    > **주의 사항**
+    > 예외를 생성자에서 던질 때 주의해야 할 점이 있습니다.
+    > 바로 **생성자에서 예외 발생 시 소멸자는 호출되지 않는다** 라는 점입니다.
+    > 따라서 예외를 던지기 이전에 획득한 자원이 있다면 `catch`에서 잘 해제해야합니다.
+    ***
+    # 모든 예외 받기
+    `catch`는 `else if` 나 `switch`문 처럼 일일히 모든 예외를 명시적으로 작성하면
+    예외처리가 가능합니다. 하지만, 때로는 예외 객체 하나하나 처리 없이
+    **그냥 나머지 전부다!** 라고 쓰고 싶을 때가 있습니다.
+    
+    이럴 때는, `...` 을 사용하면 됩니다.
+    ```cpp
+        try
+        {
+            someFunction(c);
+        }
+        catch(int e)
+        {
+            std::cout << "int!" << e << std::endl; 
+        }
+        catch(...)
+        {
+            std::cout << "Default!" << std::endl;
+        }
+    ```
+    ***
+    # 예외를 발생시키지 않는 함수 - noexcept
+    만약 어떤 함수가 예외를 발생시키지 않는다면 `noexcept`를 통해 명시할 수 있습니다.
+    ```cpp
+        int foo() noexcept{}
+    ```
+    foo 함수의 경우 예외를 발생시키지 않으므로 위와 같이 함수 정의 옆에 `noexcept`를 넣음으로써 나타낼 수 있습니다.
+    참고로, 함수에 `noexcept`를 붙였다고 해서, 함수가 예외를 절대로 던지지 않는 것은 아닙니다.
+    컴파일러는 `noexcept` 키워드가 붙은 함수가 **이 함수는 예외를 발생시키지 않는구나**라고 믿고 컴파일합니다.
+
+    대신 `noexcept`로 명시된 함수가 예외를 발생시키게 된다면 예외가 처리되지 않고 프로그램이 종료됩니다.
+
+    그렇다면 이 `noexcept` 키워드는 왜 붙이는 것일까요?
+    이는 단순히 프로그래머가 컴파일러에게 주는 힌트라고 생각하시면 됩니다.
+    컴파일러가 어떤 함수가 절대로 예외를 발생시키지 않는다는 사실을 알면,
+    여러가지 최적화를 수행할 수 있습니다.
+
+    > 주의 사항
+    > C++11부터 소멸자들은 기본적으로 `noexcept`입니다.
+    > 절대로 소멸자에서 예외를 던지면 안됩니다.
+
+    ***
+    참조 : 모두의코드
+    *** 
 
 	*/
     #pragma endregion
