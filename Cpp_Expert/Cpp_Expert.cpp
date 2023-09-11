@@ -2243,6 +2243,205 @@ using namespace std;
     #pragma endregion
     #pragma region 1.11 생성자 이니셜라이저
 	/*
+    ***
+    # 개요
+    아마 여러분들은 아래와 같은 실수를 한 번쯤 하셨을 것이라 생각합니다.
+    ```cpp
+	#include <iostream>
+
+	class A {
+	 public:
+	  A() { std::cout << "A 의 생성자 호출!" << std::endl; }
+	};
+
+	int main() {
+	  A a();  // ?
+	}
+    ```
+    성공적으로 컴파일 했다면,
+    >
+
+    놀랍게도 아무것도 출력되지 않습니다.
+    ```cpp
+        A a();
+    ```
+    왜냐면 사실은 위 코드가 A의 객체 a를 만든 것이 아닌, 자료형 A를 리턴하는 a라는 함수를 정의한 것이기 때문입니다.
+    왜냐하면 C++의 컴파일러는 **함수의 정의처럼 보이는 것들은 모두 함수의 정의로 해석**하기 때문입니다.
+
+    이러한 문제는 `()` 가 함수의 인자들을 정의하는데도 사용되고,
+    그냥 일반적인 객체의 생성자를 호출하는데에도 사용되기 때문입니다.
+
+    따라서 C++11 부터는 이러한 문제를 해결하기 위해 **균일한 초기화(Uniform Initialization)**을 도입 했습니다.
+    ***
+    # 균일한 초기화 (Uniform Initialization)
+    균일한 초기화 문법을 사용하기 위해서는 생성자 호출을 위해 `()`대신 `{}` 를 사용하면 됩니다.
+    ```cpp
+        class A
+        {
+        public:
+            A() { std::cout << "A의 생성자 호출!" << std::endl; }
+        };
+
+        int main()
+        {
+            A a{};
+        }
+    ```
+
+    성공적으로 컴파일 하였다면,
+    > A의 생성자 호출!
+
+    위와 같이 제대로 생성자가 호출되었음을 알 수 있습니다.
+
+    중괄호를 이용해서 생성자를 호출하는 문법은 동일합니다.
+    그냥 기존에 `()` 자리를 `{}` 로 바꿔주기만하면 됩니다.
+    하지만, `()`를 이용한 생성과 `{}`를 이용한 생성의 경우 한 가지 큰 차이가 있는데
+    바로 일부 암시적 타입 변환들을 불허하고 있다는 점입니다.
+
+    예를 들어 아래 코드를 봅시다.
+    ```cpp
+	#include <iostream>
+
+	class A {
+	 public:
+	  A(int x) { std::cout << "A 의 생성자 호출!" << std::endl; }
+	};
+
+	int main() {
+	  A a(3.5);  // Narrow-conversion 가능
+	  A b{3.5};  // Narrow-conversion 불가
+	}
+    ```
+    컴파일하면
+    > A b{3.5};  // Narrow-conversion 불가
+    
+    에서 `double` 을 `int` 로 변환할 수 없다는 오류가 발생합니다.
+
+    그 이유는 중괄호를 이용해서 생성자를 호출하는 경우 아래와 같은 암시적인 타입 변환이 불가능해집니다.
+    이들은 전부 **데이터 손실이 있는(Narrowing) 변환** 입니다.
+
+        * 부동 소수점 타입에서 정수 타입으로 변환
+        * `long double`에서 `double` 혹은 `float`으로의 변환, `double` 에서 `float`으로의 변환
+        * 정수 타입에서 부동 소수점 타입으로 변환
+    
+    등등이 있습니다.
+
+    따라서 `{}`를 사용하게 된다면, 위와 같이 원하지 않는 타입 캐스팅을 방지해서 미연에 오류를 잡아낼 수 있습니다.
+
+    `{}` 를 이용한 생성의 또 다른 쓰임새로, 함수 리턴 시에 굳이 생성하는 객체의 타입을 다시 명시하지 않아도 됩니다.
+
+    ```cpp
+	#include <iostream>
+
+	class A {
+	 public:
+	  A(int x, double y) { std::cout << "A 생성자 호출" << std::endl; }
+	};
+
+	A func() {
+	  return {1, 2.3};  // A(1, 2.3) 과 동일
+	}
+
+	int main() { func(); }
+    ```
+    성공적으로 컴파일 하였다면
+    > A 생성자 호출
+
+    와 같이 잘 나옵니다. `{}`를 이용해서 생성하지 않았다면, `A(1, 2.3)` 과 같이
+    클래스를 명시해야했지만, `{}`를 사용할 경우, 컴파일러가 알아서 함수의 리턴타입을 보고 추론해줍니다.
+    ***
+    # 초기화자 리스트 (Initializer List)
+    배열을 정의할 때, 우리는 다음과 같이 작성합니다.
+    ```cpp
+        int arr[] = {1,2,3,4};
+    ```
+    그렇다면 중괄호를 이용해서 마찬가지 효과를 낼 수 없을까요? 예를 들면,
+    ```cpp
+        vector<int> v = {1,2,3,4};
+    ```
+    와 같이 말이죠. 근데, 놀랍게도 C++11부터 이와 같은 문법을 사용할 수 있게 되었습니다.
+    ```cpp
+	#include <iostream>
+
+	class A {
+	 public:
+	  A(std::initializer_list<int> l) {
+		for (auto itr = l.begin(); itr != l.end(); ++itr) {
+		  std::cout << *itr << std::endl;
+		}
+	  }
+	};
+
+	int main() { A a = {1, 2, 3, 4, 5}; }
+    ```
+
+    성공적으로 컴파일 하였다면,
+    > 1
+    > 2
+    > 3
+    > 4
+    > 5
+
+    와 같이 나옵니다.
+
+    `initializer_list`는 우리가 `{}`를 이용해서 생성자를 호출할 때, 클래스의 생성자들 중에
+    `initializer_list`를 인자로 받는 생성자가 있다면 전달 됩니다.
+
+    > `()`를 사용해 생성자를 호출하면 `initializer_list`가 생성되지 않습니다.
+
+    `initializer_list`를 이용하면, 컨테이너들을 간단하게 정의할 수 있습니다.
+    ```cpp
+	#include <iostream>
+	#include <map>
+	#include <string>
+	#include <vector>
+
+	template <typename T>
+	void print_vec(const std::vector<T>& vec) {
+	  std::cout << "[";
+	  for (const auto& e : vec) {
+		std::cout << e << " ";
+	  }
+	  std::cout << "]" << std::endl;
+	}
+
+	template <typename K, typename V>
+	void print_map(const std::map<K, V>& m) {
+	  for (const auto& kv : m) {
+		std::cout << kv.first << " : " << kv.second << std::endl;
+	  }
+	}
+
+	int main() {
+	  std::vector<int> v = {1, 2, 3, 4, 5};
+	  print_vec(v);
+
+	  std::cout << "----------------------" << std::endl;
+	  std::map<std::string, int> m = {
+		{"abc", 1}, {"hi", 3}, {"hello", 5}, {"c++", 2}, {"java", 6}};
+	  print_map(m);
+	}
+    ```
+    성공적으로 컴파일 하였다면,
+    > [1 2 3 4 5]
+	> ----------------------
+	> abc : 1
+	> c++ : 2
+	> hello : 5
+	> hi : 3
+	> java : 6
+    
+    와 같이 나옵니다.
+    ***
+    ## initializer_list 사용 시 주의할 점
+    생성자들 중에서 `initializer_list`를 받는 생성자가 있다면, 한 가지 주의해야 할 점이 있습니다.
+    만일, `{}`를 이용해서 객체를 생성할 경우, 생성자 오버로딩 시에 해당 함수가 **최우선**으로 고려된다는 점입니다.
+
+    예를 들어, `vector`의 경우 아래와 같은 생성자가 존재합니다.
+    ```cpp
+        vector(size_type count);
+    ```
+    이 생성자는 count 개수 만큼의 원소 자리를 미리 생성해놓습니다.
 
 
 
@@ -2269,9 +2468,8 @@ using namespace std;
     6. 예외 처리
     7. 타입 추론 auto
     8. decltype
-    9. 생성자 이니셜라이저
-    10. 유니폼 초기화
-    11. 컴파일 에러 / 런타임 에러 / 링킹 에러 / 논리 에러 / 파스 에러
+    9. 유니폼 초기화
+    10. 컴파일 에러 / 런타임 에러 / 링킹 에러 / 논리 에러 / 파스 에러
 
 2장 :
     1. 스트링 리터럴
