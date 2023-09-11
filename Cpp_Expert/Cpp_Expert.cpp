@@ -2141,6 +2141,118 @@ using namespace std;
 
 	*/
     #pragma endregion
+    #pragma region 1.10 타입 추론 auto과 decltype
+	/*
+    ***
+    # 개요
+    C++에는 타입을 추론할 수 있는 편리한 키워드가 있습니다.
+    `auto` 와 `decltype` 키워드 입니다. 둘은 C++ 프로그래밍 언어에서
+    변수의 타입을 추론하기 위한 키워드입니다. 그러나 각각의 사용 및 동작 방식은 조금씩 다릅니다.
+
+    # Auto키워드
+    변수를 선언할 때 타입 자리에 `auto` 키워드를 사용하면, **컴파일 시간**에 변수의 타입을 자동으로 추론해줍니다.
+    
+    ```cpp
+        auto x = 10;    // x의 타입은 int로 추론된다.
+    ```
+
+    사실 위 예제처럼 간단한 타입은 auto를 쓰면 별다른 이점은 없습니다. 하지만 다음처럼 복잡하고 긴 이름을 가진
+    타입을 보면, `auto` 키워드의 진가가 나타납니다.
+
+    ```cpp
+        std::vector<std::vector<std::vector<double>>> vecValue = Function();
+    ```
+    위의 타입을 auto 키워드를 통해 다음과 같이 간단하게 나타낼 수 있습니다.
+
+    ```cpp
+        auto vecValue = Function();
+    ```
+    이렇게 하면 나중에 이 함수의 리턴타입을 변경하더라도, 코드에서 그 함수가 나온 모든 지점을 찾아서
+    고칠 필요가 없습니다. 바로 `auto` 키워드가 자동으로 변경해 주기 때문입니다.
+
+    하지만 auto 키워드도 사용 시 주의 사항이 있습니다. auto 키워드로 타입을 추론할 때,
+    **참조(&)**와 **const 한정자**는 **제거**된다는 것입니다.
+    
+    예를 들어, 함수의 리턴타입이 const std::string& 이라면, 참조와 const가 제거되어서
+    std::string 타입을 리턴하게 됩니다. 이렇게하면 의도와는 달리 const 레퍼런스 기능이 사라지면서
+    **리턴 값이 복제**됩니다.
+
+    ```cpp
+        const std::string message = "test";
+
+        const std::string& printTest() { return message; }
+
+        int main()
+        {
+            auto a = printTest;     // message 값의 복사가 일어난다. (성능저하 발생 가능)
+            a = "exam";             // 할당받는 변수 값도 임의로 바꿀 수 있다.
+            cout << a << endl;
+            cout << message << endl;
+
+            return 0;
+        }
+    ```
+
+    > exam
+    > test
+
+    위의 경우 간단한 string 값이라서 성능 저하는 발생하지 않지만,
+    리턴 값의 용량이 매우 큰 경우 **복제로 인한 성능 저하**의 원인이 되기도 합니다.
+    따라서, 함수의 리턴 타입대로 지정하려면 다음과 같이 auto에 const와 &를 붙이면 됩니다.
+
+    ```cpp
+        const auto& a = printTest();
+    ```
+    ***
+    
+    # decltype 키워드
+    decltype은 인수로 지정한 표현식의 타입을 알아내는 키워드 입니다.
+    ```cpp
+        double x = 10.0;
+        decltype(x) y = 9.0;
+    ```
+
+    위의 예에서 decltype(x)는 y의 타입을 double로 추론합니다. decltype의 좋은 점은
+    auto와는 다르게 const와 레퍼런스(&)를 제거하지 않는 점입니다.
+
+    ```cpp
+        const std::string message = "test;
+
+        const std::string& printTest()
+        {
+            cout << message << endl;
+            return message;
+        }
+
+        int main()
+        {
+            decltype(printTest()) a = printTest();
+            return 0;
+        }   
+    ```
+    > test
+
+    여기서 한 가지 더 확인할 수 있는 사실은, decltype()안에 printTest() 함수가 있지만,
+    printTest() 함수는 실행이 되지않고 함수의 반환 타입 참고용으로만 사용 되었습니다.
+
+    ***
+    참조 : todamfather 티스토리
+    ***
+
+	*/
+    #pragma endregion
+    #pragma region 1.11 생성자 이니셜라이저
+	/*
+
+
+
+	*/
+#pragma endregion
+
+
+
+
+
 #pragma endregion
 
 
