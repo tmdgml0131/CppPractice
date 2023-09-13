@@ -2441,13 +2441,142 @@ using namespace std;
     ```cpp
         vector(size_type count);
     ```
-    이 생성자는 count 개수 만큼의 원소 자리를 미리 생성해놓습니다.
+    이 생성자는 count 개수 만큼의 원소 자리를 미리 생성해놓습니다. 그렇다면,
+    ```cpp
+        vector v{10};
+    ```
+    은 해당 생성자를 호출할까요? 아닙니다. 그냥 원소 1개짜리 `initializer_list`라 생각해서
+    `10`을 보관하고 있는 벡터를 생성하게 됩니다.
+
+    따라서, 이러한 불상사를 막기 위해서는 `{}`로 생성하기 보다는 `()`을 이용해서
+    ```cpp
+        vector v(10);
+    ```
+    과 같이 v를 생성한다면 우리가 원하는 생성자를 호출할 수 있게 됩니다.
+
+    ```cpp
+	#include <initializer_list>
+	#include <iostream>
+
+	class A {
+	 public:
+	  A(int x, double y) { std::cout << "일반 생성자! " << std::endl; }
+
+	  A(std::initializer_list<int> lst) {
+		std::cout << "초기화자 사용 생성자! " << std::endl;
+	  }
+	};
+
+	int main() {
+	  A a(3, 1.5);  // Good
+	  A b{3, 1.5};  // Bad!
+	}
+    ```
+
+    다음 문장이 왜 문제가 될까요?
+    ```cpp
+        A b{3, 1.5};  // Bad!
+    ```
+    컴파일러는 `{}`를 이용해서 생성자를 호출할 경우, `initializer_list`를 받는 생성자를
+    최우선으로 고려한다고 했습니다. 따라서, 컴파일러는 `initializer_list`를 이용하도록 최대한 노력하는데,
+    1.5는 `int`가 아니지만, `double`에서 `int`로 암시적 변환을 할 수 있으므로 이를 택하게 됩니다.
+
+    그런데 `{}`는 데이터 손실이 있는 변환을 할 수 없다고 했습니다. 그런데 `double`에서 `int`로의 타입 변환은
+    데이터 손실이 있으므로 오류가 발생하게 됩니다. 사실, `A(int x, double y)` 이 생성자가 더 나은 매칭이지만,
+    C++컴파일러는 `initializer_list`를 이용한 생성자를 최대한 고려하려고 합니다. 이러한 문제가 발생하지 않으려면
+    `initializer_list`의 원소 타입으로 타입 변환 자체가 불가능한 경우여야 합니다.
+    ```cpp
+		#include <initializer_list>
+	#include <iostream>
+	#include <string>
+
+	class A {
+	 public:
+	  A(int x, double y) { std::cout << "일반 생성자! " << std::endl; }
+
+	  A(std::initializer_list<std::string> lst) {
+		std::cout << "초기화자 사용 생성자! " << std::endl;
+	  }
+	};
+
+	int main() {
+	  A a(3, 1.5);        // 일반
+	  A b{3, 1.5};        // 일반
+	  A c{"abc", "def"};  // 초기화자
+	}
+    ```
+
+    성공적으로 컴파일 했다면
+    > 일반 생성자!
+    > 일반 생성자!
+    > 초기화자 사용 생성자!
+
+    와 같이 잘 나옵니다. 위 경우 `int`나 `double`이 `string`으로 변환될 수 없기 때문에
+    `initializer_list`를 받는 생성자는 아예 고려 대상에서 제외됩니다.
+    ***
+    # initializer_list와 auto
+    만일 `{}`를 이용해서 생성할 때 타입으로 `auto`를 지정하면 `initializer_list` 객체가 생성됩니다.
+
+    ```cpp
+        auto list = {1,2,3};
+    ```
+
+    을 하게 되면 `list`는 `initializer_list<int>`가 되겠지요.
+
+    그렇다면 아래는 어떨까요?
+    ```cpp
+        auto a = {1};               // std::initializer_list<int>
+        auto b{1}};                 // std::initializer_list<int>
+        auto c = {1,2}};            // std::initializer_list<int>
+        auto d{1,2}};               // std::initializer_list<int>
+    ```
+
+    적어도 `b`는 `int`로 추론되어야 할 것 같지만, C++11에서는 모두 `std::initializer_list<int>`로 정의됩니다.
+
+    하지만 C++17부터는 아래와 같이 두 가지 형태로 구분해서 `auto` 타입이 추론됩니다.
+
+        * `auto x = {arg1, arg2...} 의 경우, `arg1`, `arg2` 들이 같은 타입이라면
+                x는 `std::initializer_list<T>` 로 추론 됩니다.
+        * `auto x {arg1, arg2...}` 형태의 경우 만일 인자가 단 1개라면, 인자의 타입을 추론되고
+                여러개라면 오류를 발생시킵니다.
+
+    따라서 C++17부터는 다음과 같습니다.
+    
+    ```cpp
+		auto a = {1};               // std::initializer_list<int>
+		auto b{1}};                 // int
+		auto c = {1,2}};            // std::initializer_list<int>
+		auto d{1,2}};               // 오류
+    ```
+
+    유니폼 초기화와 `auto`를 같이 사용 할 때 또 한 가지 주의할 점은, 문자열을 다룰 때
+    ```cpp
+        auto list = {"a", "b", "cc"};
+    ```
+    를 하게되면 `list`는 `initializer_list<std::string>`이 아닌
+    `initializer_list<const char*>이 된다는 점입니다. 이는 C++14에서 추가된
+	리터럴 연산자를 통해 해결 할 수 있습니다.
+	```cpp
+        using namespace std::literals;         // 문자열 리터럴 연산자 사용을 위해
+
+		auto list = {"a"s, "b"s, "cc"s};
+	```
+    
+    와 같이 하면, `initializer_list<std::string>`으로 추론됩니다.
+
+    ***
+    참조 : 모두의 코드
+    *** 
+
+	*/
+#pragma endregion
+    #pragma region 1.12 에러
+	/*
 
 
 
 	*/
 #pragma endregion
-
 
 
 
@@ -2466,10 +2595,9 @@ using namespace std;
     4. 스마트 포인터
     5. 전달 방식
     6. 예외 처리
-    7. 타입 추론 auto
-    8. decltype
-    9. 유니폼 초기화
-    10. 컴파일 에러 / 런타임 에러 / 링킹 에러 / 논리 에러 / 파스 에러
+	7. 타입 추론 auto / decltype
+    8. 유니폼 초기화
+    9. 컴파일 에러 / 런타임 에러 / 링킹 에러 / 논리 에러 / 파스 에러
 
 2장 :
     1. 스트링 리터럴
