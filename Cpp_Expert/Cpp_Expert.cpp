@@ -2819,6 +2819,121 @@ using namespace std;
 
 	*/
     #pragma endregion
+    #pragma region 2.2 string_view
+	/*
+    ***
+    # 개요
+    `string_view`는 c++17에서 추가된 기능으로
+    다양한 문자열 타입을 전달 받을 수 있는 안전하면서 효과적인 방법을 제공합니다.
+    내부적으로 문자열에 대한 `pointer`와 길이만 가지므로 임시객체를 생성하지 않고
+    문자열의 사용이 가능하며 또한 원본 데이터에 대한 변경을 방지합니다.
+
+    주의할 점은 `string_view`는 내부적으로 `null` 종료 문자를 가지지 않는다는 것입니다.
+    또, 원본 데이터에 대한 객체의 수명을 제어할 수 없기 때문에
+    호출하는 주체가 원본 데이터의 안정성을 보장 해줘야 합니다.
+    `string_view`는 암시적 변환이 지원되면 `template`를 사용하지 않고도
+    다양한 타입의 문자열을 전달 받아 사용할 수 있습니다.
+    ***
+    # string_view 기본 타입
+    `string_view` 타입들은 내부적으로 `std::basic_string_view<T>`로 구현됩니다.
+
+    > **string_view**
+    std::basic_string_view<char>
+    
+	> **wstring_view**
+	std::basic_string_view<wchar_t>
+
+	> **u16string_view**
+	std::basic_string_view<char16_t>
+
+	> **u32string_view**
+	std::basic_string_view<char32_t>
+    ***
+    # string_view 사용하기
+    string_view는 2가지 방법으로 사용 할 수 있습니다.
+    
+    * 문자열 전체 전달
+    * 문자열의 부분 전달
+    
+    ```cpp
+    int main()
+    {
+        //전체 문자열 전달
+        std::string_view sv1("123456789");
+        copy(sv1.begin(), sv1.end(), ostream_iterator<char>(cout));     // 123456789 출력
+        cout << '\n';
+        cout << sv1.data(); << '\n';                                    // 123456789 출력
+
+        // 부분 문자열 전달
+        std::string_view sv2("123456789", 2);
+        copy(sv2.begin(), sv2.end(), ostream_iterator<char>(cout));     // 12 출력
+        cout << '\n';
+
+        // data 함수를 사용하면 const char*를 리턴해서 '\0'까지 출력
+        // 부분 문자열을 사용하려면 begin(), end() 형태로 사용 필요
+        cout << sv2.data() << '\n';                                     // 123456789 출력
+    }
+    ```
+    ***
+    # string_view 장점
+    ```cpp
+    int main()
+    {
+		// c++ 14버전
+		std::string FiveCharacterOnlyString(const std::string & str)
+		{
+			if (str.size() < 5) return str;
+			return str.substr(0, 5);
+		}
+
+		// c++ 17 string_view
+		// string_view를 사용하면 string 객체의 복사가 발생하지 않습니다.
+		std::string_view FiveCharacterOnlyStringView(const std::string_view str)
+		{
+			if (str.size() < 5) return str;
+			return str.substr(0, 5);
+		}
+
+		// std::string val1 = "12345"
+		auto val1 = FiveCharacterOnlyString("123456789");
+		// std::string_view val2 = "12345"
+		auto val2 = FiveCharacterOnlyStringView("123456789");
+    }
+    ```
+    `string_view`를 사용하면 `std::string`으로 구현된 `FiveCharacterOnlyString`을
+    `std::string_view`로 구현된 `FiveCharacterOnlyStringView`로 대체할 수 있습니다.
+    `FiveCharacterOnlyString`을 사용하면 `std::string` 타입의 복사본이 생성되지만
+    `FiveCharacterOnlyStringView`을 사용하면 복사본 생성 없이 효율적으로 동작할 수 있도록 지원합니다.
+
+    ```cpp
+        void UsedString(std::string& str)
+        {
+            // string 원본 객체에 대한 변경이 이루어집니다.
+            str = "실수로 데이터 변경 시도";
+        }
+        
+		void UsedStringView(std::string_view str_v)
+		{
+			// string 원본 객체에 대한 변경이 발생하지 않습니다.
+			str_v = "실수로 데이터 변경 시도";
+		}
+    ```
+    추가적으로 `std::string_view`를 사용하게 되면 실수로 데이터 변경을 해도
+    전달 받은 원본 객체에 대해서 안전하게 사용 할 수 있습니다.
+    또한 `std::string`이 지원하는 다양한 멤버함수를 `std::string_vew`도 지원합니다.
+
+    또한, `string_view` 자체는 원본 데이터를 수정할 수 없지만
+    바라보는 원본 데이터가 수정되면 `string_view` 문자열 데이터도 수정됩니다.
+    주의할 점은, sized 정보는 원본데이터를 할당 받을 당시의 size로 고정되기 때문에
+    예상하지 않은 동작이 발생할 수 있습니다.
+    **따라서, `string_view` 사용 도중에는 호출 입장에서 원본 데이터가 수정되지 않을 것을 보장해야 합니다.**
+    
+    ***
+    참조 : 웅웅이의 지식창고 티스토리 
+    *** 
+    
+	*/
+    #pragma endregion
 
 #pragma endregion
 
@@ -2828,6 +2943,7 @@ using namespace std;
 2장 :
     1. 스트링
     2. string_view
+    3. constexpr / noexcept
 
 3장 :
     1. 주석 작성법
