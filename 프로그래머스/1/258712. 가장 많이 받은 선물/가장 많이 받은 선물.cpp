@@ -1,67 +1,66 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <sstream>
 
 using namespace std;
 
-map<string, int> msi;
-vector<vector<int>> vvi;        
-vector<int> vi;             // 선물점수
-
-void SplitGift(string tmp)
-{
-    istringstream is;
-    is.str(tmp);
-    vector<string>ans;
-    string st;
-    while(getline(is,st,' '))
-    {
-        ans.push_back(st);
-    }
-    vvi[msi[ans[0]]][msi[ans[1]]]+=1;
-    vvi[msi[ans[1]]][msi[ans[0]]]-=1;
-    vi[msi[ans[0]]]+=1;
-    vi[msi[ans[1]]]-=1;
-}
-
 int solution(vector<string> friends, vector<string> gifts) 
 {
+    map<string, int> m;
+    int size = friends.size();
+
+    for (int i = 0; i < size; ++i)
+    {
+        m[friends[i]] = i;  // indexing
+    }
+
+    vector<vector<int>> arr(size, vector<int>(size, 0));
+    vector<int> order(size, 0);
+    vector<int> result(size, 0);
+
+    for (const auto& gift : gifts)
+    {
+        istringstream iss(gift);
+        string a, b;
+        iss >> a >> b;
+
+        int giver = m[a];
+        int receiver = m[b];
+        arr[giver][receiver] += 1;
+        order[giver] += 1;
+        order[receiver] -= 1;
+    }
+
+    for (int i = 0; i < size; ++i)
+    {
+        for (int j = i + 1; j < size; ++j)
+        {
+            if (arr[i][j] == arr[j][i]) // 주고 받은 선물 갯수가 같을때
+            {
+                if (order[i] > order[j])
+                    result[i] += 1;
+                else if (order[j] > order[i])
+                    result[j] += 1;
+            }
+            else // 주고 받은 선물 갯수가 다를때
+            {
+                if (arr[i][j] > arr[j][i])
+                    result[i] += 1;
+                else
+                    result[j] += 1;
+            }
+        }
+    }
+
     int answer = 0;
-    vi = vector<int>(friends.size(), 0);    // 초기화
-    
-    for(int i=0; i<friends.size(); i++)
+
+    for (int i = 0; i < size; ++i)
     {
-        msi.insert({friends[i],i});     // 멤버 당 인덱스 할당
+        if (answer < result[i])
+            answer = result[i];
     }
-    
-    vvi=vector<vector<int>>(friends.size(),vector<int>(friends.size(),0)); // 초기화
-    
-    for(int i=0; i<gifts.size(); i++)
-    {
-        SplitGift(gifts[i]);        // 표 구현
-    }
-    
-    for (int i=0; i<friends.size(); i++)
-    {
-        int nowGift=0;
-        for (int j=0; j<friends.size(); j++)
-        {
-            if (vvi[i][j]>0)
-            {
-                nowGift+=1;
-            }
-            else if (vvi[i][j]==0)
-            {
-                if (vi[i]>vi[j])            // 선물 지수 클 시 +1
-                {
-                    nowGift+=1;
-                }
-            }
-        }
-        
-        if (nowGift>answer)
-        {
-            answer=nowGift;     // 갱신
-        }
-    }
+
     return answer;
-    
 }
